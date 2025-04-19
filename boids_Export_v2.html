@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Boids Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid black;
+            background: #87CEEB;
+        }
+        .controls {
+            margin: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .param-group {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .param-group h3 {
+            margin-top: 0;
+        }
+        label {
+            display: inline-block;
+            width: 200px;
+            margin-right: 10px;
+        }
+        .value-display {
+            display: inline-block;
+            width: 40px;
+        }
+        .export-button {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <div class="param-group">
+            <h3>World Parameters</h3>
+            <div>
+                <label for="worldWidth">World Width:</label>
+                <input type="number" id="worldWidth" value="800" min="100" max="2000">
+            </div>
+            <div>
+                <label for="worldHeight">World Height:</label>
+                <input type="number" id="worldHeight" value="600" min="100" max="2000">
+            </div>
+            <button onclick="updateWorldSize()">Update World Size</button>
+        </div>
+
+        <div class="param-group">
+            <h3>Boid Parameters</h3>
+            <div>
+                <label for="boidSize">Boid Size:</label>
+                <input type="range" id="boidSize" min="1" max="10" value="3">
+                <span id="boidSizeValue" class="value-display">3</span>
+            </div>
+            <div>
+                <label for="totalBoids">Number of Boids:</label>
+                <input type="number" id="totalBoids" value="50" min="1" max="500">
+                <button onclick="updateBoidsCount()">Update</button>
+            </div>
+        </div>
+
+        <div class="param-group">
+            <h3>Behavior Parameters</h3>
+            <div>
+                <label for="maxSpeed">Max Speed:</label>
+                <input type="range" id="maxSpeed" min="1" max="10" value="4" step="0.5">
+                <span id="maxSpeedValue" class="value-display">4</span>
+            </div>
+            <div>
+                <label for="perceptionRadius">Perception Radius:</label>
+                <input type="range" id="perceptionRadius" min="10" max="200" value="75">
+                <span id="perceptionRadiusValue" class="value-display">75</span>
+            </div>
+        </div>
+
+        <div class="param-group">
+            <h3>Behavior Forces</h3>
+            <div>
+                <label for="separationForce">Separation Force:</label>
+                <input type="range" id="separationForce" min="0" max="1" value="0.05" step="0.01">
+                <span id="separationForceValue" class="value-display">0.05</span>
+            </div>
+            <div>
+                <label for="alignmentForce">Alignment Force:</label>
+                <input type="range" id="alignmentForce" min="0" max="1" value="0.05" step="0.01">
+                <span id="alignmentForceValue" class="value-display">0.05</span>
+            </div>
+            <div>
+                <label for="cohesionForce">Cohesion Force:</label>
+                <input type="range" id="cohesionForce" min="0" max="1" value="0.05" step="0.01">
+                <span id="cohesionForceValue" class="value-display">0.05</span>
+            </div>
+        </div>
+    </div>
+    <button class="export-button" onclick="exportCanvas()">Export Image</button>
+    <canvas id="boidCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('boidCanvas');
+        const ctx = canvas.getContext('2d');
+        let boids = [];
+
+        // Update value displays for range inputs
+        const rangeInputs = ['boidSize', 'maxSpeed', 'perceptionRadius', 'separationForce', 'alignmentForce', 'cohesionForce'];
+        rangeInputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                document.getElementById(id + 'Value').textContent = this.value;
+            });
+        });
+
+        class Boid {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.velocity = {
+                    x: Math.random() * 4 - 2,
+                    y: Math.random() * 4 - 2
+                };
+            }
+
+            update(boids) {
+                const separation = this.getSeparation(boids);
+                const alignment = this.getAlignment(boids);
+                const cohesion = this.getCohesion(boids);
+
+                const separationForce = Number(document.getElementById('separationForce').value);
+                const alignmentForce = Number(document.getElementById('alignmentForce').value);
+                const cohesionForce = Number(document.getElementById('cohesionForce').value);
+
+                // Apply forces
+                this.velocity.x += separation.x * separationForce + 
+                                 alignment.x * alignmentForce + 
+                                 cohesion.x * cohesionForce;
+                this.velocity.y += separation.y * separationForce + 
+                                 alignment.y * alignmentForce + 
+                                 cohesion.y * cohesionForce;
+
+                // Limit speed
+                const maxSpeed = Number(document.getElementById('maxSpeed').value);
+                const speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+                if (speed > maxSpeed) {
+                    this.velocity.x = (this.velocity.x / speed) * maxSpeed;
+                    this.velocity.y = (this.velocity.y / speed) * maxSpeed;
+                }
+
+                // Update position
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+
+                // Wrap around the edges
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+
+            getSeparation(boids) {
+                const separation = { x: 0, y: 0 };
+                let count = 0;
+                const perceptionRadius = Number(document.getElementById('perceptionRadius').value);
+                const desiredSeparation = perceptionRadius * 0.5; // Minimum distance to maintain
+
+                boids.forEach(other => {
+                    const distance = Math.sqrt(
+                        Math.pow(this.x - other.x, 2) + 
+                        Math.pow(this.y - other.y, 2)
+                    );
+                    
+                    if (distance > 0 && distance < desiredSeparation) {
+                        const diffX = this.x - other.x;
+                        const diffY = this.y - other.y;
+                        separation.x += diffX / distance;
+                        separation.y += diffY / distance;
+                        count++;
+                    }
+                });
+
+                if (count > 0) {
+                    separation.x /= count;
+                    separation.y /= count;
+                }
+
+                return separation;
+            }
+
+            getAlignment(boids) {
+                const alignment = { x: 0, y: 0 };
+                let count = 0;
+                const perceptionRadius = Number(document.getElementById('perceptionRadius').value);
+
+                boids.forEach(other => {
+                    const distance = Math.sqrt(
+                        Math.pow(this.x - other.x, 2) + 
+                        Math.pow(this.y - other.y, 2)
+                    );
+
+                    if (distance > 0 && distance < perceptionRadius) {
+                        alignment.x += other.velocity.x;
+                        alignment.y += other.velocity.y;
+                        count++;
+                    }
+                });
+
+                if (count > 0) {
+                    alignment.x /= count;
+                    alignment.y /= count;
+                    // Normalize the alignment vector
+                    const length = Math.sqrt(alignment.x * alignment.x + alignment.y * alignment.y);
+                    if (length > 0) {
+                        alignment.x /= length;
+                        alignment.y /= length;
+                    }
+                }
+
+                return alignment;
+            }
+
+            getCohesion(boids) {
+                const cohesion = { x: 0, y: 0 };
+                let count = 0;
+                const perceptionRadius = Number(document.getElementById('perceptionRadius').value);
+
+                boids.forEach(other => {
+                    const distance = Math.sqrt(
+                        Math.pow(this.x - other.x, 2) + 
+                        Math.pow(this.y - other.y, 2)
+                    );
+
+                    if (distance > 0 && distance < perceptionRadius) {
+                        cohesion.x += other.x;
+                        cohesion.y += other.y;
+                        count++;
+                    }
+                });
+
+                if (count > 0) {
+                    cohesion.x = cohesion.x / count - this.x;
+                    cohesion.y = cohesion.y / count - this.y;
+                    // Normalize the cohesion vector
+                    const length = Math.sqrt(cohesion.x * cohesion.x + cohesion.y * cohesion.y);
+                    if (length > 0) {
+                        cohesion.x /= length;
+                        cohesion.y /= length;
+                    }
+                }
+
+                return cohesion;
+            }
+
+            draw() {
+                const size = Number(document.getElementById('boidSize').value);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+                ctx.fillStyle = 'black';
+                ctx.fill();
+            }
+        }
+
+        function updateWorldSize() {
+            const width = Number(document.getElementById('worldWidth').value);
+            const height = Number(document.getElementById('worldHeight').value);
+            
+            canvas.width = width;
+            canvas.height = height;
+
+            boids.forEach(boid => {
+                if (boid.x > width) boid.x = width / 2;
+                if (boid.y > height) boid.y = height / 2;
+            });
+        }
+
+        function updateBoidsCount() {
+            const desiredCount = Number(document.getElementById('totalBoids').value);
+            
+            while (boids.length > desiredCount) {
+                boids.pop();
+            }
+            
+            while (boids.length < desiredCount) {
+                boids.push(new Boid());
+            }
+        }
+
+        function exportCanvas() {
+            const link = document.createElement('a');
+            link.download = 'boids-simulation.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            boids.forEach(boid => {
+                boid.update(boids);
+                boid.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Initialization
+        updateBoidsCount();
+        animate();
+    </script>
+</body>
+</html>
