@@ -121,7 +121,6 @@
         }
         .round-input {
             max-width: 100px;
-            margin: 0 auto;
         }
         .history-table {
             font-size: 14px;
@@ -134,7 +133,7 @@
             margin: 20px auto;
             display: block;
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 14px;
         }
         .toggle-switch {
             position: relative;
@@ -188,6 +187,15 @@
             background-color: #f9f9f9;
             border-radius: 5px;
             border: 1px solid #ddd;
+        }
+        .player-points-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -249,42 +257,32 @@
             <h2 id="points-game-title">Jeu de points</h2>
             <p id="points-goal-display">Objectif: <span id="points-goal">1000</span> points</p>
             
-            <div class="container">
-                <h3>Tour <span id="current-round">1</span></h3>
-                
-                <div id="round-total-display" class="remaining-container" style="display: none;">
-                    <p>Total de points du tour: <span id="round-total-value-display">100</span></p>
-                    <p>Points restants à distribuer: <span id="remaining-points" class="remaining-points">100</span></p>
-                </div>
-                
-                <table id="points-round-table">
-                    <thead>
-                        <tr>
-                            <th>Joueur</th>
-                            <th>Score actuel</th>
-                            <th>Points du tour</th>
-                        </tr>
-                    </thead>
-                    <tbody id="points-round-players">
-                        <!-- Les joueurs seront ajoutés ici -->
-                    </tbody>
-                </table>
-                
-                <button class="btn submit-round" id="submit-round">Valider ce tour</button>
+            <div class="remaining-container" id="round-total-display" style="display: none;">
+                <p>Total de points du tour: <span id="round-total-value-display">100</span></p>
+                <p>Points restants à distribuer: <span id="remaining-points" class="remaining-points">100</span></p>
             </div>
             
-            <h3>Tableau des scores</h3>
+            <h3>Tour <span id="current-round">1</span></h3>
+            
             <table id="points-table">
                 <thead>
-                    <tr id="points-header">
+                    <tr>
                         <th>Joueur</th>
                         <th>Score Total</th>
+                        <th>Points à ajouter</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="points-players">
                     <!-- Les joueurs seront ajoutés ici -->
                 </tbody>
             </table>
+            
+            <div class="controls">
+                <button class="btn submit-round" id="submit-round">Valider le tour</button>
+                <button class="btn btn-warning" id="reset-points">Réinitialiser</button>
+                <button class="btn btn-info" id="new-points-game">Nouveau jeu</button>
+            </div>
             
             <h3>Historique des tours</h3>
             <table id="rounds-history" class="history-table">
@@ -298,11 +296,6 @@
                     <!-- L'historique des tours sera ajouté ici -->
                 </tbody>
             </table>
-            
-            <div class="controls">
-                <button class="btn btn-warning" id="reset-points">Réinitialiser les scores</button>
-                <button class="btn btn-info" id="new-points-game">Nouveau jeu</button>
-            </div>
         </div>
     </div>
     
@@ -352,7 +345,6 @@
         const startGameBtn = document.getElementById('start-game');
         const pointsTable = document.getElementById('points-table');
         const pointsPlayers = document.getElementById('points-players');
-        const pointsRoundPlayers = document.getElementById('points-round-players');
         const checksTable = document.getElementById('checks-table');
         const checksPlayers = document.getElementById('checks-players');
         const resetPointsBtn = document.getElementById('reset-points');
@@ -488,9 +480,8 @@
             
             historyRows.innerHTML = '';
             
-            // Mettre à jour les tableaux
+            // Mettre à jour le tableau
             updatePointsTable();
-            updateRoundInputTable();
         }
         
         // Mise à jour du tableau de points
@@ -517,6 +508,10 @@
                 row.innerHTML = `
                     <td>${player}</td>
                     <td class="score-cell">${pointsScores[player]}</td>
+                    <td><input type="number" id="round-points-${player}" class="round-input" value="0" oninput="updateRemainingPoints()"></td>
+                    <td>
+                        <button class="btn btn-small" onclick="addPointsToPlayer('${player}')">Ajouter</button>
+                    </td>
                 `;
                 
                 pointsPlayers.appendChild(row);
@@ -529,27 +524,61 @@
             }
         }
         
-        // Mise à jour du tableau de saisie des points pour le tour en cours
-        function updateRoundInputTable() {
-            pointsRoundPlayers.innerHTML = '';
-            const players = Object.keys(pointsScores);
+        // Ajout des points à un joueur spécifique
+        function addPointsToPlayer(player) {
+            const input = document.getElementById(`round-points-${player}`);
+            const pointsToAdd = parseInt(input.value) || 0;
             
-            players.forEach(player => {
-                const row = document.createElement('tr');
+            if (pointsToAdd === 0) {
+                alert("Veuillez entrer un nombre de points à ajouter");
+                return;
+            }
+            
+            // Vérifier si le total est correct pour un jeu à total fixe
+            if (hasFixedRoundTotal) {
+                let totalAssigned = 0;
+                const players = Object.keys(pointsScores);
                 
-                row.innerHTML = `
-                    <td>${player}</td>
-                    <td class="score-cell">${pointsScores[player]}</td>
-                    <td><input type="number" id="round-points-${player}" class="round-input" value="0" oninput="updateRemainingPoints()"></td>
-                `;
+                players.forEach(p => {
+                    const points = p === player ? pointsToAdd : 0;
+                    totalAssigned += points;
+                });
                 
-                pointsRoundPlayers.appendChild(row);
+            }
+            
+            // Ajouter les points au joueur
+            pointsScores[player] += pointsToAdd;
+            
+            // Enregistrer dans l'historique
+            const adjustmentEntry = {
+                round: currentRound,
+                scores: { [player]: pointsToAdd },
+                total: pointsToAdd
+            };
+            
+            roundsHistory.push(adjustmentEntry);
+            
+            // Mettre à jour l'affichage
+            updatePointsTable();
+            updateRemainingPoints();
+            
+            // Ajouter à l'historique visuel
+            const historyRow = document.createElement('tr');
+            historyRow.innerHTML = `<td class="history-round">Tour ${currentRound}</td>`;
+            
+            Object.keys(pointsScores).forEach(p => {
+                if (p === player) {
+                    historyRow.innerHTML += `<td>${pointsToAdd > 0 ? '+' : ''}${pointsToAdd}</td>`;
+                } else {
+                    historyRow.innerHTML += '<td>-</td>';
+                }
             });
             
-            // Réinitialiser les points restants si nécessaire
-            if (hasFixedRoundTotal) {
-                remainingPointsDisplay.textContent = roundTotalPoints;
-            }
+            historyRow.innerHTML += `<td><strong>${pointsToAdd > 0 ? '+' : ''}${pointsToAdd}</strong></td>`;
+            historyRows.appendChild(historyRow);
+            
+            // Réinitialiser le champ à 0
+            input.value = 0;
         }
         
         // Mise à jour des points restants
@@ -578,11 +607,25 @@
             }
         }
         
-        // Ajout des points du tour
+        // Valider le tour complet
         submitRoundBtn.addEventListener('click', () => {
             const players = Object.keys(pointsScores);
             const roundScores = {};
             let roundTotal = 0;
+            let hasPoints = false;
+            
+            // Vérifier si au moins un joueur a des points
+            players.forEach(player => {
+                const points = parseInt(document.getElementById(`round-points-${player}`).value) || 0;
+                if (points !== 0) {
+                    hasPoints = true;
+                }
+            });
+            
+            if (!hasPoints) {
+                alert("Aucun point n'a été ajouté pour ce tour");
+                return;
+            }
             
             // Vérifier si le total est correct pour un jeu à total fixe
             if (hasFixedRoundTotal) {
@@ -601,9 +644,13 @@
             // Collecter les points du tour pour chaque joueur
             players.forEach(player => {
                 const points = parseInt(document.getElementById(`round-points-${player}`).value) || 0;
-                roundScores[player] = points;
-                pointsScores[player] += points;
-                roundTotal += points;
+                if (points !== 0) {
+                    roundScores[player] = points;
+                    pointsScores[player] += points;
+                    roundTotal += points;
+                    // Réinitialiser le champ
+                    document.getElementById(`round-points-${player}`).value = 0;
+                }
             });
             
             // Ajouter à l'historique
@@ -618,7 +665,7 @@
             historyRow.innerHTML = `<td class="history-round">Tour ${currentRound}</td>`;
             
             players.forEach(player => {
-                historyRow.innerHTML += `<td>${roundScores[player]}</td>`;
+                historyRow.innerHTML += `<td>${roundScores[player] || '-'}</td>`;
             });
             
             historyRow.innerHTML += `<td><strong>${roundTotal}</strong></td>`;
@@ -630,7 +677,7 @@
             
             // Mettre à jour les tableaux
             updatePointsTable();
-            updateRoundInputTable();
+            updateRemainingPoints();
         });
         
         // Configuration du jeu par coches
@@ -695,6 +742,7 @@
         // Fonction pour ajouter des coches
         function addChecks(player, amount) {
             checksScores[player] += amount;
+            if (checksScores[player] < 0) checksScores[player] = 0;
             updateChecksTable();
         }
         
@@ -709,7 +757,7 @@
                 currentRoundElement.textContent = currentRound;
                 historyRows.innerHTML = '';
                 updatePointsTable();
-                updateRoundInputTable();
+                updateRemainingPoints();
             }
         });
         
