@@ -1,289 +1,313 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>F**K Your NACHBAR</title>
+    <title>FYN Card Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        /* General Styles */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --info-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+            padding: 0;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
         }
 
         #app {
-            flex: 1;
-            max-width: 90%;
+            max-width: 1000px;
             margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .content {
+            padding: 1.5rem;
+            flex: 1;
             overflow-y: auto;
         }
 
-        h1, h2 {
-            color: #333;
-            text-align: center;
-        }
-
-        .setup, .game {
-            margin-bottom: 20px;
-        }
-
         .hidden {
-            display: none;
+            display: none !important;
+        }
+
+        h2 {
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
-        input[type="number"], input[type="text"] {
-            width: 90%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px; /* Prevent zooming on mobile */
-        }
-
-        button {
+        input[type="number"], 
+        input[type="text"] {
             width: 100%;
-            padding: 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
         }
 
-        button:hover {
-            background-color: #218838;
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .player-order-info {
+            background-color: #f0f8ff;
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Game info section */
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+        }
+
+        .round-info {
+            font-weight: 500;
+        }
+
+        /* Score table */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            font-size: 0.9rem;
         }
 
         th, td {
-            padding: 10px;
+            padding: 0.8rem;
             text-align: center;
-            border: 1px solid #ddd;
+            border: 1px solid #e9ecef;
         }
 
         th {
-            background-color: #f8f9fa;
-            font-weight: bold;
+            background-color: var(--light-color);
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .player-column {
-            background-color: #f8f9fa;
+            background-color: var(--light-color);
+            font-weight: 600;
         }
 
         .score-positive {
-            color: green;
+            color: #28a745;
+            font-weight: bold;
         }
 
         .score-negative {
-            color: red;
+            color: var(--danger-color);
+            font-weight: bold;
         }
 
-        /* Updated Footer Styles */
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #f8f9fa;
-    padding: 10px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding-top: 20px; /* Move buttons higher */
-}
-
-.footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-        .footer input[type="number"] {
-            width: 60px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px; /* Prevent zooming on mobile */
+        /* Footer controls */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            padding: 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: transform 0.3s ease;
         }
 
-        .footer button {
-            padding: 10px 15px;
-            background-color: #007bff;
+        .footer.collapsed {
+            transform: translateY(calc(100% - 40px));
+        }
+
+        .toggle-footer-button {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 0;
             cursor: pointer;
-            font-size: 16px;
-        }
-
-        .footer button:hover {
-            background-color: #0056b3;
-        }
-
-        .footer-info {
-            font-weight: bold;
             text-align: center;
-        }
-
-        /* Responsive Design for Phones */
-        @media screen and (max-width: 600px) {
-            #app {
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            h2 {
-                font-size: 20px;
-            }
-
-            input[type="number"], input[type="text"] {
-                font-size: 16px;
-            }
-
-            button {
-                font-size: 16px;
-            }
-
-            table {
-                font-size: 14px;
-            }
-
-            th, td {
-                padding: 8px;
-            }
-
-            .footer-content {
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .footer input[type="number"] {
-                width: 100%;
-            }
-
-            .footer button {
-                width: 50%;
-            }
-        }
-	/* Updated Number Buttons */
-.number-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two columns */
-    gap: 5px;
-    width: 100%;
-    max-width: 200px; /* Adjust width to fit two columns */
-}
-
-.number-button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-}
-
-.number-button:disabled {
-    background-color: #ccc; /* Disabled button color */
-    cursor: not-allowed; /* Show not-allowed cursor */
-    opacity: 0.6; /* Make it look disabled */
-}
-
-.number-button:hover:not(:disabled) {
-    background-color: #0056b3;
-}
-
-        .footer {
-            padding: 15px;
+            font-size: 0.9rem;
         }
 
         .footer-content {
-            flex-direction: column;
-            gap: 10px;
+            padding: 1rem;
         }
-/* Style pour le bouton de réduction/déroulement */
-.toggle-footer-button {
-    position: absolute; /* Position absolue pour le placer en haut */
-    top: -30px; /* Déplacer le bouton au-dessus du footer */
-    left: 50%; /* Centrer horizontalement */
-    transform: translateX(-50%); /* Ajuster le centrage */
-    width: 40px; /* Largeur réduite */
-    height: 30px; /* Hauteur réduite */
-    padding: 5px;
-	justify-content: center;
-    background-color: #007bff; /* Couleur de fond */
-    color: white; /* Couleur du texte */
-    border: none;
-    border-radius: 4px 4px 0 0; /* Arrondir uniquement le haut */
-    cursor: pointer;
-    font-size: 14px; /* Taille de police réduite */
-    text-align: center;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Ombre légère */
-    z-index: 1001; /* S'assurer qu'il est au-dessus du footer */
-}
 
-.toggle-footer-button:hover {
-    background-color: #0056b3; /* Changement de couleur au survol */
-}
+        .footer-message {
+            font-weight: 500;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
 
-/* Classe pour masquer le contenu du footer */
-.footer-content.collapsed {
-    display: none;
-}
+        /* Number buttons */
+        .number-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
 
-/* Ajustement du footer pour éviter que le bouton ne chevauche le contenu */
-.footer {
-    position: relative; /* Nécessaire pour positionner le bouton en absolute */
-    padding-top: 10px; /* Espace pour le bouton */
-}
+        .number-button {
+            padding: 0.8rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .number-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .number-button:hover:not(:disabled) {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Ranking display */
         .ranking {
             display: flex;
-            gap: 10px;
+            gap: 0.5rem;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 10px;
-            font-size: 14px;
+            margin-bottom: 1rem;
         }
 
         .ranking-item {
-            background-color: #f8f9fa;
-            padding: 5px 10px;
-            border-radius: 4px;
-            border: 1px solid #dee2e6;
+            background-color: var(--light-color);
+            padding: 0.5rem 0.8rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
             display: flex;
-            gap: 5px;
+            gap: 0.5rem;
             align-items: center;
+            font-size: 0.9rem;
         }
 
         .rank {
@@ -291,104 +315,159 @@
             min-width: 20px;
         }
 
-        @media screen and (max-width: 600px) {
-            .number-button {
-                min-width: 40px;
-                padding: 8px 12px;
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .content {
+                padding: 1rem;
             }
 
-            .ranking {
-                font-size: 12px;
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .game-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .number-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .number-button {
+                padding: 0.7rem;
+            }
+
+            th, td {
+                padding: 0.6rem 0.4rem;
+                font-size: 0.8rem;
             }
 
             .ranking-item {
-                padding: 3px 8px;
+                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
             }
         }
 
+        /* Animation for button clicks */
+        .btn:active, .number-button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        /* Highlight for active inputs */
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+        }
+
+        /* Setup player inputs */
+        .player-inputs {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Round description */
+        .round-description {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
     <div id="app">
-        <h1>F**k Your Nachbar</h1>
-        
-        <div id="setup" class="setup">
-            <h2>Configuration de la partie</h2>
-            <div>
-                <label for="playerCount">Nombre de joueurs (2-6) :</label>
-                <input type="number" id="playerCount" min="2" max="6" value="2">
+        <div class="app-container">
+            <div class="header">
+                <h1>FYN Card Game</h1>
             </div>
-            <button onclick="setupPlayers()">Suivant</button>
-        </div>
 
-        <div id="playerNames" class="setup hidden">
-            <h2>Noms des joueurs</h2>
-            <div class="player-order-info">
-                Important : Entrez les noms des joueurs dans l'ordre anti-horaire en partant du premier donneur
-            </div>
-            <div id="playerInputs"></div>
-            <button onclick="startGame()">Commencer la partie</button>
-        </div>
+            <div class="content">
+                <div id="setup" class="setup">
+                    <h2>Game Setup</h2>
+                    <div class="form-group">
+                        <label for="playerCount">Number of players (2-6):</label>
+                        <input type="number" id="playerCount" min="2" max="6" value="2">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="setupPlayers()">Next</button>
+                </div>
 
-        <div id="game" class="game hidden">
-            <h2><div id="roundDescription" class="round-description"></div></h2>
-            <div class="round-info">
-                Ronde <span id="currentRound">1</span>/<span id="totalRounds">15</span>
-                
+                <div id="playerNames" class="setup hidden">
+                    <h2>Player Names</h2>
+                    <div class="player-order-info">
+                        Important: Enter player names in counter-clockwise order starting from the first dealer
+                    </div>
+                    <div id="playerInputs" class="player-inputs"></div>
+                    <button class="btn btn-primary btn-block" onclick="startGame()">Start Game</button>
+                </div>
+
+                <div id="game" class="game hidden">
+                    <div class="game-info">
+                        <div class="round-description" id="roundDescription"></div>
+                        <div class="round-info">
+                            Round <span id="currentRound">1</span>/<span id="totalRounds">15</span>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <div id="scoreTable"></div>
+                    </div>
+                </div>
             </div>
-            <div id="scoreTable"></div>
         </div>
     </div>
 
     <!-- Footer for input -->
     <div id="footer" class="footer">
-    <button id="toggleFooterButton" class="toggle-footer-button">-</button>
-    <div class="footer-content">
-        <div class="ranking" id="rankingDisplay"></div>
-        <div class="footer-info" id="footerMessage"></div>
-        <div class="number-buttons" id="numberButtons"></div>
+        <button id="toggleFooterButton" class="toggle-footer-button">▲ Hide Controls ▼</button>
+        <div class="footer-content">
+            <div class="ranking" id="rankingDisplay"></div>
+            <div class="footer-message" id="footerMessage"></div>
+            <div class="number-buttons" id="numberButtons"></div>
+        </div>
     </div>
-</div>
-
 
     <script>
         // Configuration initiale
         const roundDescriptions = {
             15: [
-                "7 cartes",
-                "6 cartes",
-                "5 cartes",
-                "4 cartes",
-                "3 cartes",
-                "2 cartes",
-                "1 carte",
-                "1 carte sans regarder",
-                "1 carte",
-                "2 cartes",
-                "3 cartes",
-                "4 cartes",
-                "5 cartes",
-                "6 cartes",
-                "7 cartes (Final)"
+                "7 cards",
+                "6 cards",
+                "5 cards",
+                "4 cards",
+                "3 cards",
+                "2 cards",
+                "1 card",
+                "1 card blind",
+                "1 card",
+                "2 cards",
+                "3 cards",
+                "4 cards",
+                "5 cards",
+                "6 cards",
+                "7 cards (Final)"
             ],
             13: [
-                "6 cartes",
-                "5 cartes",
-                "4 cartes",
-                "3 cartes",
-                "2 cartes",
-                "1 carte",
-                "1 carte sans regarder",
-                "1 carte",
-                "2 cartes",
-                "3 cartes",
-                "4 cartes",
-                "5 cartes",
-                "6 cartes (Final)"
+                "6 cards",
+                "5 cards",
+                "4 cards",
+                "3 cards",
+                "2 cards",
+                "1 card",
+                "1 card blind",
+                "1 card",
+                "2 cards",
+                "3 cards",
+                "4 cards",
+                "5 cards",
+                "6 cards (Final)"
             ]
         };
 
-        // État du jeu
+        // Game state
         let gameState = {
             players: [],
             rounds: [],
@@ -402,35 +481,32 @@
             isCollectingBets: true
         };
 
-        // Fonction utilitaire pour extraire le nombre de cartes
+        // Toggle footer visibility
+        function toggleFooter() {
+            const footer = document.getElementById('footer');
+            const button = document.getElementById('toggleFooterButton');
+            
+            footer.classList.toggle('collapsed');
+            if (footer.classList.contains('collapsed')) {
+                button.textContent = '▲ Show Controls ▼';
+            } else {
+                button.textContent = '▲ Hide Controls ▼';
+            }
+        }
+
+        document.getElementById('toggleFooterButton').addEventListener('click', toggleFooter);
+
+        // Utility function to get card count from description
         function getCardsFromDescription(description) {
             const words = description.split(' ');
             return words[0] === "Final" ? parseInt(words[2]) : parseInt(words[0]);
         }
-	// Fonction pour basculer l'état du footer
-function toggleFooter() {
-    const footerContent = document.querySelector('.footer-content');
-    const toggleButton = document.getElementById('toggleFooterButton');
 
-    if (footerContent.classList.contains('collapsed')) {
-        // Dérouler le footer
-        footerContent.classList.remove('collapsed');
-        toggleButton.textContent = '-'; // Flèche vers le haut
-    } else {
-        // Réduire le footer
-        footerContent.classList.add('collapsed');
-        toggleButton.textContent = '+'; // Flèche vers le bas
-    }
-}
-
-// Ajouter un écouteur d'événement au bouton
-document.getElementById('toggleFooterButton').addEventListener('click', toggleFooter);
-
-        // Initialisation de la partie
+        // Initialize players setup
         function setupPlayers() {
             const playerCount = parseInt(document.getElementById('playerCount').value);
             if (playerCount < 2 || playerCount > 6) {
-                alert('Le nombre de joueurs doit être entre 2 et 6');
+                alert('Number of players must be between 2 and 6');
                 return;
             }
 
@@ -443,8 +519,8 @@ document.getElementById('toggleFooterButton').addEventListener('click', toggleFo
             
             for (let i = 0; i < playerCount; i++) {
                 playerInputs.innerHTML += `
-                    <div>
-                        <label for="player${i}">Joueur ${i + 1}:</label>
+                    <div class="form-group">
+                        <label for="player${i}">Player ${i + 1}:</label>
                         <input type="text" id="player${i}" required>
                     </div>
                 `;
@@ -454,14 +530,14 @@ document.getElementById('toggleFooterButton').addEventListener('click', toggleFo
             document.getElementById('playerNames').classList.remove('hidden');
         }
 
-        // Démarrage de la partie
+        // Start the game
         function startGame() {
             gameState.players = [];
             const inputs = document.querySelectorAll('#playerInputs input');
             
             for (let input of inputs) {
                 if (!input.value.trim()) {
-                    alert('Tous les noms des joueurs sont requis');
+                    alert('All player names are required');
                     return;
                 }
                 gameState.players.push({
@@ -475,31 +551,36 @@ document.getElementById('toggleFooterButton').addEventListener('click', toggleFo
             
             gameState.currentRound = 0;
             gameState.rounds = [];
+            
+            // Add page leave protection
+            window.addEventListener('beforeunload', handlePageLeave);
+            
             initNewRound();
         }
 
-        // Initialisation d'une nouvelle ronde
+        // Initialize a new round
         function initNewRound() {
-    gameState.currentRound++;
-    document.getElementById('currentRound').textContent = gameState.currentRound;
-    
-    const roundDesc = gameState.currentRoundDescriptions[gameState.currentRound - 1];
-    document.getElementById('roundDescription').textContent = roundDesc;
-    
-    gameState.currentBets = new Array(gameState.players.length).fill(null);
-    gameState.currentScores = new Array(gameState.players.length).fill(null);
-    gameState.isCollectingBets = true;
-    
-    gameState.startingPlayerIndex = (gameState.currentRound - 1) % gameState.players.length;
-    gameState.currentPlayerIndex = gameState.startingPlayerIndex;
-    
-    updateScoreTable();
-    updateFooter(); // Appeler updateFooter pour afficher les boutons
-}
-	function updateRanking() {
+            gameState.currentRound++;
+            document.getElementById('currentRound').textContent = gameState.currentRound;
+            
+            const roundDesc = gameState.currentRoundDescriptions[gameState.currentRound - 1];
+            document.getElementById('roundDescription').textContent = roundDesc;
+            
+            gameState.currentBets = new Array(gameState.players.length).fill(null);
+            gameState.currentScores = new Array(gameState.players.length).fill(null);
+            gameState.isCollectingBets = true;
+            
+            gameState.startingPlayerIndex = (gameState.currentRound - 1) % gameState.players.length;
+            gameState.currentPlayerIndex = gameState.startingPlayerIndex;
+            
+            updateScoreTable();
+            updateFooter();
+        }
+
+        // Update player ranking display
+        function updateRanking() {
             const rankingDisplay = document.getElementById('rankingDisplay');
             
-            // Create a sorted copy of players
             const sortedPlayers = gameState.players
                 .map((player, index) => ({
                     name: player.name,
@@ -508,7 +589,6 @@ document.getElementById('toggleFooterButton').addEventListener('click', toggleFo
                 }))
                 .sort((a, b) => b.score - a.score);
 
-            // Create ranking HTML
             rankingDisplay.innerHTML = sortedPlayers
                 .map((player, index) => `
                     <div class="ranking-item">
@@ -522,73 +602,65 @@ document.getElementById('toggleFooterButton').addEventListener('click', toggleFo
                 .join('');
         }
 
-
-        // Calcul des points
+        // Calculate points for a bet
         function calculatePoints(bet, actual) {
             return bet === actual ? (bet * bet) + 10 : -(Math.abs(bet - actual) * 10);
         }
 
-        // Function to create number buttons (0 to 7)
-function createNumberButtons(forbiddenNumber = null) {
-    const numberButtons = document.getElementById('numberButtons');
-    const roundDesc = gameState.currentRoundDescriptions[gameState.currentRound - 1];
-    const roundCards = getCardsFromDescription(roundDesc);
-    numberButtons.innerHTML = ''; // Clear existing buttons
-
-    for (let i = 0; i <= 7; i++) {
-        const button = document.createElement('button');
-        button.className = 'number-button';
-        button.textContent = i;
-        button.onclick = () => submitFooterInput(i);
-
-        // Disable the forbidden number button
-        if (forbiddenNumber !== null && i === forbiddenNumber) {
-            button.disabled = true;
-        }
-	if(i>roundCards) {
-            button.disabled = true;
-        }
-
-        numberButtons.appendChild(button);
-    }
-}
-
-        // Function to update the footer
-function updateFooter() {
-    const footerMessage = document.getElementById('footerMessage');
-    const numberButtons = document.getElementById('numberButtons');
-
-    if (gameState.isCollectingBets) {
-        const playerName = gameState.players[gameState.currentPlayerIndex].name;
-        const roundDesc = gameState.currentRoundDescriptions[gameState.currentRound - 1];
-        let message = `Tour de ${playerName} pour miser`;
-
-        const remainingBets = gameState.currentBets.filter(bet => bet === null).length;
-        if (remainingBets === 1) {
-            const totalBets = gameState.currentBets.reduce((sum, bet) => sum + (bet || 0), 0);
+        // Create number buttons for input
+        function createNumberButtons(forbiddenNumber = null) {
+            const numberButtons = document.getElementById('numberButtons');
+            const roundDesc = gameState.currentRoundDescriptions[gameState.currentRound - 1];
             const roundCards = getCardsFromDescription(roundDesc);
-            const forbiddenBet = roundCards - totalBets;
-            message += `\n Ne peut pas miser ${forbiddenBet}`;
-            createNumberButtons(forbiddenBet); // Disable the forbidden bet
-        } else {
-		const roundCards = getCardsFromDescription(roundDesc);
+            numberButtons.innerHTML = '';
 
-            createNumberButtons(); // No forbidden bet
+            for (let i = 0; i <= 7; i++) {
+                const button = document.createElement('button');
+                button.className = 'number-button';
+                button.textContent = i;
+                button.onclick = () => submitFooterInput(i);
+
+                // Disable invalid options
+                if ((forbiddenNumber !== null && i === forbiddenNumber) || i > roundCards) {
+                    button.disabled = true;
+                }
+
+                numberButtons.appendChild(button);
+            }
         }
 
-        footerMessage.textContent = message;
-    } else {
-        const playerName = gameState.players[gameState.currentPlayerIndex].name;
-        const playerBet = gameState.currentBets[gameState.currentPlayerIndex];
-        footerMessage.textContent = `Points de ${playerName} (mise: ${playerBet})`;
-        createNumberButtons(); // No forbidden bet
-    }
+        // Update footer controls
+        function updateFooter() {
+            const footerMessage = document.getElementById('footerMessage');
 
-    updateRanking();
-}
-	
+            if (gameState.isCollectingBets) {
+                const playerName = gameState.players[gameState.currentPlayerIndex].name;
+                const roundDesc = gameState.currentRoundDescriptions[gameState.currentRound - 1];
+                let message = `${playerName}'s turn to bet`;
 
-        // Soumission de l'entrée du footer
+                const remainingBets = gameState.currentBets.filter(bet => bet === null).length;
+                if (remainingBets === 1) {
+                    const totalBets = gameState.currentBets.reduce((sum, bet) => sum + (bet || 0), 0);
+                    const roundCards = getCardsFromDescription(roundDesc);
+                    const forbiddenBet = roundCards - totalBets;
+                    message += ` (Cannot bet ${forbiddenBet})`;
+                    createNumberButtons(forbiddenBet);
+                } else {
+                    createNumberButtons();
+                }
+
+                footerMessage.textContent = message;
+            } else {
+                const playerName = gameState.players[gameState.currentPlayerIndex].name;
+                const playerBet = gameState.currentBets[gameState.currentPlayerIndex];
+                footerMessage.textContent = `${playerName}'s turn (Bet: ${playerBet})`;
+                createNumberButtons();
+            }
+
+            updateRanking();
+        }
+
+        // Handle footer input submission
         function submitFooterInput(value) {
             if (gameState.isCollectingBets) {
                 const isLastPlayer = gameState.currentBets.filter(bet => bet === null).length === 1;
@@ -597,7 +669,7 @@ function updateFooter() {
                     const totalBets = gameState.currentBets.reduce((sum, bet) => sum + (bet || 0), 0) + value;
 
                     if (totalBets === roundCards) {
-                        alert(`La somme des mises ne peut pas être égale au nombre de cartes (${roundCards})`);
+                        alert(`Total bets cannot equal the number of cards (${roundCards})`);
                         return;
                     }
                 }
@@ -626,7 +698,7 @@ function updateFooter() {
             updateScoreTable();
         }
 
-        // Finalisation d'une ronde
+        // Finish the current round
         function finishRound() {
             const roundData = {
                 bets: [...gameState.currentBets],
@@ -646,21 +718,24 @@ function updateFooter() {
             if (gameState.currentRound < gameState.totalRounds) {
                 initNewRound();
             } else {
+                // Remove page leave protection
+                window.removeEventListener('beforeunload', handlePageLeave);
+                
                 const winner = gameState.players.reduce((prev, current) => 
                     (current.totalScore > prev.totalScore) ? current : prev
                 );
-                alert(`Partie terminée ${winner.name} gagne avec ${winner.totalScore} points !`);
+                alert(`Game over! ${winner.name} wins with ${winner.totalScore} points!`);
             }
         }
 
-        // Mise à jour du tableau des scores
+        // Update score table display
         function updateScoreTable() {
             const table = document.getElementById('scoreTable');
             let html = `
                 <table>
                     <tr>
-                        <th style="width: 60px;">Ronde</th>
-                        <th style="width: 100px;">Description</th>
+                        <th>Round</th>
+                        <th>Cards</th>
                         ${gameState.players.map(player => `
                             <th colspan="3" class="player-column">${player.name}</th>
                         `).join('')}
@@ -669,14 +744,14 @@ function updateFooter() {
                         <th></th>
                         <th></th>
                         ${gameState.players.map(() => `
-                            <th>Mise</th>
-                            <th>Score</th>
+                            <th>Bet</th>
+                            <th>Taken</th>
                             <th>Points</th>
                         `).join('')}
                     </tr>
             `;
 
-            // Affichage des rondes terminées
+            // Completed rounds
             gameState.rounds.forEach((round, index) => {
                 html += `
                     <tr>
@@ -693,7 +768,7 @@ function updateFooter() {
                 `;
             });
 
-            // Affichage de la ronde en cours
+            // Current round
             if (gameState.currentRound > 0 && gameState.currentRound > gameState.rounds.length) {
                 html += `
                     <tr>
@@ -708,7 +783,7 @@ function updateFooter() {
                 `;
             }
 
-            // Affichage des totaux
+            // Totals
             html += `
                 <tr>
                     <th colspan="2">Total</th>
@@ -722,83 +797,14 @@ function updateFooter() {
 
             html += '</table>';
             table.innerHTML = html;
-		updateRanking();
-        }
-	// Function to handle page leave protection
-        function setupPageLeaveProtection() {
-            window.addEventListener('beforeunload', handlePageLeave);
+            updateRanking();
         }
 
-        function removePageLeaveProtection() {
-            window.removeEventListener('beforeunload', handlePageLeave);
-        }
-
+        // Handle page leave confirmation
         function handlePageLeave(e) {
-            // This will show a standard browser confirmation dialog
             e.preventDefault();
-            // Message might not be shown in modern browsers for security reasons,
-            // but we still need to set it for older browsers
-            e.returnValue = 'La partie en cours sera perdue. Voulez-vous vraiment quitter ?';
+            e.returnValue = 'The current game will be lost. Are you sure you want to leave?';
         }
-
-        // Modify the startGame function to add protection
-        function startGame() {
-            gameState.players = [];
-            const inputs = document.querySelectorAll('#playerInputs input');
-            
-            for (let input of inputs) {
-                if (!input.value.trim()) {
-                    alert('Tous les noms des joueurs sont requis');
-                    return;
-                }
-                gameState.players.push({
-                    name: input.value.trim(),
-                    totalScore: 0
-                });
-            }
-
-            document.getElementById('playerNames').classList.add('hidden');
-            document.getElementById('game').classList.remove('hidden');
-            
-            gameState.currentRound = 0;
-            gameState.rounds = [];
-            
-            // Add page leave protection when game starts
-            setupPageLeaveProtection();
-            
-            initNewRound();
-        }
-
-        // Modify finishRound function to remove protection when game ends
-        function finishRound123() {
-            const roundData = {
-                bets: [...gameState.currentBets],
-                scores: [...gameState.currentScores],
-                points: gameState.currentBets.map((bet, index) => 
-                    calculatePoints(bet, gameState.currentScores[index])),
-                description: gameState.currentRoundDescriptions[gameState.currentRound - 1]
-            };
-
-            roundData.points.forEach((points, index) => {
-                gameState.players[index].totalScore += points;
-            });
-
-            gameState.rounds.push(roundData);
-            updateScoreTable();
-
-            if (gameState.currentRound < gameState.totalRounds) {
-                initNewRound();
-            } else {
-                // Remove page leave protection when game ends
-                removePageLeaveProtection();
-                
-                const winner = gameState.players.reduce((prev, current) => 
-                    (current.totalScore > prev.totalScore) ? current : prev
-                );
-                alert(`Partie terminée! ${winner.name} gagne avec ${winner.totalScore} points !`);
-            }
-        }
-
     </script>
 </body>
 </html>
