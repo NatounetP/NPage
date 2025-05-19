@@ -290,6 +290,25 @@
             transform: translateY(-2px);
         }
 
+        /* Back button */
+        .back-button {
+            padding: 0.8rem;
+            background-color: var(--warning-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: center;
+            transition: var(--transition);
+            grid-column: span 4;
+        }
+
+        .back-button:hover {
+            background-color: #e07e00;
+            transform: translateY(-2px);
+        }
+
         /* Ranking display */
         .ranking {
             display: flex;
@@ -478,7 +497,8 @@
             startingPlayerIndex: 0,
             currentBets: [],
             currentScores: [],
-            isCollectingBets: true
+            isCollectingBets: true,
+            previousStates: [] // To store previous states for undo functionality
         };
 
         // Toggle footer visibility
@@ -627,6 +647,43 @@
 
                 numberButtons.appendChild(button);
             }
+
+            // Add Back button
+            const backButton = document.createElement('button');
+            backButton.className = 'back-button';
+            backButton.textContent = 'Back';
+            backButton.onclick = undoLastAction;
+            numberButtons.appendChild(backButton);
+        }
+
+        // Undo the last action
+        function undoLastAction() {
+            if (gameState.previousStates.length === 0) return;
+
+            // Restore previous state
+            const previousState = gameState.previousStates.pop();
+            gameState.currentPlayerIndex = previousState.currentPlayerIndex;
+            gameState.currentBets = [...previousState.currentBets];
+            gameState.currentScores = [...previousState.currentScores];
+            gameState.isCollectingBets = previousState.isCollectingBets;
+
+            updateScoreTable();
+            updateFooter();
+        }
+
+        // Save current state for undo functionality
+        function saveState() {
+            gameState.previousStates.push({
+                currentPlayerIndex: gameState.currentPlayerIndex,
+                currentBets: [...gameState.currentBets],
+                currentScores: [...gameState.currentScores],
+                isCollectingBets: gameState.isCollectingBets
+            });
+
+            // Limit the number of saved states to prevent memory issues
+            if (gameState.previousStates.length > 10) {
+                gameState.previousStates.shift();
+            }
         }
 
         // Update footer controls
@@ -662,6 +719,8 @@
 
         // Handle footer input submission
         function submitFooterInput(value) {
+            saveState(); // Save state before making changes
+
             if (gameState.isCollectingBets) {
                 const isLastPlayer = gameState.currentBets.filter(bet => bet === null).length === 1;
                 if (isLastPlayer) {
