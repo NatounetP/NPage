@@ -3,6 +3,13 @@
 <head>
     <title>FYN Card Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="FYN Card Game">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="FYN Card Game">
+
+<meta name="theme-color" content="#4361ee">
     <style>
         :root {
             --primary-color: #4361ee;
@@ -551,32 +558,36 @@
         }
 
         // Start the game
-        function startGame() {
-            gameState.players = [];
-            const inputs = document.querySelectorAll('#playerInputs input');
-            
-            for (let input of inputs) {
-                if (!input.value.trim()) {
-                    alert('All player names are required');
-                    return;
-                }
-                gameState.players.push({
-                    name: input.value.trim(),
-                    totalScore: 0
-                });
-            }
-
-            document.getElementById('playerNames').classList.add('hidden');
-            document.getElementById('game').classList.remove('hidden');
-            
-            gameState.currentRound = 0;
-            gameState.rounds = [];
-            
-            // Add page leave protection
-            window.addEventListener('beforeunload', handlePageLeave);
-            
-            initNewRound();
+function startGame() {
+    gameState.players = [];
+    const inputs = document.querySelectorAll('#playerInputs input');
+    
+    for (let input of inputs) {
+        if (!input.value.trim()) {
+            alert('All player names are required');
+            return;
         }
+        gameState.players.push({
+            name: input.value.trim(),
+            totalScore: 0
+        });
+    }
+
+    document.getElementById('playerNames').classList.add('hidden');
+    document.getElementById('game').classList.remove('hidden');
+    
+    gameState.currentRound = 0;
+    gameState.rounds = [];
+    
+    // Add page leave protection
+    window.addEventListener('beforeunload', handlePageLeave);
+    
+    // Activer le plein écran et l'anti-veille
+    activerPleinEcran();
+    acquireWakeLock();
+    
+    initNewRound();
+}
 
         // Initialize a new round
         function initNewRound() {
@@ -864,6 +875,139 @@
             e.preventDefault();
             e.returnValue = 'The current game will be lost. Are you sure you want to leave?';
         }
+// Variables pour le wake lock et le plein écran
+let wakeLock = null;
+let documentInFullscreen = false;
+
+// Fonction pour activer le mode plein écran
+function activerPleinEcran() {
+    const element = document.documentElement;
+    
+    if (element.requestFullscreen) {
+        element.requestFullscreen();
+    } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+    } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+    }
+    
+    documentInFullscreen = true;
+}
+
+// Fonction pour acquérir le wake lock (empêche la mise en veille)
+async function acquireWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake Lock activé');
+            
+            // Réacquérir le wake lock en cas de changement de visibilité
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+        } else {
+            // Méthode alternative pour garder l'écran actif
+            keepScreenAlive();
+        }
+    } catch (err) {
+        console.error(`Erreur d'activation du Wake Lock: ${err.message}`);
+        // Méthode alternative pour garder l'écran actif
+        keepScreenAlive();
+    }
+}
+
+// Fonction pour gérer les changements de visibilité
+function handleVisibilityChange() {
+    if (document.visibilityState === 'visible' && wakeLock === null) {
+        acquireWakeLock();
+    }
+}
+
+// Fonction alternative pour garder l'écran actif (compatibilité)
+function keepScreenAlive() {
+    // Créer une vidéo invisible qui joue en continu
+    const video = document.createElement('video');
+    video.setAttribute('loop', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('muted', '');
+    video.setAttribute('autoplay', '');
+    video.style.width = '1px';
+    video.style.height = '1px';
+    video.style.position = 'absolute';
+    video.style.opacity = '0.01';
+    
+    // Créer une source vidéo vide
+    const source = document.createElement('source');
+    source.setAttribute('src', 'data:video/mp4;base64,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=');
+    source.setAttribute('type', 'video/mp4');
+    
+    video.appendChild(source);
+    document.body.appendChild(video);
+    
+    // Essayer de jouer la vidéo
+    video.play().catch(e => {
+        console.error('Erreur de lecture vidéo pour anti-veille:', e);
+    });
+    
+    // Démarrer également un timer pour simuler une activité
+    setInterval(() => {
+        // Simuler une activité minimale pour garder l'écran actif
+        document.body.style.opacity = document.body.style.opacity === '0.99999' ? '1' : '0.99999';
+    }, 5000);
+}
+
+// Initialisation pour activer le plein écran et l'anti-veille
+function initialiserApp() {
+    // Ajouter des boutons pour le plein écran et l'anti-veille
+    const header = document.querySelector('.header');
+    const fullscreenButton = document.createElement('button');
+    fullscreenButton.className = 'btn btn-info';
+    fullscreenButton.style.position = 'absolute';
+    fullscreenButton.style.right = '10px';
+    fullscreenButton.style.top = '50%';
+    fullscreenButton.style.transform = 'translateY(-50%)';
+    fullscreenButton.style.padding = '0.4rem';
+    fullscreenButton.style.fontSize = '0.8rem';
+    fullscreenButton.innerHTML = '📺';
+    fullscreenButton.title = 'Mode plein écran';
+    fullscreenButton.onclick = () => {
+        activerPleinEcran();
+        acquireWakeLock();
+    };
+    header.appendChild(fullscreenButton);
+    
+    // Gérer le changement de visibilité
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Écouter les modifications de plein écran
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+}
+
+// Gérer les changements de mode plein écran
+function handleFullscreenChange() {
+    documentInFullscreen = !!document.fullscreenElement || 
+                           !!document.webkitFullscreenElement || 
+                           !!document.mozFullScreenElement || 
+                           !!document.msFullscreenElement;
+                           
+    if (documentInFullscreen) {
+        acquireWakeLock();
+    }
+}
+
+// Appliquer automatiquement le plein écran lors d'un clic
+document.addEventListener('click', function() {
+    if (!documentInFullscreen) {
+        activerPleinEcran();
+        acquireWakeLock();
+    }
+}, { once: true });
+
+// Initialiser l'application après le chargement
+window.addEventListener('load', initialiserApp);
     </script>
 </body>
 </html>
