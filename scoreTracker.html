@@ -61,6 +61,189 @@
                 min-height: auto;
             }
         }
+		
+		/* Classe pour le mode fullscreen */
+.fullscreen-mode {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    overflow: hidden !important;
+    background-color: #f5f7fa !important;
+}
+
+.fullscreen-mode .container {
+    max-width: none !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.fullscreen-mode .app-container {
+    height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Styles pour les notifications du mode app */
+.app-mode-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    display: none;
+    animation: slideInRight 0.3s ease;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+}
+
+.app-mode-notification.info {
+    background-color: var(--info-color);
+}
+
+.app-mode-notification.error {
+    background-color: var(--danger-color);
+}
+
+.app-mode-notification.success {
+    background-color: var(--success-color);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Bouton pour sortir du mode app */
+.exit-app-mode-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10001;
+    padding: 8px 16px;
+    font-size: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(248, 150, 30, 0.9);
+    color: white;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.exit-app-mode-btn:hover {
+    background-color: rgba(248, 150, 30, 1);
+    transform: scale(1.05);
+}
+
+.exit-app-mode-btn:active {
+    transform: scale(0.95);
+}
+
+/* Ajustements pour les onglets en mode fullscreen */
+.fullscreen-mode .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.fullscreen-mode .header {
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+}
+
+/* Amélioration de la scrollabilité en mode fullscreen */
+.fullscreen-mode .tab-content {
+    height: calc(100vh - 140px); /* Ajuster selon la hauteur du header + tabs */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Styles pour les appareils mobiles en mode fullscreen */
+@media (max-width: 767px) {
+    .fullscreen-mode .tab-content {
+        height: calc(100vh - 120px);
+    }
+    
+    .exit-app-mode-btn {
+        top: 10px;
+        left: 10px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .app-mode-notification {
+        top: 10px;
+        right: 10px;
+        max-width: 250px;
+        font-size: 12px;
+        padding: 10px 16px;
+    }
+}
+
+/* Masquer les barres de défilement en mode fullscreen pour une expérience plus clean */
+.fullscreen-mode::-webkit-scrollbar {
+    display: none;
+}
+
+.fullscreen-mode {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Indicateur visuel du mode app actif */
+.fullscreen-mode .header::before {
+    content: "🔒 Mode App Actif";
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 12px;
+    opacity: 0.7;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* Amélioration de la visibilité des boutons en mode fullscreen */
+.fullscreen-mode .btn {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fullscreen-mode .btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation d'entrée en mode fullscreen */
+.fullscreen-mode {
+    animation: fadeInFullscreen 0.5s ease;
+}
+
+@keyframes fadeInFullscreen {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
         
         .header {
             background-color: var(--primary-color);
@@ -548,6 +731,8 @@
         let roundsHistory = [];
         let hasFixedRoundTotal = false;
         let roundTotalPoints = 0;
+		let wakeLock = null;
+		let isFullscreenActive = false;
         
         // Sélecteurs DOM
         const tabs = document.querySelectorAll('.tab');
@@ -573,6 +758,59 @@
         const roundTotalDisplay = document.getElementById('round-total-display');
         const roundTotalValueDisplay = document.getElementById('round-total-value-display');
         const remainingPointsDisplay = document.getElementById('remaining-points');
+		
+		document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Support Safari
+
+function handleFullscreenChange() {
+    const isCurrentlyFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    
+    if (!isCurrentlyFullscreen && isFullscreenActive) {
+        // L'utilisateur est sorti manuellement du fullscreen
+        console.log('Sortie manuelle du fullscreen détectée');
+        isFullscreenActive = false;
+        document.body.classList.remove('fullscreen-mode');
+        
+        // Libérer le wake lock aussi
+        if (wakeLock) {
+            wakeLock.release().then(() => {
+                wakeLock = null;
+                console.log('Wake lock libéré suite à la sortie du fullscreen');
+            });
+        }
+        
+        showAppModeNotification('Mode plein écran désactivé');
+    }
+}
+
+function checkAPISupport() {
+    const support = {
+        fullscreen: !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen),
+        wakeLock: 'wakeLock' in navigator
+    };
+    
+    if (!support.fullscreen) {
+        console.warn('API Fullscreen non supportée');
+    }
+    
+    if (!support.wakeLock) {
+        console.warn('API Wake Lock non supportée');
+    }
+    
+    return support;
+}
+
+document.addEventListener('visibilitychange', async () => {
+    if (wakeLock !== null && document.visibilityState === 'visible') {
+        // Réactiver le wake lock si la page redevient visible
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake lock réactivé après retour sur la page');
+        } catch (error) {
+            console.error('Impossible de réactiver le wake lock:', error);
+        }
+    }
+});
         
         // Gestionnaire pour l'interrupteur de total fixe par tour
         roundTotalSwitch.addEventListener('change', function() {
@@ -614,42 +852,44 @@
         });
         
         // Démarrer le jeu
-        startGameBtn.addEventListener('click', () => {
-            gameName = document.getElementById('game-name').value || 'Jeu sans nom';
-            const gameType = document.getElementById('game-type').value;
-            const goal = parseInt(document.getElementById('game-goal').value) || 0;
-            const playersInput = document.getElementById('players').value;
-            
-            if (!playersInput) {
-                alert('Veuillez entrer au moins un joueur');
-                return;
-            }
-            
-            const players = playersInput.split(',').map(p => p.trim()).filter(p => p);
-            
-            if (players.length === 0) {
-                alert('Veuillez entrer au moins un joueur valide');
-                return;
-            }
-            
-            // Vérifier si le jeu a un total fixe par tour
-            hasFixedRoundTotal = roundTotalSwitch.checked;
-            if (hasFixedRoundTotal) {
-                roundTotalPoints = parseInt(roundTotalValueInput.value) || 0;
-                if (roundTotalPoints <= 0) {
-                    alert('Veuillez entrer un total de points par tour valide (> 0)');
-                    return;
-                }
-            }
-            
-            // Initialiser le jeu en fonction du type
-            if (gameType === 'points') {
-                setupPointsGame(gameName, players, goal);
-            } else {
-                setupChecksGame(gameName, players, goal);
-            }
-            
-            // Basculer vers l'onglet approprié
+        startGameBtn.addEventListener('click', async () => {
+    gameName = document.getElementById('game-name').value || 'Jeu sans nom';
+    const gameType = document.getElementById('game-type').value;
+    const goal = parseInt(document.getElementById('game-goal').value) || 0;
+    const playersInput = document.getElementById('players').value;
+    
+    if (!playersInput) {
+        alert('Veuillez entrer au moins un joueur');
+        return;
+    }
+    
+    const players = playersInput.split(',').map(p => p.trim()).filter(p => p);
+    
+    if (players.length === 0) {
+        alert('Veuillez entrer au moins un joueur valide');
+        return;
+    }
+    
+    // Vérifier si le jeu a un total fixe par tour
+    hasFixedRoundTotal = roundTotalSwitch.checked;
+    if (hasFixedRoundTotal) {
+        roundTotalPoints = parseInt(roundTotalValueInput.value) || 0;
+        if (roundTotalPoints <= 0) {
+            alert('Veuillez entrer un total de points par tour valide (> 0)');
+            return;
+        }
+    }
+    
+    // Initialiser le jeu en fonction du type
+    if (gameType === 'points') {
+        setupPointsGame(gameName, players, goal);
+    } else {
+        setupChecksGame(gameName, players, goal);
+    }
+    
+   
+    
+    // Basculer vers l'onglet approprié
             tabs.forEach(t => t.classList.remove('active'));
             tabContents.forEach(tc => tc.classList.remove('active'));
             
@@ -660,6 +900,9 @@
                 document.querySelector('[data-tab="checks"]').classList.add('active');
                 document.getElementById('checks').classList.add('active');
             }
+			
+			 // NOUVEAU: Activer le mode app avant de basculer vers le jeu
+    await enableAppMode();
         });
         
         // Configuration du jeu par points
@@ -700,6 +943,78 @@
             // Mettre à jour le tableau
             updatePointsTable();
         }
+		
+		async function enableAppMode() {
+    try {
+        // Activation du mode plein écran
+        if (document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+            isFullscreenActive = true;
+            console.log('Mode plein écran activé');
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            // Support Safari
+            await document.documentElement.webkitRequestFullscreen();
+            isFullscreenActive = true;
+            console.log('Mode plein écran activé (webkit)');
+        }
+        
+        // Ajout de la classe CSS pour le mode fullscreen
+        document.body.classList.add('fullscreen-mode');
+        
+        // Demande du wake lock pour maintenir l'écran allumé
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake lock activé');
+            
+            // Gestion de la perte du wake lock
+            wakeLock.addEventListener('release', () => {
+                console.log('Wake lock libéré');
+                wakeLock = null;
+            });
+        } else {
+            console.warn('Wake Lock API non supportée');
+        }
+        
+        // Notification à l'utilisateur
+        showAppModeNotification('Mode app activé - Écran en plein écran et maintenu allumé');
+        
+    } catch (error) {
+        console.error('Erreur lors de l\'activation du mode app:', error);
+        showAppModeNotification('Impossible d\'activer le mode app complet', 'error');
+    }
+}
+
+async function disableAppMode() {
+    try {
+        // Sortie du mode plein écran
+        if (document.fullscreenElement && document.exitFullscreen) {
+            await document.exitFullscreen();
+            console.log('Mode plein écran désactivé');
+        } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+            // Support Safari
+            await document.webkitExitFullscreen();
+            console.log('Mode plein écran désactivé (webkit)');
+        }
+        
+        isFullscreenActive = false;
+        
+        // Suppression de la classe CSS
+        document.body.classList.remove('fullscreen-mode');
+        
+        // Libération du wake lock
+        if (wakeLock) {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('Wake lock libéré manuellement');
+        }
+        
+        // Notification à l'utilisateur
+        showAppModeNotification('Mode app désactivé');
+        
+    } catch (error) {
+        console.error('Erreur lors de la désactivation du mode app:', error);
+    }
+}
         
         // Mise à jour du tableau de points
         function updatePointsTable() {
@@ -987,13 +1302,17 @@
             }
         });
         
-        newPointsGameBtn.addEventListener('click', () => {
-            tabs[0].click(); // Retour à l'onglet de configuration
-        });
-        
-        newChecksGameBtn.addEventListener('click', () => {
-            tabs[0].click(); // Retour à l'onglet de configuration
-        });
+        newPointsGameBtn.addEventListener('click', async () => {
+    // NOUVEAU: Désactiver le mode app avant de retourner à la configuration
+    await disableAppMode();
+    tabs[0].click(); // Retour à l'onglet de configuration
+});
+
+newChecksGameBtn.addEventListener('click', async () => {
+    // NOUVEAU: Désactiver le mode app avant de retourner à la configuration
+    await disableAppMode();
+    tabs[0].click(); // Retour à l'onglet de configuration
+});
         
         // Vérifier le type de jeu initialement sélectionné
         if (gameTypeSelect.value === 'checks') {
