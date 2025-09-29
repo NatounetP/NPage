@@ -244,6 +244,43 @@
         transform: scale(1);
     }
 }
+
+/* Bouton pour activer/désactiver le mode app */
+.app-mode-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 101;
+    padding: 8px 16px;
+    font-size: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.app-mode-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.app-mode-toggle:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 767px) {
+    .app-mode-toggle {
+        top: 15px;
+        right: 15px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
         
         .header {
             background-color: var(--primary-color);
@@ -591,6 +628,7 @@
         <div class="app-container">
             <div class="header">
                 <h1>Suivi des Scores</h1>
+                <button class="app-mode-toggle" id="app-mode-toggle">Mode App</button>
             </div>
             
             <div class="tabs">
@@ -758,6 +796,7 @@
         const roundTotalDisplay = document.getElementById('round-total-display');
         const roundTotalValueDisplay = document.getElementById('round-total-value-display');
         const remainingPointsDisplay = document.getElementById('remaining-points');
+        const appModeToggle = document.getElementById('app-mode-toggle');
 		
 		document.addEventListener('fullscreenchange', handleFullscreenChange);
 document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Support Safari
@@ -778,6 +817,9 @@ function handleFullscreenChange() {
                 console.log('Wake lock libéré suite à la sortie du fullscreen');
             });
         }
+        
+        // Mettre à jour le texte du bouton
+        appModeToggle.textContent = 'Mode App';
         
         showAppModeNotification('Mode plein écran désactivé');
     }
@@ -809,6 +851,15 @@ document.addEventListener('visibilitychange', async () => {
         } catch (error) {
             console.error('Impossible de réactiver le wake lock:', error);
         }
+    }
+});
+
+// Gestionnaire pour le bouton de mode app
+appModeToggle.addEventListener('click', async () => {
+    if (isFullscreenActive) {
+        await disableAppMode();
+    } else {
+        await enableAppMode();
     }
 });
         
@@ -852,7 +903,7 @@ document.addEventListener('visibilitychange', async () => {
         });
         
         // Démarrer le jeu
-        startGameBtn.addEventListener('click', async () => {
+        startGameBtn.addEventListener('click', () => {
     gameName = document.getElementById('game-name').value || 'Jeu sans nom';
     const gameType = document.getElementById('game-type').value;
     const goal = parseInt(document.getElementById('game-goal').value) || 0;
@@ -887,23 +938,18 @@ document.addEventListener('visibilitychange', async () => {
         setupChecksGame(gameName, players, goal);
     }
     
-   
-    
     // Basculer vers l'onglet approprié
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(tc => tc.classList.remove('active'));
-            
-            if (gameType === 'points') {
-                document.querySelector('[data-tab="points"]').classList.add('active');
-                document.getElementById('points').classList.add('active');
-            } else {
-                document.querySelector('[data-tab="checks"]').classList.add('active');
-                document.getElementById('checks').classList.add('active');
-            }
-			
-			 // NOUVEAU: Activer le mode app avant de basculer vers le jeu
-    await enableAppMode();
-        });
+    tabs.forEach(t => t.classList.remove('active'));
+    tabContents.forEach(tc => tc.classList.remove('active'));
+    
+    if (gameType === 'points') {
+        document.querySelector('[data-tab="points"]').classList.add('active');
+        document.getElementById('points').classList.add('active');
+    } else {
+        document.querySelector('[data-tab="checks"]').classList.add('active');
+        document.getElementById('checks').classList.add('active');
+    }
+});
         
         // Configuration du jeu par points
         function setupPointsGame(name, players, goal) {
@@ -975,6 +1021,9 @@ document.addEventListener('visibilitychange', async () => {
             console.warn('Wake Lock API non supportée');
         }
         
+        // Mettre à jour le texte du bouton
+        appModeToggle.textContent = 'Quitter Mode App';
+        
         // Notification à l'utilisateur
         showAppModeNotification('Mode app activé - Écran en plein écran et maintenu allumé');
         
@@ -1008,12 +1057,35 @@ async function disableAppMode() {
             console.log('Wake lock libéré manuellement');
         }
         
+        // Mettre à jour le texte du bouton
+        appModeToggle.textContent = 'Mode App';
+        
         // Notification à l'utilisateur
         showAppModeNotification('Mode app désactivé');
         
     } catch (error) {
         console.error('Erreur lors de la désactivation du mode app:', error);
     }
+}
+
+function showAppModeNotification(message, type = 'info') {
+    // Créer une notification si elle n'existe pas
+    let notification = document.querySelector('.app-mode-notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.className = 'app-mode-notification';
+        document.body.appendChild(notification);
+    }
+    
+    // Mettre à jour le contenu et le style
+    notification.textContent = message;
+    notification.className = `app-mode-notification ${type}`;
+    notification.style.display = 'block';
+    
+    // Masquer après 3 secondes
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
 }
         
         // Mise à jour du tableau de points
@@ -1061,156 +1133,106 @@ async function disableAppMode() {
             const input = document.getElementById(`round-points-${player}`);
             const pointsToAdd = parseInt(input.value) || 0;
             
-            if (pointsToAdd === 0) {
-                alert("Veuillez entrer un nombre de points à ajouter");
-                return;
-            }
+            if (pointsToAdd === 0) return;
             
-            // Vérifier si le total est correct pour un jeu à total fixe
-            if (hasFixedRoundTotal) {
-                let totalAssigned = 0;
-                const players = Object.keys(pointsScores);
-                
-                players.forEach(p => {
-                    const points = p === player ? pointsToAdd : 0;
-                    totalAssigned += points;
-                });
-                
-            }
-            
-            // Ajouter les points au joueur
             pointsScores[player] += pointsToAdd;
-            
-            // Enregistrer dans l'historique
-            const adjustmentEntry = {
-                round: currentRound,
-                scores: { [player]: pointsToAdd },
-                total: pointsToAdd
-            };
-            
-            roundsHistory.push(adjustmentEntry);
-            
-            // Mettre à jour l'affichage
+            input.value = 0;
             updatePointsTable();
             updateRemainingPoints();
-            
-            // Ajouter à l'historique visuel
-            const historyRow = document.createElement('tr');
-            historyRow.innerHTML = `<td class="history-round">${currentRound}</td>`;
-            
-            Object.keys(pointsScores).forEach(p => {
-                if (p === player) {
-                    historyRow.innerHTML += `<td>${pointsToAdd > 0 ? '+' : ''}${pointsToAdd}</td>`;
-                } else {
-                    historyRow.innerHTML += '<td>-</td>';
-                }
-            });
-            
-            historyRow.innerHTML += `<td><strong>${pointsToAdd > 0 ? '+' : ''}${pointsToAdd}</strong></td>`;
-            historyRows.appendChild(historyRow);
-            
-            // Réinitialiser le champ à 0
-            input.value = 0;
         }
         
-        // Mise à jour des points restants
+        // Mise à jour des points restants à distribuer
         function updateRemainingPoints() {
             if (!hasFixedRoundTotal) return;
             
             const players = Object.keys(pointsScores);
-            let totalAssigned = 0;
+            let totalPointsUsed = 0;
             
             players.forEach(player => {
-                const pointInput = document.getElementById(`round-points-${player}`);
-                const points = parseInt(pointInput.value) || 0;
-                totalAssigned += points;
+                const input = document.getElementById(`round-points-${player}`);
+                const points = parseInt(input.value) || 0;
+                totalPointsUsed += points;
             });
             
-            const remaining = roundTotalPoints - totalAssigned;
+            const remaining = roundTotalPoints - totalPointsUsed;
             remainingPointsDisplay.textContent = remaining;
             
-            // Changer la couleur en fonction des points restants
+            // Changer la couleur si on dépasse le total
             if (remaining < 0) {
-                remainingPointsDisplay.style.color = '#f72585'; // Rouge
-            } else if (remaining > 0) {
-                remainingPointsDisplay.style.color = '#f8961e'; // Orange
+                remainingPointsDisplay.style.color = 'red';
             } else {
-                remainingPointsDisplay.style.color = '#4cc9f0'; // Vert
+                remainingPointsDisplay.style.color = 'inherit';
             }
         }
         
-        // Valider le tour complet
+        // Validation d'un tour
         submitRoundBtn.addEventListener('click', () => {
             const players = Object.keys(pointsScores);
-            const roundScores = {};
-            let roundTotal = 0;
-            let hasPoints = false;
+            const roundPoints = {};
+            let totalPointsUsed = 0;
             
-            // Vérifier si au moins un joueur a des points
+            // Collecter les points du tour
             players.forEach(player => {
-                const points = parseInt(document.getElementById(`round-points-${player}`).value) || 0;
-                if (points !== 0) {
-                    hasPoints = true;
-                }
+                const input = document.getElementById(`round-points-${player}`);
+                const points = parseInt(input.value) || 0;
+                roundPoints[player] = points;
+                totalPointsUsed += points;
+                
+                // Réinitialiser l'input
+                input.value = 0;
             });
             
-            if (!hasPoints) {
-                alert("Aucun point n'a été ajouté pour ce tour");
+            // Vérifier le total fixe si activé
+            if (hasFixedRoundTotal && totalPointsUsed !== roundTotalPoints) {
+                alert(`Le total des points du tour doit être exactement ${roundTotalPoints}. Actuellement: ${totalPointsUsed}`);
                 return;
             }
             
-            // Vérifier si le total est correct pour un jeu à total fixe
-            if (hasFixedRoundTotal) {
-                let totalAssigned = 0;
-                players.forEach(player => {
-                    const points = parseInt(document.getElementById(`round-points-${player}`).value) || 0;
-                    totalAssigned += points;
-                });
-                
-                if (totalAssigned !== roundTotalPoints) {
-                    alert(`Le total des points doit être égal à ${roundTotalPoints}. Actuellement: ${totalAssigned}`);
-                    return;
-                }
-            }
-            
-            // Collecter les points du tour pour chaque joueur
+            // Ajouter les points aux scores totaux
             players.forEach(player => {
-                const points = parseInt(document.getElementById(`round-points-${player}`).value) || 0;
-                if (points !== 0) {
-                    roundScores[player] = points;
-                    pointsScores[player] += points;
-                    roundTotal += points;
-                    // Réinitialiser le champ
-                    document.getElementById(`round-points-${player}`).value = 0;
-                }
+                pointsScores[player] += roundPoints[player];
             });
             
-            // Ajouter à l'historique
-            roundsHistory.push({
+            // Enregistrer le tour dans l'historique
+            const roundData = {
                 round: currentRound,
-                scores: {...roundScores},
-                total: roundTotal
-            });
+                points: {...roundPoints},
+                totals: {...pointsScores}
+            };
+            roundsHistory.push(roundData);
             
-            // Mettre à jour l'historique dans le tableau
-            const historyRow = document.createElement('tr');
-            historyRow.innerHTML = `<td class="history-round">${currentRound}</td>`;
-            
-            players.forEach(player => {
-                historyRow.innerHTML += `<td>${roundScores[player] || '-'}</td>`;
-            });
-            
-            historyRow.innerHTML += `<td><strong>${roundTotal}</strong></td>`;
-            historyRows.appendChild(historyRow);
+            // Mettre à jour l'affichage de l'historique
+            updateHistoryTable();
             
             // Passer au tour suivant
             currentRound++;
             currentRoundElement.textContent = currentRound;
             
-            // Mettre à jour les tableaux
+            // Mettre à jour le tableau
             updatePointsTable();
             updateRemainingPoints();
         });
+        
+        // Mise à jour du tableau d'historique
+        function updateHistoryTable() {
+            historyRows.innerHTML = '';
+            
+            roundsHistory.forEach(roundData => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="history-round">${roundData.round}</td>`;
+                
+                const players = Object.keys(pointsScores);
+                players.forEach(player => {
+                    row.innerHTML += `<td>${roundData.points[player]}</td>`;
+                });
+                
+                // Calculer le total du tour
+                const roundTotal = players.reduce((sum, player) => sum + roundData.points[player], 0);
+                row.innerHTML += `<td><strong>${roundTotal}</strong></td>`;
+                
+                historyRows.appendChild(row);
+            });
+        }
         
         // Configuration du jeu par coches
         function setupChecksGame(name, players, goal) {
@@ -1219,7 +1241,7 @@ async function disableAppMode() {
             document.getElementById('checks-game-title').textContent = name;
             document.getElementById('checks-goal').textContent = goal > 0 ? goal : 'Illimité';
             
-            // Réinitialiser les coches
+            // Réinitialiser les scores
             checksScores = {};
             players.forEach(player => {
                 checksScores[player] = 0;
@@ -1254,9 +1276,9 @@ async function disableAppMode() {
                     <td>${player}</td>
                     <td class="score-cell">${checksScores[player]}</td>
                     <td>
-                        <div class="score-buttons">
-                            <button class="btn btn-success" onclick="addChecks('${player}', 1)">+1</button>
-                            <button class="btn btn-danger" onclick="addChecks('${player}', -1)">-1</button>
+                        <div class="player-controls">
+                            <button class="btn btn-small btn-primary" onclick="addCheckToPlayer('${player}')">+</button>
+                            <button class="btn btn-small btn-danger" onclick="removeCheckFromPlayer('${player}')">-</button>
                         </div>
                     </td>
                 `;
@@ -1271,17 +1293,25 @@ async function disableAppMode() {
             }
         }
         
-        // Fonction pour ajouter des coches
-        function addChecks(player, amount) {
-            checksScores[player] += amount;
-            if (checksScores[player] < 0) checksScores[player] = 0;
+        // Ajouter une coche à un joueur
+        function addCheckToPlayer(player) {
+            checksScores[player]++;
             updateChecksTable();
         }
         
-        // Gestionnaires d'événements pour les boutons de réinitialisation et de nouveau jeu
+        // Retirer une coche d'un joueur
+        function removeCheckFromPlayer(player) {
+            if (checksScores[player] > 0) {
+                checksScores[player]--;
+                updateChecksTable();
+            }
+        }
+        
+        // Réinitialiser les points
         resetPointsBtn.addEventListener('click', () => {
-            if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les scores?')) {
-                Object.keys(pointsScores).forEach(player => {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser les scores?')) {
+                const players = Object.keys(pointsScores);
+                players.forEach(player => {
                     pointsScores[player] = 0;
                 });
                 roundsHistory = [];
@@ -1293,36 +1323,44 @@ async function disableAppMode() {
             }
         });
         
+        // Réinitialiser les coches
         resetChecksBtn.addEventListener('click', () => {
-            if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les coches?')) {
-                Object.keys(checksScores).forEach(player => {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser les coches?')) {
+                const players = Object.keys(checksScores);
+                players.forEach(player => {
                     checksScores[player] = 0;
                 });
                 updateChecksTable();
             }
         });
         
-        newPointsGameBtn.addEventListener('click', async () => {
-    // NOUVEAU: Désactiver le mode app avant de retourner à la configuration
-    await disableAppMode();
-    tabs[0].click(); // Retour à l'onglet de configuration
-});
-
-newChecksGameBtn.addEventListener('click', async () => {
-    // NOUVEAU: Désactiver le mode app avant de retourner à la configuration
-    await disableAppMode();
-    tabs[0].click(); // Retour à l'onglet de configuration
-});
+        // Nouveau jeu de points
+        newPointsGameBtn.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir commencer un nouveau jeu? Les scores actuels seront perdus.')) {
+                document.querySelector('[data-tab="setup"]').click();
+            }
+        });
         
-        // Vérifier le type de jeu initialement sélectionné
-        if (gameTypeSelect.value === 'checks') {
-            document.getElementById('round-total-container').style.display = 'none';
-        }
+        // Nouveau jeu de coches
+        newChecksGameBtn.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir commencer un nouveau jeu? Les scores actuels seront perdus.')) {
+                document.querySelector('[data-tab="setup"]').click();
+            }
+        });
         
-        // Make functions available globally
-        window.addPointsToPlayer = addPointsToPlayer;
-        window.updateRemainingPoints = updateRemainingPoints;
-        window.addChecks = addChecks;
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Vérifier le support des APIs
+            const apiSupport = checkAPISupport();
+            
+            // Afficher un avertissement si le mode app n'est pas entièrement supporté
+            if (!apiSupport.fullscreen || !apiSupport.wakeLock) {
+                console.log('Certaines fonctionnalités du mode app ne sont pas supportées');
+            }
+            
+            // Initialiser l'application
+            console.log('Application de suivi des scores initialisée');
+        });
     </script>
 </body>
 </html>
