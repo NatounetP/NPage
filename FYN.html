@@ -3,13 +3,12 @@
 <head>
     <title>FYN Card Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="FYN Card Game">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="FYN Card Game">
-
-<meta name="theme-color" content="#4361ee">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="FYN Card Game">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="FYN Card Game">
+    <meta name="theme-color" content="#4361ee">
     <style>
         :root {
             --primary-color: #4361ee;
@@ -141,7 +140,6 @@
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
-	    margin-bottom: 150px;
         }
 
         .btn-primary:hover {
@@ -228,50 +226,6 @@
             font-weight: bold;
         }
 
-        /* Footer controls */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-	    height: 95%;
-            background-color: #00000082;
-            padding: 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .footer.collapsed {
-            transform: translateY(calc(100% - 40px));
-        }
-
-        .toggle-footer-button {
-            width: 100%;
-            padding: 0.5rem;
-            background-color: #000;
-            color: white;
-            border: none;
-            border-radius: 0;
-            cursor: pointer;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .footer-content {
-            padding: 10px;
-position: absolute;
-bottom: 0;
-width: 100%;
-background-color: white;
-        }
-
-        .footer-message {
-            font-weight: 500;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
         /* Number buttons */
         .number-buttons {
             display: grid;
@@ -325,26 +279,91 @@ background-color: white;
         /* Ranking display */
         .ranking {
             display: flex;
+            flex-direction: column;
             gap: 0.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .ranking-item {
             background-color: var(--light-color);
-            padding: 0.5rem 0.8rem;
+            padding: 0.8rem 1rem;
             border-radius: var(--border-radius);
             border: 1px solid #e9ecef;
             display: flex;
-            gap: 0.5rem;
+            justify-content: space-between;
             align-items: center;
             font-size: 0.9rem;
         }
 
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
         .rank {
             font-weight: bold;
-            min-width: 20px;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .player-name {
+            font-weight: 500;
+        }
+
+        .current-bet {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .player-score {
+            font-weight: 600;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Current player message */
+        .current-player-message {
+            background-color: #e7f3ff;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+            border-left: 4px solid var(--primary-color);
         }
 
         /* Mobile specific styles */
@@ -381,7 +400,12 @@ background-color: white;
 
             .ranking-item {
                 font-size: 0.8rem;
-                padding: 0.3rem 0.6rem;
+                padding: 0.6rem 0.8rem;
+            }
+
+            .tab {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
             }
         }
 
@@ -438,27 +462,33 @@ background-color: white;
                 </div>
 
                 <div id="game" class="game hidden">
-                    <div class="game-info">
-                        <div class="round-description" id="roundDescription"></div>
-                        <div class="round-info">
-                            Tour <span id="currentRound">1</span>/<span id="totalRounds">15</span>
-                        </div>
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab('gameTab')">Jeu</button>
+                        <button class="tab" onclick="switchTab('resultsTab')">Résultats</button>
                     </div>
-                    <div class="table-container">
-                        <div id="scoreTable"></div>
+
+                    <div id="gameTab" class="tab-content active">
+                        <div class="game-info">
+                            <div class="round-description" id="roundDescription"></div>
+                            <div class="round-info">
+                                Tour <span id="currentRound">1</span>/<span id="totalRounds">15</span>
+                            </div>
+                        </div>
+                        
+                        <div class="current-player-message" id="currentPlayerMessage"></div>
+                        
+                        <div class="ranking" id="rankingDisplay"></div>
+                        
+                        <div class="number-buttons" id="numberButtons"></div>
+                    </div>
+
+                    <div id="resultsTab" class="tab-content">
+                        <div class="table-container">
+                            <div id="scoreTable"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Footer for input -->
-    <div id="footer" class="footer">
-        <button id="toggleFooterButton" class="toggle-footer-button">▲ Cacher les boutons ▼</button>
-        <div class="footer-content">
-            <div class="ranking" id="rankingDisplay"></div>
-            <div class="footer-message" id="footerMessage"></div>
-            <div class="number-buttons" id="numberButtons"></div>
         </div>
     </div>
 
@@ -514,20 +544,24 @@ background-color: white;
             previousStates: [] // To store previous states for undo functionality
         };
 
-        // Toggle footer visibility
-        function toggleFooter() {
-            const footer = document.getElementById('footer');
-            const button = document.getElementById('toggleFooterButton');
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
-            footer.classList.toggle('collapsed');
-            if (footer.classList.contains('collapsed')) {
-                button.textContent = '▲ Afficher les boutons ▼';
-            } else {
-                button.textContent = '▲ Masquer les boutons ▼';
-            }
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
         }
-
-        document.getElementById('toggleFooterButton').addEventListener('click', toggleFooter);
 
         // Utility function to get card count from description
         function getCardsFromDescription(description) {
@@ -564,36 +598,36 @@ background-color: white;
         }
 
         // Start the game
-function startGame() {
-    gameState.players = [];
-    const inputs = document.querySelectorAll('#playerInputs input');
-    
-    for (let input of inputs) {
-        if (!input.value.trim()) {
-            alert('All player names are required');
-            return;
-        }
-        gameState.players.push({
-            name: input.value.trim(),
-            totalScore: 0
-        });
-    }
+        function startGame() {
+            gameState.players = [];
+            const inputs = document.querySelectorAll('#playerInputs input');
+            
+            for (let input of inputs) {
+                if (!input.value.trim()) {
+                    alert('Tous les noms des joueurs sont requis');
+                    return;
+                }
+                gameState.players.push({
+                    name: input.value.trim(),
+                    totalScore: 0
+                });
+            }
 
-    document.getElementById('playerNames').classList.add('hidden');
-    document.getElementById('game').classList.remove('hidden');
-    
-    gameState.currentRound = 0;
-    gameState.rounds = [];
-    
-    // Add page leave protection
-    window.addEventListener('beforeunload', handlePageLeave);
-    
-    // Activer le plein écran et l'anti-veille
-    activerPleinEcran();
-    acquireWakeLock();
-    
-    initNewRound();
-}
+            document.getElementById('playerNames').classList.add('hidden');
+            document.getElementById('game').classList.remove('hidden');
+            
+            gameState.currentRound = 0;
+            gameState.rounds = [];
+            
+            // Add page leave protection
+            window.addEventListener('beforeunload', handlePageLeave);
+            
+            // Activer le plein écran et l'anti-veille
+            activerPleinEcran();
+            acquireWakeLock();
+            
+            initNewRound();
+        }
 
         // Initialize a new round
         function initNewRound() {
@@ -611,27 +645,31 @@ function startGame() {
             gameState.currentPlayerIndex = gameState.startingPlayerIndex;
             
             updateScoreTable();
-            updateFooter();
+            updateGameInterface();
         }
 
-        // Update player ranking display
+        // Update player ranking display with current bets
         function updateRanking() {
             const rankingDisplay = document.getElementById('rankingDisplay');
             
-            const sortedPlayers = gameState.players
+            const playersWithData = gameState.players
                 .map((player, index) => ({
                     name: player.name,
                     score: player.totalScore,
+                    bet: gameState.currentBets[index],
                     index: index
                 }))
                 .sort((a, b) => b.score - a.score);
 
-            rankingDisplay.innerHTML = sortedPlayers
+            rankingDisplay.innerHTML = playersWithData
                 .map((player, index) => `
                     <div class="ranking-item">
-                        <span class="rank">${index + 1}.</span>
-                        <span>${player.name}:</span>
-                        <span class="${player.score >= 0 ? 'score-positive' : 'score-negative'}">
+                        <div class="player-info">
+                            <span class="rank">${index + 1}.</span>
+                            <span class="player-name">${player.name}</span>
+                            ${player.bet !== null ? `<span class="current-bet">(${player.bet})</span>` : ''}
+                        </div>
+                        <span class="player-score ${player.score >= 0 ? 'score-positive' : 'score-negative'}">
                             ${player.score}
                         </span>
                     </div>
@@ -655,7 +693,7 @@ function startGame() {
                 const button = document.createElement('button');
                 button.className = 'number-button';
                 button.textContent = i;
-                button.onclick = () => submitFooterInput(i);
+                button.onclick = () => submitInput(i);
 
                 // Disable invalid options
                 if ((forbiddenNumber !== null && i === forbiddenNumber) || i > roundCards) {
@@ -679,13 +717,22 @@ function startGame() {
 
             // Restore previous state
             const previousState = gameState.previousStates.pop();
+            
+            // Only allow undo for current round
+            if (previousState.round !== gameState.currentRound) {
+                alert("Vous ne pouvez revenir en arrière que pour le tour actuel.");
+                return;
+            }
+            
+            // Restore state
             gameState.currentPlayerIndex = previousState.currentPlayerIndex;
             gameState.currentBets = [...previousState.currentBets];
             gameState.currentScores = [...previousState.currentScores];
             gameState.isCollectingBets = previousState.isCollectingBets;
+            gameState.startingPlayerIndex = previousState.startingPlayerIndex;
 
             updateScoreTable();
-            updateFooter();
+            updateGameInterface();
         }
 
         // Save current state for undo functionality
@@ -694,7 +741,9 @@ function startGame() {
                 currentPlayerIndex: gameState.currentPlayerIndex,
                 currentBets: [...gameState.currentBets],
                 currentScores: [...gameState.currentScores],
-                isCollectingBets: gameState.isCollectingBets
+                isCollectingBets: gameState.isCollectingBets,
+                startingPlayerIndex: gameState.startingPlayerIndex,
+                round: gameState.currentRound
             });
 
             // Limit the number of saved states to prevent memory issues
@@ -703,39 +752,39 @@ function startGame() {
             }
         }
 
-        // Update footer controls
-        function updateFooter() {
-            const footerMessage = document.getElementById('footerMessage');
+        // Update game interface
+        function updateGameInterface() {
+            const currentPlayerMessage = document.getElementById('currentPlayerMessage');
 
             if (gameState.isCollectingBets) {
                 const playerName = gameState.players[gameState.currentPlayerIndex].name;
                 const roundDesc = gameState.currentRoundDescriptions[gameState.currentRound - 1];
-                let message = `à ${playerName} de miser`;
+                let message = `À ${playerName} de miser`;
 
                 const remainingBets = gameState.currentBets.filter(bet => bet === null).length;
                 if (remainingBets === 1) {
                     const totalBets = gameState.currentBets.reduce((sum, bet) => sum + (bet || 0), 0);
                     const roundCards = getCardsFromDescription(roundDesc);
                     const forbiddenBet = roundCards - totalBets;
-                    message += ` (Ne peut miser ${forbiddenBet})`;
+                    message += ` (Ne peut pas miser ${forbiddenBet})`;
                     createNumberButtons(forbiddenBet);
                 } else {
                     createNumberButtons();
                 }
 
-                footerMessage.textContent = message;
+                currentPlayerMessage.textContent = message;
             } else {
                 const playerName = gameState.players[gameState.currentPlayerIndex].name;
                 const playerBet = gameState.currentBets[gameState.currentPlayerIndex];
-                footerMessage.textContent = `${playerName}'s turn (Bet: ${playerBet})`;
+                currentPlayerMessage.textContent = `À ${playerName} de jouer (Mise: ${playerBet})`;
                 createNumberButtons();
             }
 
             updateRanking();
         }
 
-        // Handle footer input submission
-        function submitFooterInput(value) {
+        // Handle input submission
+        function submitInput(value) {
             saveState(); // Save state before making changes
 
             if (gameState.isCollectingBets) {
@@ -745,7 +794,7 @@ function startGame() {
                     const totalBets = gameState.currentBets.reduce((sum, bet) => sum + (bet || 0), 0) + value;
 
                     if (totalBets === roundCards) {
-                        alert(`Total bets cannot equal the number of cards (${roundCards})`);
+                        alert(`Le total des mises ne peut pas être égal au nombre de cartes (${roundCards})`);
                         return;
                     }
                 }
@@ -754,18 +803,18 @@ function startGame() {
                 gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
 
                 if (gameState.currentBets.filter(bet => bet === null).length > 0) {
-                    updateFooter();
+                    updateGameInterface();
                 } else {
                     gameState.isCollectingBets = false;
                     gameState.currentPlayerIndex = gameState.startingPlayerIndex;
-                    updateFooter();
+                    updateGameInterface();
                 }
             } else {
                 gameState.currentScores[gameState.currentPlayerIndex] = value;
                 gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
 
                 if (gameState.currentScores.filter(score => score === null).length > 0) {
-                    updateFooter();
+                    updateGameInterface();
                 } else {
                     finishRound();
                 }
@@ -800,7 +849,7 @@ function startGame() {
                 const winner = gameState.players.reduce((prev, current) => 
                     (current.totalScore > prev.totalScore) ? current : prev
                 );
-                alert(`Game over! ${winner.name} wins with ${winner.totalScore} points!`);
+                alert(`Partie terminée ! ${winner.name} gagne avec ${winner.totalScore} points !`);
             }
         }
 
@@ -811,7 +860,7 @@ function startGame() {
                 <table>
                     <tr>
                         <th>Round</th>
-                        <th>Cards</th>
+                        <th>Cartes</th>
                         ${gameState.players.map(player => `
                             <th colspan="3" class="player-column">${player.name}</th>
                         `).join('')}
@@ -873,147 +922,109 @@ function startGame() {
 
             html += '</table>';
             table.innerHTML = html;
-            updateRanking();
         }
 
         // Handle page leave confirmation
         function handlePageLeave(e) {
             e.preventDefault();
-            e.returnValue = 'The current game will be lost. Are you sure you want to leave?';
+            e.returnValue = 'La partie en cours sera perdue. Êtes-vous sûr de vouloir quitter ?';
         }
-// Variables pour le wake lock et le plein écran
-let wakeLock = null;
-let documentInFullscreen = false;
 
-// Fonction pour activer le mode plein écran
-function activerPleinEcran() {
-    const element = document.documentElement;
-    
-    if (element.requestFullscreen) {
-        element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-        element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-    }
-    
-    documentInFullscreen = true;
-}
+        // Variables pour le wake lock et le plein écran
+        let wakeLock = null;
+        let documentInFullscreen = false;
 
-// Fonction pour acquérir le wake lock (empêche la mise en veille)
-async function acquireWakeLock() {
-    try {
-        if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-            console.log('Wake Lock activé');
+        // Fonction pour activer le mode plein écran
+        function activerPleinEcran() {
+            const element = document.documentElement;
             
-            // Réacquérir le wake lock en cas de changement de visibilité
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-        } else {
-            // Méthode alternative pour garder l'écran actif
-            keepScreenAlive();
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+            
+            documentInFullscreen = true;
         }
-    } catch (err) {
-        console.error(`Erreur d'activation du Wake Lock: ${err.message}`);
-        // Méthode alternative pour garder l'écran actif
-        keepScreenAlive();
-    }
-}
 
-// Fonction pour gérer les changements de visibilité
-function handleVisibilityChange() {
-    if (document.visibilityState === 'visible' && wakeLock === null) {
-        acquireWakeLock();
-    }
-}
+        // Fonction pour acquérir le wake lock (empêche la mise en veille)
+        async function acquireWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock activé');
+                    
+                    // Réacquérir le wake lock en cas de changement de visibilité
+                    document.addEventListener('visibilitychange', handleVisibilityChange);
+                }
+            } catch (err) {
+                console.error(`Erreur d'activation du Wake Lock: ${err.message}`);
+            }
+        }
 
-// Fonction alternative pour garder l'écran actif (compatibilité)
-function keepScreenAlive() {
-    // Créer une vidéo invisible qui joue en continu
-    const video = document.createElement('video');
-    video.setAttribute('loop', '');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('muted', '');
-    video.setAttribute('autoplay', '');
-    video.style.width = '1px';
-    video.style.height = '1px';
-    video.style.position = 'absolute';
-    video.style.opacity = '0.01';
-    
-    // Créer une source vidéo vide
-    const source = document.createElement('source');
-    source.setAttribute('src', 'data:video/mp4;base64,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=');
-    source.setAttribute('type', 'video/mp4');
-    
-    video.appendChild(source);
-    document.body.appendChild(video);
-    
-    // Essayer de jouer la vidéo
-    video.play().catch(e => {
-        console.error('Erreur de lecture vidéo pour anti-veille:', e);
-    });
-    
-    // Démarrer également un timer pour simuler une activité
-    setInterval(() => {
-        // Simuler une activité minimale pour garder l'écran actif
-        document.body.style.opacity = document.body.style.opacity === '0.99999' ? '1' : '0.99999';
-    }, 5000);
-}
+        // Fonction pour gérer les changements de visibilité
+        function handleVisibilityChange() {
+            if (document.visibilityState === 'visible' && wakeLock === null) {
+                acquireWakeLock();
+            }
+        }
 
-// Initialisation pour activer le plein écran et l'anti-veille
-function initialiserApp() {
-    // Ajouter des boutons pour le plein écran et l'anti-veille
-    const header = document.querySelector('.header');
-    const fullscreenButton = document.createElement('button');
-    fullscreenButton.className = 'btn btn-info';
-    fullscreenButton.style.position = 'absolute';
-    fullscreenButton.style.right = '10px';
-    fullscreenButton.style.top = '50%';
-    fullscreenButton.style.transform = 'translateY(-50%)';
-    fullscreenButton.style.padding = '0.4rem';
-    fullscreenButton.style.fontSize = '0.8rem';
-    fullscreenButton.innerHTML = '📺';
-    fullscreenButton.title = 'Mode plein écran';
-    fullscreenButton.onclick = () => {
-        activerPleinEcran();
-        acquireWakeLock();
-    };
-    header.appendChild(fullscreenButton);
-    
-    // Gérer le changement de visibilité
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Écouter les modifications de plein écran
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-}
+        // Initialisation pour activer le plein écran et l'anti-veille
+        function initialiserApp() {
+            // Ajouter un bouton pour le plein écran
+            const header = document.querySelector('.header');
+            const fullscreenButton = document.createElement('button');
+            fullscreenButton.className = 'btn btn-info';
+            fullscreenButton.style.position = 'absolute';
+            fullscreenButton.style.right = '10px';
+            fullscreenButton.style.top = '50%';
+            fullscreenButton.style.transform = 'translateY(-50%)';
+            fullscreenButton.style.padding = '0.4rem';
+            fullscreenButton.style.fontSize = '0.8rem';
+            fullscreenButton.innerHTML = '📺';
+            fullscreenButton.title = 'Mode plein écran';
+            fullscreenButton.onclick = () => {
+                activerPleinEcran();
+                acquireWakeLock();
+            };
+            header.appendChild(fullscreenButton);
+            
+            // Gérer le changement de visibilité
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            
+            // Écouter les modifications de plein écran
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        }
 
-// Gérer les changements de mode plein écran
-function handleFullscreenChange() {
-    documentInFullscreen = !!document.fullscreenElement || 
+        // Gérer les changements de mode plein écran
+        function handleFullscreenChange() {
+            documentInFullscreen = !!document.fullscreenElement || 
                            !!document.webkitFullscreenElement || 
                            !!document.mozFullScreenElement || 
                            !!document.msFullscreenElement;
                            
-    if (documentInFullscreen) {
-        acquireWakeLock();
-    }
-}
+            if (documentInFullscreen) {
+                acquireWakeLock();
+            }
+        }
 
-// Appliquer automatiquement le plein écran lors d'un clic
-document.addEventListener('click', function() {
-    if (!documentInFullscreen) {
-        activerPleinEcran();
-        acquireWakeLock();
-    }
-}, { once: true });
+        // Appliquer automatiquement le plein écran lors d'un clic
+        document.addEventListener('click', function() {
+            if (!documentInFullscreen) {
+                activerPleinEcran();
+                acquireWakeLock();
+            }
+        }, { once: true });
 
-// Initialiser l'application après le chargement
-window.addEventListener('load', initialiserApp);
+        // Initialiser l'application après le chargement
+        window.addEventListener('load', initialiserApp);
     </script>
 </body>
 </html>
