@@ -21,20 +21,16 @@
             position: relative;
         }
         
-        .safe-area {
-            position: absolute;
+        .header {
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 140px;
             background: rgba(0, 0, 0, 0.7);
             z-index: 1000;
             pointer-events: auto;
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .header {
             padding: 15px 20px 0;
         }
         
@@ -44,6 +40,7 @@
             font-size: 1.8rem;
             margin-bottom: 15px;
             font-weight: 600;
+            pointer-events: none;
         }
         
         .mode-selector {
@@ -53,6 +50,7 @@
             padding: 4px;
             margin: 0 auto;
             max-width: 400px;
+            pointer-events: auto;
         }
         
         .mode-btn {
@@ -68,6 +66,7 @@
             font-size: 0.85rem;
             position: relative;
             overflow: hidden;
+            pointer-events: auto;
         }
         
         .mode-btn.active {
@@ -88,6 +87,7 @@
             max-width: 400px;
             display: none;
             border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: auto;
         }
         
         .settings-panel.active {
@@ -102,6 +102,7 @@
         
         .setting-group {
             margin-bottom: 10px;
+            pointer-events: auto;
         }
         
         .setting-group label {
@@ -110,12 +111,14 @@
             margin-bottom: 6px;
             font-weight: 500;
             font-size: 0.9rem;
+            pointer-events: none;
         }
         
         .slider-container {
             display: flex;
             align-items: center;
             gap: 12px;
+            pointer-events: auto;
         }
         
         .slider-container input {
@@ -125,6 +128,7 @@
             background: rgba(255, 255, 255, 0.2);
             outline: none;
             -webkit-appearance: none;
+            pointer-events: auto;
         }
         
         .slider-container input::-webkit-slider-thumb {
@@ -146,11 +150,13 @@
             padding: 4px 8px;
             border-radius: 8px;
             font-size: 0.9rem;
+            pointer-events: none;
         }
         
         .ranking-style-buttons {
             display: flex;
             gap: 8px;
+            pointer-events: auto;
         }
         
         .ranking-style-btn {
@@ -163,6 +169,7 @@
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 500;
+            pointer-events: auto;
         }
         
         .ranking-style-btn.active {
@@ -170,32 +177,15 @@
             color: #1a1a2e;
         }
         
-        .status-display {
-            position: absolute;
-            top: 150px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 1rem;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 16px;
-            border-radius: 20px;
-            z-index: 999;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-            max-width: 80%;
-            pointer-events: none;
-        }
-        
         .countdown-bar {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             height: 4px;
             background: rgba(255, 255, 255, 0.1);
             z-index: 1001;
+            pointer-events: none;
         }
         
         .countdown-progress {
@@ -292,6 +282,7 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.2);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            pointer-events: auto;
         }
         
         .reset-button:hover {
@@ -300,6 +291,24 @@
         
         .reset-button:active {
             transform: translateX(-50%) scale(0.95);
+        }
+        
+        .status-display {
+            position: fixed;
+            top: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            z-index: 999;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            max-width: 80%;
+            pointer-events: none;
         }
         
         .finger-info {
@@ -318,6 +327,7 @@
             display: none;
             backdrop-filter: blur(20px);
             border: 2px solid rgba(255,255,255,0.2);
+            pointer-events: none;
         }
         
         .finger-info.active {
@@ -359,46 +369,44 @@
             .finger { width: 70px; height: 70px; font-size: 1.4rem; }
             .reset-button { padding: 12px 24px; font-size: 0.9rem; }
             .finger-info { font-size: 1.8rem; padding: 15px 30px; }
+            .status-display { top: 150px; }
         }
         
         @media (max-height: 700px) {
-            .safe-area { height: 130px; }
-            .status-display { top: 140px; }
+            .status-display { top: 145px; }
         }
     </style>
 </head>
 <body>
-    <div class="safe-area">
-        <div class="countdown-bar">
-            <div class="countdown-progress" id="countdownProgress"></div>
+    <div class="countdown-bar">
+        <div class="countdown-progress" id="countdownProgress"></div>
+    </div>
+    
+    <div class="header">
+        <h1>👆 Finger Chooser</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="winner">🎯 Winner</button>
+            <button class="mode-btn" data-mode="teams">👥 Teams</button>
+            <button class="mode-btn" data-mode="ranking">🏆 Ranking</button>
         </div>
         
-        <div class="header">
-            <h1>👆 Finger Chooser</h1>
-            
-            <div class="mode-selector">
-                <button class="mode-btn active" data-mode="winner">🎯 Winner</button>
-                <button class="mode-btn" data-mode="teams">👥 Teams</button>
-                <button class="mode-btn" data-mode="ranking">🏆 Ranking</button>
-            </div>
-            
-            <div class="settings-panel" id="teamsSettings">
-                <div class="setting-group">
-                    <label>Number of Teams:</label>
-                    <div class="slider-container">
-                        <input type="range" id="teamCount" min="2" max="5" value="2" class="team-slider">
-                        <span class="slider-value" id="teamCountValue">2</span>
-                    </div>
+        <div class="settings-panel" id="teamsSettings">
+            <div class="setting-group">
+                <label>Number of Teams:</label>
+                <div class="slider-container">
+                    <input type="range" id="teamCount" min="2" max="5" value="2" class="team-slider">
+                    <span class="slider-value" id="teamCountValue">2</span>
                 </div>
             </div>
-            
-            <div class="settings-panel" id="rankingSettings">
-                <div class="setting-group">
-                    <label>Ranking Style:</label>
-                    <div class="ranking-style-buttons">
-                        <button class="ranking-style-btn active" data-ranking="numbers">Numbers</button>
-                        <button class="ranking-style-btn" data-ranking="medals">Medals</button>
-                    </div>
+        </div>
+        
+        <div class="settings-panel" id="rankingSettings">
+            <div class="setting-group">
+                <label>Ranking Style:</label>
+                <div class="ranking-style-buttons">
+                    <button class="ranking-style-btn active" data-ranking="numbers">Numbers</button>
+                    <button class="ranking-style-btn" data-ranking="medals">Medals</button>
                 </div>
             </div>
         </div>
@@ -421,6 +429,7 @@
         const statusDisplay = document.getElementById('statusDisplay');
         const countdownProgress = document.getElementById('countdownProgress');
         const fingerInfo = document.getElementById('fingerInfo');
+        const header = document.querySelector('.header');
         
         let touches = new Map();
         let currentMode = 'winner';
@@ -501,7 +510,7 @@
                 valueDisplay.textContent = teamCount;
             });
             
-            // Prevent touch events from bubbling
+            // Prevent touch events from bubbling to document
             slider.addEventListener('touchstart', function(e) {
                 e.stopPropagation();
             });
@@ -509,10 +518,14 @@
             slider.addEventListener('touchmove', function(e) {
                 e.stopPropagation();
             });
+            
+            slider.addEventListener('touchend', function(e) {
+                e.stopPropagation();
+            });
         }
         
         function setupTouchEvents() {
-            // Only allow touch events outside the safe area
+            // Add touch event listeners to document
             document.addEventListener('touchstart', handleTouchStart, { passive: false });
             document.addEventListener('touchmove', handleTouchMove, { passive: false });
             document.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -525,11 +538,19 @@
         }
         
         function handleTouchStart(e) {
-            // Check if touch is in safe area (top 140px)
-            for (let touch of e.touches) {
-                if (touch.clientY < 140) {
-                    return; // Ignore touches in safe area
-                }
+            // Check if touch is on an interactive element in header
+            const touch = e.touches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            // If touch is on interactive element in header, allow it
+            if (isInteractiveElement(target)) {
+                return; // Let the element handle its own events
+            }
+            
+            // Check if touch is in header area (for blocking finger creation)
+            if (touch.clientY < header.getBoundingClientRect().bottom) {
+                // In header but not on interactive element - prevent finger creation
+                return;
             }
             
             e.preventDefault();
@@ -547,7 +568,18 @@
         }
         
         function handleMouseDown(e) {
-            if (e.button !== 0 || e.clientY < 140) return;
+            // Check if click is on interactive element in header
+            if (isInteractiveElement(e.target)) {
+                return; // Let the element handle its own events
+            }
+            
+            // Check if click is in header area
+            const headerRect = header.getBoundingClientRect();
+            if (e.clientY < headerRect.bottom) {
+                return; // Block finger creation in header
+            }
+            
+            if (e.button !== 0) return;
             
             const mockTouch = {
                 identifier: Date.now() + Math.random(),
@@ -557,10 +589,44 @@
             handleNewTouches({ length: 1, 0: mockTouch });
         }
         
+        function isInteractiveElement(element) {
+            // Check if element or its parent is interactive
+            const interactiveSelectors = [
+                'button',
+                'input',
+                'select',
+                'textarea',
+                '.mode-btn',
+                '.ranking-style-btn',
+                '.team-slider'
+            ];
+            
+            let currentElement = element;
+            while (currentElement && currentElement !== document.body) {
+                // Check tag name
+                if (['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(currentElement.tagName)) {
+                    return true;
+                }
+                
+                // Check classes
+                for (const selector of interactiveSelectors) {
+                    if (currentElement.matches && currentElement.matches(selector)) {
+                        return true;
+                    }
+                }
+                
+                currentElement = currentElement.parentElement;
+            }
+            
+            return false;
+        }
+        
         function handleNewTouches(touchList) {
             for (let i = 0; i < touchList.length; i++) {
                 const touch = touchList[i];
-                if (touch.clientY >= 140 && !touches.has(touch.identifier)) {
+                // Check if touch is below header
+                const headerRect = header.getBoundingClientRect();
+                if (touch.clientY >= headerRect.bottom && !touches.has(touch.identifier)) {
                     createFinger(touch.identifier, touch.clientX, touch.clientY);
                 }
             }
@@ -574,7 +640,8 @@
             // Update existing touches
             for (let i = 0; i < touchList.length; i++) {
                 const touch = touchList[i];
-                if (touch.clientY >= 140) {
+                const headerRect = header.getBoundingClientRect();
+                if (touch.clientY >= headerRect.bottom) {
                     currentTouchIds.add(touch.identifier);
                     
                     if (touches.has(touch.identifier)) {
