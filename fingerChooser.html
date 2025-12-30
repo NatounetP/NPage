@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finger Chooser - Improved</title>
+    <title>Finger Chooser</title>
     <style>
         * {
             margin: 0;
@@ -15,117 +15,195 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a2e;
             min-height: 100vh;
             overflow: hidden;
+            position: relative;
         }
         
-        .header {
-            position: fixed;
+        .safe-area {
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 15px;
-            z-index: 100;
-            backdrop-filter: blur(10px);
+            height: 140px;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            pointer-events: auto;
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header {
+            padding: 15px 20px 0;
         }
         
         h1 {
             color: white;
             text-align: center;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
         
         .mode-selector {
             display: flex;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 4px;
             margin: 0 auto;
             max-width: 400px;
         }
         
         .mode-btn {
             flex: 1;
-            padding: 8px 5px;
+            padding: 12px 5px;
             border: none;
             background: transparent;
             color: white;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             position: relative;
             overflow: hidden;
         }
         
         .mode-btn.active {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
         .mode-btn:active {
             transform: scale(0.98);
         }
         
-        .status-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px auto 0;
+            max-width: 400px;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .settings-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .setting-group {
+            margin-bottom: 10px;
+        }
+        
+        .setting-group label {
+            color: white;
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .slider-container input {
+            flex: 1;
             height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider-container input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .slider-value {
+            color: white;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .ranking-style-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .ranking-style-btn {
+            flex: 1;
+            padding: 8px 10px;
+            border: none;
             background: rgba(255, 255, 255, 0.1);
-            z-index: 1000;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .ranking-style-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+        }
+        
+        .status-display {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            z-index: 999;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            max-width: 80%;
+            pointer-events: none;
         }
         
         .countdown-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            border-radius: 0 3px 3px 0;
-        }
-        
-        .countdown-overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1001;
         }
         
-        .countdown-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .countdown-number {
-            font-size: 8rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 0 30px rgba(255,255,255,0.5);
-            margin-bottom: 20px;
-        }
-        
-        .countdown-message {
-            color: white;
-            font-size: 1.5rem;
-            text-align: center;
-            padding: 0 20px;
+        .countdown-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00b894, #00cec9);
+            border-radius: 0 2px 2px 0;
+            transition: width 0.1s linear;
         }
         
         .touch-area {
@@ -140,476 +218,209 @@
         
         .finger {
             position: absolute;
-            width: 85px;
-            height: 85px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: white;
             transform: translate(-50%, -50%);
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             z-index: 10;
             text-align: center;
-            line-height: 1;
             user-select: none;
-            border: 4px solid white;
+            border: 3px solid white;
         }
         
         .finger.winner {
-            animation: winnerPulse 0.8s infinite alternate;
+            transform: translate(-50%, -50%) scale(1.5);
             z-index: 1000;
+            box-shadow: 0 0 40px rgba(255,215,0,0.8);
+            border-color: #FFD700;
         }
         
-        @keyframes winnerPulse {
-            0% {
-                transform: translate(-50%, -50%) scale(1);
-                box-shadow: 0 0 30px rgba(255,215,0,0.7);
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1.3);
-                box-shadow: 0 0 60px rgba(255,215,0,1);
+        .finger.winner-only {
+            opacity: 0;
+        }
+        
+        .finger.winner-only.winner {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.8);
+        }
+        
+        .finger.fixed {
+            transition: none;
+            animation: fadeOut 2s ease 3s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
             }
         }
         
-        .winner-display {
+        .team-color-1 { background: #FF5252 !important; }
+        .team-color-2 { background: #448AFF !important; }
+        .team-color-3 { background: #64FFDA !important; }
+        .team-color-4 { background: #FFD740 !important; }
+        .team-color-5 { background: #E040FB !important; }
+        
+        .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500) !important; }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0, #909090) !important; }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32, #A0522D) !important; }
+        .rank-other { background: linear-gradient(135deg, #667eea, #764ba2) !important; }
+        
+        .reset-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 28px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .reset-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .reset-button:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+        
+        .finger-info {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: all 0.5s ease;
-            border: 8px solid white;
-            box-shadow: 0 0 80px rgba(255,215,0,0.8);
-        }
-        
-        .winner-display.active {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-        }
-        
-        .winner-text {
-            font-size: 3.5rem;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2rem;
             font-weight: bold;
-            color: white;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .teams-display {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .teams-display.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .teams-title {
-            color: white;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
             text-align: center;
-            font-weight: bold;
-        }
-        
-        .teams-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            max-width: 800px;
-            width: 100%;
-        }
-        
-        .team-card {
-            flex: 1;
-            min-width: 250px;
-            background: rgba(255, 255, 255, 0.1);
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 40px;
             border-radius: 20px;
-            padding: 25px;
-            backdrop-filter: blur(10px);
+            display: none;
+            backdrop-filter: blur(20px);
             border: 2px solid rgba(255,255,255,0.2);
         }
         
-        .team-header {
-            color: white;
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: bold;
+        .finger-info.active {
+            display: block;
+            animation: popIn 0.3s ease;
         }
         
-        .team-members {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        @keyframes popIn {
+            from {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
         }
         
-        .team-member {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50px;
-            padding: 12px 20px;
-            color: white;
-            font-size: 1.3rem;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        .ranking-display {
+        .simple-result {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #1a237e, #311b92);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .ranking-display.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .ranking-title {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: white;
             font-size: 2.5rem;
-            margin-bottom: 30px;
+            font-weight: bold;
             text-align: center;
-            font-weight: bold;
-        }
-        
-        .ranking-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 500px;
-            width: 100%;
-        }
-        
-        .ranking-item {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.1);
-            transform: translateX(-100%);
-            opacity: 0;
-            transition: all 0.5s ease;
-        }
-        
-        .ranking-item.visible {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        
-        .rank-number {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            color: #667eea;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 1.8rem;
-            flex-shrink: 0;
-        }
-        
-        .ranking-item:nth-child(1) .rank-number {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: white;
-        }
-        
-        .ranking-item:nth-child(2) .rank-number {
-            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
-            color: white;
-        }
-        
-        .ranking-item:nth-child(3) .rank-number {
-            background: linear-gradient(135deg, #CD7F32, #A0522D);
-            color: white;
-        }
-        
-        .rank-finger {
-            color: white;
-            flex: 1;
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-        
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            z-index: 100;
-            padding: 0 20px;
-        }
-        
-        .action-btn {
-            padding: 16px 30px;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 50px;
-            background: white;
-            color: #667eea;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            min-width: 160px;
-        }
-        
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .action-btn.secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-        
-        .settings-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 10px auto 0;
-            max-width: 400px;
+            z-index: 2000;
             display: none;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
         }
         
-        .settings-panel.active {
+        .simple-result.active {
             display: block;
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from { transform: translateY(-10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .setting-group {
-            margin-bottom: 15px;
-        }
-        
-        .setting-group label {
-            color: white;
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .slider-container input {
-            flex: 1;
-            height: 10px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.2);
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .slider-container input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        
-        .slider-value {
-            color: white;
-            font-weight: bold;
-            min-width: 35px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 10px;
-        }
-        
-        .instructions {
-            position: fixed;
-            top: 120px;
-            left: 20px;
-            right: 20px;
-            color: white;
-            text-align: center;
-            font-size: 1.1rem;
-            opacity: 0.9;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 12px;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .finger-count {
-            position: fixed;
-            top: 170px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 1.3rem;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 8px 20px;
-            border-radius: 30px;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
         }
         
         @media (max-width: 480px) {
-            h1 { font-size: 1.3rem; }
-            .mode-btn { padding: 8px 3px; font-size: 0.75rem; }
-            .finger { width: 75px; height: 75px; font-size: 1.6rem; }
-            .action-btn { padding: 14px 20px; min-width: 140px; font-size: 1rem; }
-            .teams-title, .ranking-title { font-size: 2rem; }
-            .team-card { min-width: 100%; }
+            h1 { font-size: 1.5rem; }
+            .mode-btn { padding: 10px 4px; font-size: 0.8rem; }
+            .finger { width: 70px; height: 70px; font-size: 1.4rem; }
+            .reset-button { padding: 12px 24px; font-size: 0.9rem; }
+            .finger-info { font-size: 1.8rem; padding: 15px 30px; }
+        }
+        
+        @media (max-height: 700px) {
+            .safe-area { height: 130px; }
+            .status-display { top: 140px; }
         }
     </style>
 </head>
 <body>
-    <div class="status-bar">
-        <div class="countdown-bar" id="countdownBar"></div>
-    </div>
-    
-    <div class="countdown-overlay" id="countdownOverlay">
-        <div class="countdown-number" id="countdownNumber">4</div>
-        <div class="countdown-message" id="countdownMessage">Keep fingers still...</div>
-    </div>
-    
-    <div class="winner-display" id="winnerDisplay">
-        <div class="winner-text">👑</div>
-    </div>
-    
-    <div class="teams-display" id="teamsDisplay">
-        <div class="teams-title" id="teamsTitle">Teams</div>
-        <div class="teams-container" id="teamsContainer"></div>
-    </div>
-    
-    <div class="ranking-display" id="rankingDisplay">
-        <div class="ranking-title" id="rankingTitle">Ranking</div>
-        <div class="ranking-list" id="rankingList"></div>
-    </div>
-    
-    <div class="header">
-        <h1>👆 Finger Chooser</h1>
-        
-        <div class="mode-selector">
-            <button class="mode-btn active" data-mode="winner">🎯 Winner</button>
-            <button class="mode-btn" data-mode="teams">👥 Teams</button>
-            <button class="mode-btn" data-mode="ranking">🏆 Ranking</button>
+    <div class="safe-area">
+        <div class="countdown-bar">
+            <div class="countdown-progress" id="countdownProgress"></div>
         </div>
         
-        <div class="settings-panel" id="teamsSettings">
-            <div class="setting-group">
-                <label>Number of Teams:</label>
-                <div class="slider-container">
-                    <input type="range" id="teamCount" min="2" max="5" value="2" class="team-slider">
-                    <span class="slider-value" id="teamCountValue">2</span>
+        <div class="header">
+            <h1>👆 Finger Chooser</h1>
+            
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="winner">🎯 Winner</button>
+                <button class="mode-btn" data-mode="teams">👥 Teams</button>
+                <button class="mode-btn" data-mode="ranking">🏆 Ranking</button>
+            </div>
+            
+            <div class="settings-panel" id="teamsSettings">
+                <div class="setting-group">
+                    <label>Number of Teams:</label>
+                    <div class="slider-container">
+                        <input type="range" id="teamCount" min="2" max="5" value="2" class="team-slider">
+                        <span class="slider-value" id="teamCountValue">2</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="settings-panel" id="rankingSettings">
-            <div class="setting-group">
-                <label>Ranking Style:</label>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="mode-btn" data-ranking="medals" style="flex: none; padding: 8px 15px;">Medals</button>
-                    <button class="mode-btn active" data-ranking="numbers" style="flex: none; padding: 8px 15px;">Numbers</button>
+            
+            <div class="settings-panel" id="rankingSettings">
+                <div class="setting-group">
+                    <label>Ranking Style:</label>
+                    <div class="ranking-style-buttons">
+                        <button class="ranking-style-btn active" data-ranking="numbers">Numbers</button>
+                        <button class="ranking-style-btn" data-ranking="medals">Medals</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="instructions" id="instructions">
-        Touch anywhere with fingers. Hold for 4 seconds to activate automatically!
+    <div class="status-display" id="statusDisplay">
+        Place fingers on screen and hold still...
     </div>
-    
-    <div class="finger-count" id="fingerCount">0 fingers</div>
     
     <div class="touch-area" id="touchArea"></div>
     
-    <div class="controls">
-        <button class="action-btn secondary" onclick="resetSelection()">
-            <span style="font-size: 1.2rem;">↻</span> Reset
-        </button>
-        <button class="action-btn" onclick="executeMode()" id="executeBtn">
-            <span style="font-size: 1.2rem;">🎯</span> Select Winner
-        </button>
-    </div>
+    <div class="finger-info" id="fingerInfo"></div>
+    
+    <button class="reset-button" onclick="resetSelection()">
+        ↻ Reset
+    </button>
 
     <script>
         const touchArea = document.getElementById('touchArea');
-        const instructions = document.getElementById('instructions');
-        const fingerCount = document.getElementById('fingerCount');
-        const executeBtn = document.getElementById('executeBtn');
-        const countdownBar = document.getElementById('countdownBar');
-        const countdownOverlay = document.getElementById('countdownOverlay');
-        const countdownNumber = document.getElementById('countdownNumber');
-        const countdownMessage = document.getElementById('countdownMessage');
-        const winnerDisplay = document.getElementById('winnerDisplay');
-        const teamsDisplay = document.getElementById('teamsDisplay');
-        const teamsContainer = document.getElementById('teamsContainer');
-        const rankingDisplay = document.getElementById('rankingDisplay');
-        const rankingList = document.getElementById('rankingList');
+        const statusDisplay = document.getElementById('statusDisplay');
+        const countdownProgress = document.getElementById('countdownProgress');
+        const fingerInfo = document.getElementById('fingerInfo');
         
         let touches = new Map();
         let currentMode = 'winner';
@@ -621,15 +432,11 @@
         let isCountingDown = false;
         let lastTouchCount = 0;
         let stableStartTime = null;
-        const ACTIVATION_TIME = 4000; // 4 seconds
-        const STABILITY_THRESHOLD = 50; // pixels movement allowed
+        const ACTIVATION_TIME = 3000; // 3 seconds
+        const STABILITY_THRESHOLD = 30; // pixels movement allowed
+        const RESULT_DISPLAY_TIME = 2000; // 2 seconds
         
-        const colors = [
-            '#FF5252', '#FF4081', '#E040FB', '#7C4DFF',
-            '#536DFE', '#448AFF', '#40C4FF', '#18FFFF',
-            '#64FFDA', '#69F0AE', '#B2FF59', '#EEFF41',
-            '#FFD740', '#FFAB40', '#FF6E40', '#FF8A80'
-        ];
+        const teamColors = ['team-color-1', 'team-color-2', 'team-color-3', 'team-color-4', 'team-color-5'];
         
         // Initialize
         init();
@@ -638,22 +445,19 @@
             setupModeSelector();
             setupTeamSlider();
             setupTouchEvents();
-            updateInstructions();
-            updateFingerCount();
+            updateStatusDisplay();
         }
         
         function setupModeSelector() {
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Prevent event bubbling
+                    e.stopPropagation();
+                    e.preventDefault();
                     const mode = this.dataset.mode;
-                    const ranking = this.dataset.ranking;
                     
                     if (mode) {
                         // Mode selection
-                        document.querySelectorAll('.mode-btn[data-mode]').forEach(b => {
-                            b.classList.remove('active');
-                        });
+                        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
                         currentMode = mode;
                         
@@ -669,16 +473,21 @@
                             document.getElementById('rankingSettings').classList.add('active');
                         }
                         
-                        updateInstructions();
-                        updateExecuteButton();
-                    } else if (ranking) {
-                        // Ranking style selection
-                        document.querySelectorAll('[data-ranking]').forEach(b => {
-                            b.classList.remove('active');
-                        });
-                        this.classList.add('active');
-                        rankingStyle = ranking;
+                        updateStatusDisplay();
                     }
+                });
+            });
+            
+            // Ranking style buttons
+            document.querySelectorAll('.ranking-style-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const ranking = this.dataset.ranking;
+                    
+                    document.querySelectorAll('.ranking-style-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    rankingStyle = ranking;
                 });
             });
         }
@@ -692,17 +501,18 @@
                 valueDisplay.textContent = teamCount;
             });
             
+            // Prevent touch events from bubbling
             slider.addEventListener('touchstart', function(e) {
                 e.stopPropagation();
             });
             
-            slider.addEventListener('mousedown', function(e) {
+            slider.addEventListener('touchmove', function(e) {
                 e.stopPropagation();
             });
         }
         
         function setupTouchEvents() {
-            // Touch events for the entire document
+            // Only allow touch events outside the safe area
             document.addEventListener('touchstart', handleTouchStart, { passive: false });
             document.addEventListener('touchmove', handleTouchMove, { passive: false });
             document.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -715,6 +525,13 @@
         }
         
         function handleTouchStart(e) {
+            // Check if touch is in safe area (top 140px)
+            for (let touch of e.touches) {
+                if (touch.clientY < 140) {
+                    return; // Ignore touches in safe area
+                }
+            }
+            
             e.preventDefault();
             handleNewTouches(e.touches);
         }
@@ -730,7 +547,8 @@
         }
         
         function handleMouseDown(e) {
-            if (e.button !== 0) return;
+            if (e.button !== 0 || e.clientY < 140) return;
+            
             const mockTouch = {
                 identifier: Date.now() + Math.random(),
                 clientX: e.clientX,
@@ -742,7 +560,7 @@
         function handleNewTouches(touchList) {
             for (let i = 0; i < touchList.length; i++) {
                 const touch = touchList[i];
-                if (!touches.has(touch.identifier)) {
+                if (touch.clientY >= 140 && !touches.has(touch.identifier)) {
                     createFinger(touch.identifier, touch.clientX, touch.clientY);
                 }
             }
@@ -756,10 +574,12 @@
             // Update existing touches
             for (let i = 0; i < touchList.length; i++) {
                 const touch = touchList[i];
-                currentTouchIds.add(touch.identifier);
-                
-                if (touches.has(touch.identifier)) {
-                    updateFinger(touch.identifier, touch.clientX, touch.clientY);
+                if (touch.clientY >= 140) {
+                    currentTouchIds.add(touch.identifier);
+                    
+                    if (touches.has(touch.identifier)) {
+                        updateFinger(touch.identifier, touch.clientX, touch.clientY);
+                    }
                 }
             }
             
@@ -783,8 +603,8 @@
                     stableStartTime = currentTime;
                     stopCountdown();
                 } else if (!isCountingDown) {
-                    // Start countdown if stable for 500ms
-                    if (stableStartTime && (currentTime - stableStartTime) >= 500) {
+                    // Start countdown if stable for 300ms
+                    if (stableStartTime && (currentTime - stableStartTime) >= 300) {
                         startCountdown();
                     }
                 }
@@ -795,8 +615,7 @@
                 stopCountdown();
             }
             
-            updateFingerCount();
-            updateInstructions();
+            updateStatusDisplay();
         }
         
         function checkIfFingersMoving() {
@@ -821,9 +640,9 @@
             finger.style.left = `${x}px`;
             finger.style.top = `${y}px`;
             
-            // Assign color based on finger order
-            const colorIndex = touches.size % colors.length;
-            finger.style.background = colors[colorIndex];
+            // Assign random color
+            const hue = Math.floor(Math.random() * 360);
+            finger.style.background = `hsl(${hue}, 70%, 60%)`;
             
             touches.set(id, {
                 element: finger,
@@ -858,16 +677,10 @@
         function removeFinger(id) {
             const fingerData = touches.get(id);
             if (fingerData) {
-                fingerData.element.style.transition = 'all 0.3s ease';
-                fingerData.element.style.opacity = '0';
-                fingerData.element.style.transform = 'translate(-50%, -50%) scale(0)';
-                
-                setTimeout(() => {
-                    if (fingerData.element.parentNode) {
-                        fingerData.element.parentNode.removeChild(fingerData.element);
-                    }
-                }, 300);
-                
+                // Just remove without animation
+                if (fingerData.element.parentNode) {
+                    fingerData.element.parentNode.removeChild(fingerData.element);
+                }
                 touches.delete(id);
             }
         }
@@ -878,97 +691,55 @@
             isCountingDown = true;
             const startTime = Date.now();
             
-            // Show countdown overlay
-            countdownOverlay.classList.add('active');
-            
-            // Update countdown every 100ms for smoother animation
             countdownTimer = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                const remaining = Math.ceil((ACTIVATION_TIME - elapsed) / 1000);
                 const progress = Math.min(elapsed / ACTIVATION_TIME, 1);
                 
                 // Update progress bar
-                countdownBar.style.width = `${progress * 100}%`;
-                
-                // Update countdown number
-                if (remaining > 0) {
-                    countdownNumber.textContent = remaining;
-                    countdownMessage.textContent = 'Keep fingers still...';
-                } else {
-                    countdownNumber.textContent = '🎉';
-                    countdownMessage.textContent = 'Activating!';
-                }
+                countdownProgress.style.width = `${progress * 100}%`;
                 
                 // Execute when countdown completes
                 if (elapsed >= ACTIVATION_TIME) {
                     clearInterval(countdownTimer);
-                    setTimeout(() => {
-                        executeMode();
-                        stopCountdown();
-                    }, 500);
+                    executeMode();
+                    stopCountdown();
                 }
-            }, 100);
+            }, 50);
         }
         
         function stopCountdown() {
             isCountingDown = false;
             clearInterval(countdownTimer);
-            countdownOverlay.classList.remove('active');
-            countdownBar.style.width = '0%';
+            countdownProgress.style.width = '0%';
         }
         
-        function updateFingerCount() {
+        function updateStatusDisplay() {
             const count = touches.size;
-            fingerCount.textContent = `${count} finger${count !== 1 ? 's' : ''}`;
-        }
-        
-        function updateInstructions() {
-            const count = touches.size;
-            let instructionText = '';
+            let statusText = '';
             
             if (count === 0) {
-                instructionText = 'Touch anywhere with fingers. Hold for 4 seconds to activate automatically!';
+                statusText = 'Place fingers on screen and hold still...';
             } else if (count === 1) {
-                instructionText = 'Add more fingers (need at least 2)';
+                statusText = 'Add more fingers (need at least 2)';
             } else {
                 if (isCountingDown) {
-                    const remaining = 4 - Math.floor((Date.now() - (Date.now() - 4000 * (1 - parseFloat(countdownBar.style.width) / 100))) / 1000);
-                    instructionText = `Activating ${currentMode} in ${remaining}s...`;
+                    const remaining = Math.ceil((ACTIVATION_TIME - (Date.now() - (Date.now() - ACTIVATION_TIME * (1 - parseFloat(countdownProgress.style.width) / 100)))) / 1000);
+                    statusText = `${count} fingers - Activating in ${remaining}s...`;
                 } else {
-                    instructionText = `Keep ${count} fingers still for 4 seconds`;
+                    statusText = `${count} fingers - Hold still for 3 seconds`;
                 }
             }
             
-            instructions.textContent = instructionText;
-        }
-        
-        function updateExecuteButton() {
-            let buttonText = '';
-            let buttonIcon = '';
-            
-            switch(currentMode) {
-                case 'winner':
-                    buttonText = 'Select Winner';
-                    buttonIcon = '🎯';
-                    break;
-                case 'teams':
-                    buttonText = 'Create Teams';
-                    buttonIcon = '👥';
-                    break;
-                case 'ranking':
-                    buttonText = 'Create Ranking';
-                    buttonIcon = '🏆';
-                    break;
-            }
-            
-            executeBtn.innerHTML = `<span style="font-size: 1.2rem;">${buttonIcon}</span> ${buttonText}`;
+            statusDisplay.textContent = statusText;
         }
         
         function executeMode() {
-            if (touches.size === 0) {
-                alert('No fingers touching!');
-                return;
-            }
+            if (touches.size === 0) return;
+            
+            // Lock all fingers in place
+            touches.forEach(fingerData => {
+                fingerData.element.classList.add('fixed');
+            });
             
             switch(currentMode) {
                 case 'winner':
@@ -992,31 +763,25 @@
             const winnerId = ids[Math.floor(Math.random() * ids.length)];
             const winnerNumber = touches.get(winnerId)?.number;
             
-            // Hide all fingers
+            // Make winner larger and others invisible
             touches.forEach((fingerData, id) => {
-                fingerData.element.style.opacity = '0.3';
                 if (id === winnerId) {
                     fingerData.element.classList.add('winner');
                     fingerData.element.textContent = '👑';
-                    fingerData.element.style.zIndex = '1000';
+                    
+                    // Show winner info briefly
+                    showFingerInfo(`Winner: Finger #${winnerNumber}`);
+                } else {
+                    fingerData.element.classList.add('winner-only');
                 }
             });
             
-            // Show winner display
-            setTimeout(() => {
-                winnerDisplay.classList.add('active');
-            }, 500);
-            
-            // Auto-reset after 5 seconds
-            setTimeout(() => {
-                winnerDisplay.classList.remove('active');
-                setTimeout(resetSelection, 500);
-            }, 5000);
+            // Auto-reset after 3 seconds
+            setTimeout(resetSelection, 3000);
         }
         
         function createTeams() {
             const ids = Array.from(touches.keys());
-            const teamColors = ['#FF5252', '#448AFF', '#64FFDA', '#FFD740', '#E040FB'];
             
             // Calculate team sizes
             const baseSize = Math.floor(ids.length / teamCount);
@@ -1030,7 +795,7 @@
             // Shuffle IDs for random assignment
             const shuffledIds = [...ids].sort(() => Math.random() - 0.5);
             
-            // Assign teams
+            // Assign teams and colors
             let teamIndex = 0;
             let teamMemberIndex = 0;
             const teams = Array.from({length: teamCount}, () => []);
@@ -1045,50 +810,31 @@
                 }
             });
             
-            // Build teams display
-            teamsContainer.innerHTML = '';
+            // Apply team colors
+            teams.forEach((team, teamIndex) => {
+                team.forEach(id => {
+                    const fingerData = touches.get(id);
+                    if (fingerData) {
+                        // Remove any existing team classes
+                        teamColors.forEach(colorClass => {
+                            fingerData.element.classList.remove(colorClass);
+                        });
+                        // Add team color
+                        fingerData.element.classList.add(teamColors[teamIndex % teamColors.length]);
+                        fingerData.element.textContent = `T${teamIndex + 1}`;
+                    }
+                });
+            });
+            
+            // Show team info briefly
+            let infoText = `${teamCount} Teams Created\n`;
             teams.forEach((team, index) => {
-                if (team.length > 0) {
-                    const teamCard = document.createElement('div');
-                    teamCard.className = 'team-card';
-                    teamCard.style.borderColor = teamColors[index % teamColors.length];
-                    
-                    const teamHeader = document.createElement('div');
-                    teamHeader.className = 'team-header';
-                    teamHeader.style.color = teamColors[index % teamColors.length];
-                    teamHeader.textContent = `Team ${index + 1} (${team.length} player${team.length > 1 ? 's' : ''})`;
-                    
-                    const teamMembers = document.createElement('div');
-                    teamMembers.className = 'team-members';
-                    
-                    team.forEach(id => {
-                        const member = document.createElement('div');
-                        member.className = 'team-member';
-                        member.textContent = `Finger #${touches.get(id)?.number}`;
-                        teamMembers.appendChild(member);
-                    });
-                    
-                    teamCard.appendChild(teamHeader);
-                    teamCard.appendChild(teamMembers);
-                    teamsContainer.appendChild(teamCard);
-                }
+                infoText += `Team ${index + 1}: ${team.length} player${team.length !== 1 ? 's' : ''}\n`;
             });
+            showFingerInfo(infoText);
             
-            // Show teams display
-            setTimeout(() => {
-                teamsDisplay.classList.add('active');
-            }, 500);
-            
-            // Hide fingers
-            touches.forEach(fingerData => {
-                fingerData.element.style.opacity = '0.2';
-            });
-            
-            // Auto-reset after 8 seconds
-            setTimeout(() => {
-                teamsDisplay.classList.remove('active');
-                setTimeout(resetSelection, 500);
-            }, 8000);
+            // Auto-reset after 3 seconds
+            setTimeout(resetSelection, 3000);
         }
         
         function createRanking() {
@@ -1097,56 +843,44 @@
             // Shuffle IDs for random ranking
             const shuffledIds = [...ids].sort(() => Math.random() - 0.5);
             
-            // Build ranking display
-            rankingList.innerHTML = '';
+            // Apply ranking styles
             shuffledIds.forEach((id, index) => {
                 const fingerData = touches.get(id);
                 if (fingerData) {
-                    const rankingItem = document.createElement('div');
-                    rankingItem.className = 'ranking-item';
+                    // Remove any existing rank classes
+                    fingerData.element.classList.remove('rank-1', 'rank-2', 'rank-3', 'rank-other');
                     
-                    const rankNumber = document.createElement('div');
-                    rankNumber.className = 'rank-number';
-                    
-                    if (rankingStyle === 'medals') {
-                        if (index === 0) rankNumber.textContent = '🥇';
-                        else if (index === 1) rankNumber.textContent = '🥈';
-                        else if (index === 2) rankNumber.textContent = '🥉';
-                        else rankNumber.textContent = index + 1;
+                    // Add appropriate rank class
+                    if (index === 0) {
+                        fingerData.element.classList.add('rank-1');
+                        fingerData.element.textContent = rankingStyle === 'medals' ? '🥇' : '1';
+                    } else if (index === 1) {
+                        fingerData.element.classList.add('rank-2');
+                        fingerData.element.textContent = rankingStyle === 'medals' ? '🥈' : '2';
+                    } else if (index === 2) {
+                        fingerData.element.classList.add('rank-3');
+                        fingerData.element.textContent = rankingStyle === 'medals' ? '🥉' : '3';
                     } else {
-                        rankNumber.textContent = index + 1;
+                        fingerData.element.classList.add('rank-other');
+                        fingerData.element.textContent = (index + 1).toString();
                     }
-                    
-                    const rankFinger = document.createElement('div');
-                    rankFinger.className = 'rank-finger';
-                    rankFinger.textContent = `Finger #${fingerData.number}`;
-                    
-                    rankingItem.appendChild(rankNumber);
-                    rankingItem.appendChild(rankFinger);
-                    rankingList.appendChild(rankingItem);
-                    
-                    // Animate each item with delay
-                    setTimeout(() => {
-                        rankingItem.classList.add('visible');
-                    }, index * 200);
                 }
             });
             
-            // Show ranking display
-            setTimeout(() => {
-                rankingDisplay.classList.add('active');
-            }, 500);
+            // Show ranking info briefly
+            showFingerInfo('Ranking Created');
             
-            // Hide fingers
-            touches.forEach(fingerData => {
-                fingerData.element.style.opacity = '0.2';
-            });
+            // Keep showing numbers even after fingers removed
+            // The numbers will fade out after 3 seconds due to .fixed class
+        }
+        
+        function showFingerInfo(text) {
+            fingerInfo.textContent = text;
+            fingerInfo.classList.add('active');
             
-            // Auto-reset after 8 seconds
             setTimeout(() => {
-                rankingDisplay.classList.remove('active');
-                setTimeout(resetSelection, 500);
-            }, 8000);
+                fingerInfo.classList.remove('active');
+            }, RESULT_DISPLAY_TIME);
         }
         
         function resetSelection() {
@@ -1157,20 +891,14 @@
             });
             touches.clear();
             
-            // Hide all displays
-            winnerDisplay.classList.remove('active');
-            teamsDisplay.classList.remove('active');
-            rankingDisplay.classList.remove('active');
+            // Hide info display
+            fingerInfo.classList.remove('active');
             
             stopCountdown();
             stableStartTime = null;
             lastTouchCount = 0;
-            updateFingerCount();
-            updateInstructions();
+            updateStatusDisplay();
         }
-        
-        // Initialize
-        updateExecuteButton();
     </script>
 </body>
 </html>
