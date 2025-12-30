@@ -16,6 +16,7 @@
             background: #1a1a2e;
             height: 100vh;
             overflow: hidden;
+            touch-action: none; /* Prevent scrolling */
         }
         
         /* Header - always clickable */
@@ -25,7 +26,7 @@
             text-align: center;
             border-bottom: 3px solid #e94560;
             position: relative;
-            z-index: 10;
+            z-index: 1000;
         }
         
         h1 {
@@ -100,7 +101,7 @@
             z-index: 5;
         }
         
-        /* Touch area - covers entire screen below header */
+        /* Touch area - covers entire screen */
         .touch-area {
             position: fixed;
             top: 0;
@@ -108,12 +109,11 @@
             right: 0;
             bottom: 0;
             background: transparent;
-            z-index: 1;
         }
         
-        /* Finger circles - BIG and CLEAR */
+        /* Finger circles - positioned at EXACT touch point */
         .finger {
-            position: fixed; /* Changed from absolute to fixed */
+            position: fixed; /* FIXED for perfect alignment */
             width: 100px;
             height: 100px;
             border-radius: 50%;
@@ -123,10 +123,10 @@
             font-weight: bold;
             font-size: 2rem;
             color: white;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); /* Center the circle on touch point */
             border: 4px solid white;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            z-index: 2;
+            z-index: 10;
             pointer-events: none; /* Don't interfere with touches */
         }
         
@@ -141,42 +141,23 @@
             z-index: 100;
         }
         
+        /* Others fade when winner selected */
+        .finger:not(.winner) {
+            opacity: 0.3;
+        }
+        
         /* Teams - same colors */
-        .team-1 { background: #FF5252; border-color: #FF5252; }
-        .team-2 { background: #448AFF; border-color: #448AFF; }
-        .team-3 { background: #64FFDA; border-color: #64FFDA; }
-        .team-4 { background: #FFD740; border-color: #FFD740; }
-        .team-5 { background: #E040FB; border-color: #E040FB; }
+        .team-1 { background: #FF5252 !important; border-color: #FF5252 !important; }
+        .team-2 { background: #448AFF !important; border-color: #448AFF !important; }
+        .team-3 { background: #64FFDA !important; border-color: #64FFDA !important; }
+        .team-4 { background: #FFD740 !important; border-color: #FFD740 !important; }
+        .team-5 { background: #E040FB !important; border-color: #E040FB !important; }
         
         /* Ranking colors */
-        .rank-1 { background: gold; border-color: gold; }
-        .rank-2 { background: silver; border-color: silver; }
-        .rank-3 { background: #cd7f32; border-color: #cd7f32; }
-        .rank-other { background: #667eea; border-color: #667eea; }
-        
-        /* Result message - stays visible */
-        .result {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-size: 1.5rem;
-            text-align: center;
-            display: none;
-            z-index: 1000;
-            border: 3px solid #e94560;
-            max-width: 90%;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            line-height: 1.4;
-        }
-        
-        .result.show {
-            display: block;
-        }
+        .rank-1 { background: gold !important; border-color: gold !important; }
+        .rank-2 { background: silver !important; border-color: silver !important; }
+        .rank-3 { background: #cd7f32 !important; border-color: #cd7f32 !important; }
+        .rank-other { background: #667eea !important; border-color: #667eea !important; }
         
         /* Reset button */
         .reset-btn {
@@ -200,35 +181,6 @@
             background: #ff6b81;
         }
         
-        /* Team result display */
-        .team-result {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        
-        .team-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .team-members {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            justify-content: center;
-        }
-        
-        .team-member {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 1rem;
-        }
-        
         @media (max-width: 600px) {
             .finger {
                 width: 90px;
@@ -240,16 +192,6 @@
                 width: 130px;
                 height: 130px;
                 font-size: 2.5rem;
-            }
-            
-            .result {
-                font-size: 1.3rem;
-                padding: 15px 20px;
-            }
-            
-            .team-member {
-                font-size: 0.9rem;
-                padding: 4px 8px;
             }
         }
     </style>
@@ -288,8 +230,6 @@
     </div>
     
     <div class="touch-area" id="touchArea"></div>
-    
-    <div class="result" id="result"></div>
     
     <button class="reset-btn" onclick="resetAll()">Reset Game</button>
 
@@ -355,109 +295,152 @@
         }
         
         function setupTouch() {
-            const touchArea = document.getElementById('touchArea');
-            
-            // Touch events on entire document
-            document.addEventListener('touchstart', handleTouch, { passive: false });
-            document.addEventListener('touchmove', handleTouch, { passive: false });
-            document.addEventListener('touchend', handleTouch, { passive: false });
-            document.addEventListener('touchcancel', handleTouch, { passive: false });
+            // Listen for touches on the entire document
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+            document.addEventListener('touchcancel', handleTouchCancel, { passive: false });
             
             // Mouse events for desktop
-            document.addEventListener('mousedown', function(e) {
-                if (gameActive) return;
-                handleMouse(e, 'start');
-            });
-            document.addEventListener('mousemove', function(e) {
-                if (gameActive) return;
-                if (e.buttons === 1) { // Left button pressed
-                    handleMouse(e, 'move');
-                }
-            });
-            document.addEventListener('mouseup', function(e) {
-                if (gameActive) return;
-                handleMouse(e, 'end');
-            });
+            document.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
             
             // Prevent context menu
             document.addEventListener('contextmenu', e => e.preventDefault());
         }
         
-        function handleTouch(e) {
+        function handleTouchStart(e) {
+            // Check if touch is on a UI control
+            for (let touch of e.touches) {
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (isUIControl(target)) {
+                    // Touch is on a control, don't create finger
+                    e.preventDefault();
+                    return;
+                }
+            }
+            
+            e.preventDefault();
+            
+            // Process all touches
+            for (let touch of e.touches) {
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (!isUIControl(target) && !gameActive) {
+                    // Create finger at EXACT touch position
+                    if (!fingers.find(f => f.id === touch.identifier)) {
+                        createFinger(touch.identifier, touch.clientX, touch.clientY);
+                    }
+                }
+            }
+            
+            checkStability();
+            updateStatus();
+        }
+        
+        function handleTouchMove(e) {
             e.preventDefault();
             if (gameActive) return;
             
+            // Update finger positions
+            for (let touch of e.touches) {
+                const finger = fingers.find(f => f.id === touch.identifier);
+                if (finger) {
+                    // Update to EXACT touch position
+                    finger.x = touch.clientX;
+                    finger.y = touch.clientY;
+                    finger.element.style.left = touch.clientX + 'px';
+                    finger.element.style.top = touch.clientY + 'px';
+                }
+            }
+            
+            checkStability();
+        }
+        
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            
             // Get current touches
-            const touches = Array.from(e.touches);
-            const touchIds = touches.map(t => t.identifier);
+            const currentTouches = new Set();
+            for (let touch of e.touches) {
+                currentTouches.add(touch.identifier);
+            }
             
             // Remove fingers that are no longer touching
             fingers = fingers.filter(finger => {
-                if (touchIds.includes(finger.id)) {
-                    return true;
-                } else {
+                if (!currentTouches.has(finger.id)) {
                     if (finger.element.parentNode) {
                         finger.element.parentNode.removeChild(finger.element);
                     }
                     return false;
                 }
-            });
-            
-            // Update or create fingers
-            touches.forEach(touch => {
-                const existing = fingers.find(f => f.id === touch.identifier);
-                if (existing) {
-                    // Update position - EXACT finger position
-                    existing.x = touch.clientX;
-                    existing.y = touch.clientY;
-                    existing.element.style.left = touch.clientX + 'px';
-                    existing.element.style.top = touch.clientY + 'px';
-                } else {
-                    // Create new finger at EXACT touch position
-                    createFinger(touch.identifier, touch.clientX, touch.clientY);
-                }
+                return true;
             });
             
             checkStability();
             updateStatus();
         }
         
-        function handleMouse(e, type) {
-            if (isUIControl(e.target)) return; // Don't create fingers when clicking UI controls
-            
-            const mouseId = 'mouse_' + Date.now();
-            
-            if (type === 'start') {
-                createFinger(mouseId, e.clientX, e.clientY);
-                checkStability();
-            } else if (type === 'move') {
-                const finger = fingers.find(f => f.id === mouseId);
-                if (finger) {
-                    finger.x = e.clientX;
-                    finger.y = e.clientY;
-                    finger.element.style.left = e.clientX + 'px';
-                    finger.element.style.top = e.clientY + 'px';
-                    checkStability();
+        function handleTouchCancel(e) {
+            e.preventDefault();
+            // Clear all touches
+            fingers.forEach(finger => {
+                if (finger.element.parentNode) {
+                    finger.element.parentNode.removeChild(finger.element);
                 }
-            } else if (type === 'end') {
-                fingers = fingers.filter(f => {
-                    if (f.id === mouseId) {
-                        if (f.element.parentNode) {
-                            f.element.parentNode.removeChild(f.element);
-                        }
-                        return false;
-                    }
-                    return true;
-                });
-                stopTimer();
-                updateStatus();
+            });
+            fingers = [];
+            checkStability();
+            updateStatus();
+        }
+        
+        // Mouse handlers for desktop testing
+        let mouseId = null;
+        
+        function handleMouseDown(e) {
+            if (e.button !== 0 || gameActive) return;
+            if (isUIControl(e.target)) return;
+            
+            mouseId = 'mouse_' + Date.now();
+            createFinger(mouseId, e.clientX, e.clientY);
+            checkStability();
+            updateStatus();
+        }
+        
+        function handleMouseMove(e) {
+            if (!mouseId || gameActive) return;
+            
+            const finger = fingers.find(f => f.id === mouseId);
+            if (finger) {
+                finger.x = e.clientX;
+                finger.y = e.clientY;
+                finger.element.style.left = e.clientX + 'px';
+                finger.element.style.top = e.clientY + 'px';
+                checkStability();
             }
+        }
+        
+        function handleMouseUp(e) {
+            if (!mouseId) return;
+            
+            fingers = fingers.filter(f => {
+                if (f.id === mouseId) {
+                    if (f.element.parentNode) {
+                        f.element.parentNode.removeChild(f.element);
+                    }
+                    return false;
+                }
+                return true;
+            });
+            mouseId = null;
+            stopTimer();
+            updateStatus();
         }
         
         function isUIControl(element) {
             // Check if element is a UI control
             const uiTags = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
-            const uiClasses = ['mode-btn', 'ranking-style-btn', 'team-slider', 'reset-btn', 'header'];
+            const uiClasses = ['mode-btn', 'ranking-style-btn', 'team-slider', 'reset-btn'];
             
             let current = element;
             while (current && current !== document.body) {
@@ -473,6 +456,11 @@
                     }
                 }
                 
+                // Check if in header area
+                if (current.classList && current.classList.contains('header')) {
+                    return true;
+                }
+                
                 current = current.parentElement;
             }
             
@@ -484,7 +472,7 @@
             fingerDiv.className = 'finger';
             fingerDiv.textContent = (fingers.length + 1).toString();
             
-            // Position at EXACT touch point
+            // Position at EXACT touch point - using FIXED positioning
             fingerDiv.style.left = x + 'px';
             fingerDiv.style.top = y + 'px';
             
@@ -510,12 +498,10 @@
                 stopTimer();
                 
                 // Start new timer if we have enough fingers
-                if (fingers.length >= 2) {
+                if (fingers.length >= 2 && !gameActive) {
                     startTimer();
                 }
             }
-            
-            updateStatus();
         }
         
         function startTimer() {
@@ -553,7 +539,7 @@
             const status = document.getElementById('status');
             
             if (gameActive) {
-                status.textContent = 'Game in progress - Press Reset to start over';
+                status.textContent = 'Game complete - Press Reset to start over';
             } else if (fingers.length === 0) {
                 status.textContent = 'Touch anywhere with fingers and hold still...';
             } else if (fingers.length === 1) {
@@ -584,20 +570,18 @@
         
         function selectWinner() {
             const winnerIndex = Math.floor(Math.random() * fingers.length);
-            const winner = fingers[winnerIndex];
             
-            // Make winner BIG and gold
+            // Make winner BIG and gold, fade others
             fingers.forEach((finger, index) => {
                 if (index === winnerIndex) {
                     finger.element.classList.add('winner');
                     finger.element.textContent = '👑';
                 } else {
-                    // Fade others
                     finger.element.style.opacity = '0.3';
                 }
             });
             
-            showResult(`🎉 Winner: Finger #${winner.number}! 🎉`);
+            // NO POPUP - result shown on circles only
         }
         
         function createTeams() {
@@ -617,27 +601,12 @@
                 teams[teamIndex].push(finger);
                 
                 // Apply team color and number - SAME COLOR FOR ALL TEAM MEMBERS
+                // Reset class first
                 finger.element.className = 'finger ' + teamColors[teamIndex];
                 finger.element.textContent = 'T' + (teamIndex + 1);
             });
             
-            // Show result
-            let resultHTML = `<div style="margin-bottom: 15px; font-size: 2rem;">👥 ${teamCount} Teams Created</div>`;
-            teams.forEach((team, index) => {
-                const teamColor = ['#FF5252', '#448AFF', '#64FFDA', '#FFD740', '#E040FB'][index];
-                resultHTML += `
-                    <div class="team-result">
-                        <div class="team-name" style="color: ${teamColor}">
-                            Team ${index + 1} (${team.length} player${team.length !== 1 ? 's' : ''})
-                        </div>
-                        <div class="team-members">
-                            ${team.map(finger => `<span class="team-member">Finger #${finger.number}</span>`).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            showResult(resultHTML);
+            // NO POPUP - results shown on circles only
         }
         
         function createRanking() {
@@ -645,7 +614,7 @@
             const shuffled = [...fingers].sort(() => Math.random() - 0.5);
             
             shuffled.forEach((finger, index) => {
-                // Remove any existing classes
+                // Reset class
                 finger.element.className = 'finger';
                 
                 // Add rank class
@@ -664,26 +633,7 @@
                 }
             });
             
-            // Show result
-            let resultHTML = `<div style="margin-bottom: 15px; font-size: 2rem;">🏆 Ranking Created</div>`;
-            shuffled.forEach((finger, index) => {
-                const rank = index + 1;
-                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🎯';
-                resultHTML += `<div style="margin: 8px 0; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                    ${medal} <strong>Rank ${rank}</strong>: Finger #${finger.number}
-                </div>`;
-            });
-            
-            showResult(resultHTML);
-        }
-        
-        function showResult(html) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = html;
-            resultDiv.classList.add('show');
-            
-            // Make sure it stays visible until reset
-            // (no timeout to hide it)
+            // NO POPUP - results shown on circles only
         }
         
         function resetAll() {
@@ -698,11 +648,11 @@
             // Reset game state
             gameActive = false;
             lastFingerCount = 0;
+            mouseId = null;
             
             // Reset UI
             stopTimer();
             updateStatus();
-            document.getElementById('result').classList.remove('show');
         }
     </script>
 </body>
