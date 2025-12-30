@@ -2,356 +2,192 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finger Chooser</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             background: #1a1a2e;
-            min-height: 100vh;
+            height: 100vh;
             overflow: hidden;
-            touch-action: none; /* Prevent browser touch actions */
         }
         
-        /* Header - controls area */
+        /* Header - always clickable */
         .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            padding: 15px 20px 0;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            pointer-events: auto; /* Ensure clicks work */
+            background: #0f3460;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 3px solid #e94560;
         }
         
         h1 {
             color: white;
-            text-align: center;
-            font-size: 1.8rem;
             margin-bottom: 15px;
-            font-weight: 600;
+            font-size: 1.8rem;
         }
         
+        /* Mode selector */
         .mode-selector {
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 4px;
-            margin: 0 auto;
+            gap: 5px;
+            margin: 0 auto 15px;
             max-width: 400px;
         }
         
         .mode-btn {
             flex: 1;
-            padding: 12px 5px;
+            padding: 10px;
             border: none;
-            background: transparent;
+            background: rgba(255,255,255,0.1);
             color: white;
-            font-weight: 600;
-            border-radius: 12px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.85rem;
-            -webkit-user-select: none;
-            user-select: none;
+            font-size: 0.9rem;
         }
         
         .mode-btn.active {
-            background: white;
-            color: #1a1a2e;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            background: #e94560;
+            color: white;
         }
         
-        .settings-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 12px;
-            margin: 10px auto 0;
-            max-width: 400px;
+        /* Settings */
+        .settings {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
             display: none;
-            border: 1px solid rgba(255,255,255,0.1);
         }
         
-        .settings-panel.active {
+        .settings.active {
             display: block;
         }
         
-        .setting-group {
-            margin-bottom: 10px;
-        }
-        
-        .setting-group label {
+        .setting {
             color: white;
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .slider-container input {
-            flex: 1;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255, 255, 255, 0.2);
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .slider-container input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .slider-value {
-            color: white;
-            font-weight: bold;
-            min-width: 30px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        
-        .ranking-style-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .ranking-style-btn {
-            flex: 1;
-            padding: 8px 10px;
-            border: none;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-        
-        .ranking-style-btn.active {
-            background: rgba(255, 255, 255, 0.9);
-            color: #1a1a2e;
+            margin-bottom: 8px;
         }
         
         /* Progress bar */
-        .countdown-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 1001;
+        .progress {
+            width: 100%;
+            height: 5px;
+            background: rgba(255,255,255,0.1);
         }
         
-        .countdown-progress {
+        .progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #00b894, #00cec9);
-            transition: width 0.1s linear;
+            background: #00b894;
+            transition: width 0.1s;
         }
         
-        /* Main touch area - covers entire screen */
+        /* Status */
+        .status {
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        
+        /* Touch area - main screen */
         .touch-area {
             position: fixed;
-            top: 0;
+            top: 180px; /* Below header */
             left: 0;
             right: 0;
             bottom: 0;
-            z-index: 1;
-            /* Will handle touches below header differently */
+            background: transparent;
         }
         
-        /* Finger circles - BIG */
+        /* Finger circles - BIG and CLEAR */
         .finger {
             position: absolute;
-            width: 110px;
-            height: 110px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: white;
             transform: translate(-50%, -50%);
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            border: 4px solid white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             z-index: 10;
-            border: 5px solid white;
-            user-select: none;
-            pointer-events: none; /* Don't interfere with touches */
         }
         
         /* Winner - VERY BIG */
         .finger.winner {
-            transform: translate(-50%, -50%) scale(2);
-            z-index: 1000;
-            box-shadow: 0 0 80px rgba(255,215,0,1);
-            border-color: #FFD700;
-            border-width: 8px;
+            width: 150px;
+            height: 150px;
+            font-size: 3rem;
+            background: gold !important;
+            border-color: gold;
+            box-shadow: 0 0 50px gold;
+            z-index: 100;
         }
         
-        /* Others fade out when winner is selected */
-        .finger:not(.winner) {
-            opacity: 0.2;
-            transform: translate(-50%, -50%) scale(0.7);
-        }
-        
-        .finger.fixed {
-            animation: fadeOut 2s ease 3s forwards;
-        }
-        
-        @keyframes fadeOut {
-            to { opacity: 0; }
-        }
-        
-        /* Team colors */
-        .team-color-1 { background: #FF5252 !important; border-color: #FF5252 !important; }
-        .team-color-2 { background: #448AFF !important; border-color: #448AFF !important; }
-        .team-color-3 { background: #64FFDA !important; border-color: #64FFDA !important; }
-        .team-color-4 { background: #FFD740 !important; border-color: #FFD740 !important; }
-        .team-color-5 { background: #E040FB !important; border-color: #E040FB !important; }
+        /* Teams - same colors */
+        .team-1 { background: #FF5252; }
+        .team-2 { background: #448AFF; }
+        .team-3 { background: #64FFDA; }
+        .team-4 { background: #FFD740; }
+        .team-5 { background: #E040FB; }
         
         /* Ranking colors */
-        .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500) !important; border-color: #FFD700 !important; }
-        .rank-2 { background: linear-gradient(135deg, #C0C0C0, #909090) !important; border-color: #C0C0C0 !important; }
-        .rank-3 { background: linear-gradient(135deg, #CD7F32, #A0522D) !important; border-color: #CD7F32 !important; }
-        .rank-other { background: linear-gradient(135deg, #667eea, #764ba2) !important; border-color: #667eea !important; }
+        .rank-1 { background: gold; }
+        .rank-2 { background: silver; }
+        .rank-3 { background: #cd7f32; }
+        .rank-other { background: #667eea; }
         
-        /* Reset button */
-        .reset-button {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 16px 32px;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 25px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255,255,255,0.3);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            pointer-events: auto; /* Ensure button is clickable */
-        }
-        
-        .reset-button:active {
-            transform: translateX(-50%) scale(0.95);
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Status display */
-        .status-display {
-            position: fixed;
-            top: 110px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border-radius: 20px;
-            z-index: 999;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            text-align: center;
-            max-width: 80%;
-            pointer-events: none;
-        }
-        
-        /* Info display */
-        .finger-info {
+        /* Result message */
+        .result {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
             color: white;
-            font-size: 2.5rem;
-            font-weight: bold;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 1.5rem;
             text-align: center;
-            z-index: 2000;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px 50px;
-            border-radius: 25px;
             display: none;
-            backdrop-filter: blur(30px);
-            border: 3px solid rgba(255,255,255,0.3);
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            pointer-events: none;
+            z-index: 1000;
+            border: 2px solid white;
         }
         
-        .finger-info.active {
+        .result.show {
             display: block;
-            animation: popIn 0.3s ease;
         }
         
-        @keyframes popIn {
-            from {
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            h1 { font-size: 1.5rem; }
-            .mode-btn { padding: 10px 3px; font-size: 0.8rem; }
-            .finger { 
-                width: 100px;
-                height: 100px;
-                font-size: 2rem;
-            }
-            .reset-button { 
-                padding: 14px 28px;
-                font-size: 1rem;
-            }
-            .finger-info { 
-                font-size: 2rem;
-                padding: 20px 30px;
-            }
-            .status-display { top: 105px; }
+        /* Reset button */
+        .reset-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <!-- Progress bar -->
-    <div class="countdown-bar">
-        <div class="countdown-progress" id="countdownProgress"></div>
-    </div>
-    
-    <!-- Header - ALWAYS clickable -->
-    <div class="header" id="header">
+    <div class="header">
         <h1>👆 Finger Chooser</h1>
         
         <div class="mode-selector">
@@ -360,396 +196,260 @@
             <button class="mode-btn" data-mode="ranking">🏆 Ranking</button>
         </div>
         
-        <div class="settings-panel" id="teamsSettings">
-            <div class="setting-group">
-                <label>Number of Teams:</label>
-                <div class="slider-container">
-                    <input type="range" id="teamCount" min="2" max="5" value="2" class="team-slider">
-                    <span class="slider-value" id="teamCountValue">2</span>
-                </div>
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="settings" id="teamsSettings">
+            <div class="setting">
+                Teams: <span id="teamCount">2</span>
+                <input type="range" id="teamSlider" min="2" max="5" value="2" style="width: 100%">
             </div>
         </div>
         
-        <div class="settings-panel" id="rankingSettings">
-            <div class="setting-group">
-                <label>Ranking Style:</label>
-                <div class="ranking-style-buttons">
-                    <button class="ranking-style-btn active" data-ranking="numbers">Numbers</button>
-                    <button class="ranking-style-btn" data-ranking="medals">Medals</button>
-                </div>
+        <div class="settings" id="rankingSettings">
+            <div class="setting">
+                <button class="mode-btn" data-style="numbers">Numbers</button>
+                <button class="mode-btn active" data-style="medals">Medals</button>
             </div>
         </div>
     </div>
     
-    <!-- Status display -->
-    <div class="status-display" id="statusDisplay">
-        Touch anywhere (avoid buttons) and hold still...
+    <div class="status" id="status">
+        Touch below with fingers and hold still...
     </div>
     
-    <!-- Info display -->
-    <div class="finger-info" id="fingerInfo"></div>
+    <div class="touch-area" id="touchArea"></div>
     
-    <!-- Reset button -->
-    <button class="reset-button" onclick="resetSelection()">
-        ↻ Reset Game
-    </button>
+    <div class="result" id="result"></div>
+    
+    <button class="reset-btn" onclick="resetAll()">Reset Game</button>
 
     <script>
-        const touchArea = document.body; // Use body for touch events
-        const statusDisplay = document.getElementById('statusDisplay');
-        const countdownProgress = document.getElementById('countdownProgress');
-        const fingerInfo = document.getElementById('fingerInfo');
-        const header = document.getElementById('header');
-        
-        let touches = new Map();
+        // Simple variables
+        let fingers = [];
         let currentMode = 'winner';
-        let rankingStyle = 'numbers';
         let teamCount = 2;
+        let rankingStyle = 'medals';
+        let timer = null;
+        let progress = 0;
         
-        // Auto-activation variables
-        let countdownTimer = null;
-        let isCountingDown = false;
-        let lastTouchCount = 0;
-        let stableStartTime = null;
-        const ACTIVATION_TIME = 3000;
+        // Setup
+        setupButtons();
+        setupTouch();
         
-        const teamColors = ['team-color-1', 'team-color-2', 'team-color-3', 'team-color-4', 'team-color-5'];
-        
-        // Initialize
-        init();
-        
-        function init() {
-            setupModeSelector();
-            setupTeamSlider();
-            setupTouchEvents();
-            updateStatusDisplay();
-        }
-        
-        function setupModeSelector() {
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    const mode = this.dataset.mode;
-                    
-                    // Mode selection
-                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        function setupButtons() {
+            // Mode buttons
+            document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+                btn.onclick = function() {
+                    // Update active button
+                    document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    currentMode = mode;
                     
-                    // Hide all settings panels
-                    document.querySelectorAll('.settings-panel').forEach(panel => {
-                        panel.classList.remove('active');
-                    });
+                    // Set mode
+                    currentMode = this.dataset.mode;
                     
-                    // Show relevant settings panel
-                    if (mode === 'teams') {
+                    // Show/hide settings
+                    document.getElementById('teamsSettings').classList.remove('active');
+                    document.getElementById('rankingSettings').classList.remove('active');
+                    
+                    if (currentMode === 'teams') {
                         document.getElementById('teamsSettings').classList.add('active');
-                    } else if (mode === 'ranking') {
+                    } else if (currentMode === 'ranking') {
                         document.getElementById('rankingSettings').classList.add('active');
                     }
                     
-                    updateStatusDisplay();
-                });
+                    updateStatus();
+                };
             });
             
             // Ranking style buttons
-            document.querySelectorAll('.ranking-style-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    const ranking = this.dataset.ranking;
-                    
-                    document.querySelectorAll('.ranking-style-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mode-btn[data-style]').forEach(btn => {
+                btn.onclick = function() {
+                    document.querySelectorAll('.mode-btn[data-style]').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    rankingStyle = ranking;
-                });
+                    rankingStyle = this.dataset.style;
+                };
             });
+            
+            // Team slider
+            document.getElementById('teamSlider').oninput = function() {
+                teamCount = this.value;
+                document.getElementById('teamCount').textContent = teamCount;
+            };
         }
         
-        function setupTeamSlider() {
-            const slider = document.getElementById('teamCount');
-            const valueDisplay = document.getElementById('teamCountValue');
+        function setupTouch() {
+            const touchArea = document.getElementById('touchArea');
             
-            slider.addEventListener('input', function() {
-                teamCount = parseInt(this.value);
-                valueDisplay.textContent = teamCount;
+            // Touch events
+            touchArea.addEventListener('touchstart', handleTouch);
+            touchArea.addEventListener('touchmove', handleTouch);
+            touchArea.addEventListener('touchend', handleTouch);
+            touchArea.addEventListener('touchcancel', handleTouch);
+            
+            // Mouse events for desktop
+            touchArea.addEventListener('mousedown', function(e) {
+                handleMouse(e, 'start');
             });
-        }
-        
-        function setupTouchEvents() {
-            // Listen for touches on the entire document
-            document.addEventListener('touchstart', handleTouchStart, { passive: false });
-            document.addEventListener('touchmove', handleTouchMove, { passive: false });
-            document.addEventListener('touchend', handleTouchEnd, { passive: false });
-            document.addEventListener('touchcancel', handleTouchCancel, { passive: false });
-            
-            // Mouse support for testing
-            document.addEventListener('mousedown', handleMouseDown);
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            
-            // Prevent context menu and zoom
-            document.addEventListener('contextmenu', (e) => e.preventDefault());
-            document.addEventListener('gesturestart', (e) => e.preventDefault());
-            document.addEventListener('gesturechange', (e) => e.preventDefault());
-            document.addEventListener('gestureend', (e) => e.preventDefault());
-        }
-        
-        function handleTouchStart(e) {
-            e.preventDefault();
-            
-            // Get the header position
-            const headerRect = header.getBoundingClientRect();
-            
-            // Check each touch
-            for (let i = 0; i < e.touches.length; i++) {
-                const touch = e.touches[i];
-                
-                // Check if touch is on a button or in header area
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (isUIControl(target) || touch.clientY < headerRect.bottom) {
-                    // This touch is on a control, skip it
-                    continue;
+            touchArea.addEventListener('mousemove', function(e) {
+                if (e.buttons === 1) { // Left button pressed
+                    handleMouse(e, 'move');
                 }
-                
-                // Create finger for this touch
-                if (!touches.has(touch.identifier)) {
-                    createFinger(touch.identifier, touch.clientX, touch.clientY);
-                }
-            }
+            });
+            touchArea.addEventListener('mouseup', function(e) {
+                handleMouse(e, 'end');
+            });
             
-            updateTouchState();
+            // Prevent context menu
+            touchArea.addEventListener('contextmenu', e => e.preventDefault());
         }
         
-        function handleTouchMove(e) {
-            e.preventDefault();
-            
-            // Update finger positions
-            for (let i = 0; i < e.touches.length; i++) {
-                const touch = e.touches[i];
-                if (touches.has(touch.identifier)) {
-                    updateFinger(touch.identifier, touch.clientX, touch.clientY);
-                }
-            }
-            
-            updateTouchState();
-        }
-        
-        function handleTouchEnd(e) {
+        function handleTouch(e) {
             e.preventDefault();
             
             // Get current touches
-            const currentTouches = new Set();
-            for (let i = 0; i < e.touches.length; i++) {
-                currentTouches.add(e.touches[i].identifier);
-            }
+            const touches = Array.from(e.touches);
+            const touchIds = touches.map(t => t.identifier);
             
             // Remove fingers that are no longer touching
-            touches.forEach((fingerData, id) => {
-                if (!currentTouches.has(id)) {
-                    removeFinger(id);
-                }
-            });
-            
-            updateTouchState();
-        }
-        
-        function handleTouchCancel(e) {
-            e.preventDefault();
-            // Clear all touches
-            touches.forEach((fingerData, id) => {
-                removeFinger(id);
-            });
-            updateTouchState();
-        }
-        
-        // Mouse handlers for desktop testing
-        let mouseDown = false;
-        let mouseId = null;
-        
-        function handleMouseDown(e) {
-            if (e.button !== 0 || isUIControl(e.target)) return;
-            
-            mouseDown = true;
-            mouseId = 'mouse_' + Date.now();
-            createFinger(mouseId, e.clientX, e.clientY);
-            updateTouchState();
-        }
-        
-        function handleMouseMove(e) {
-            if (!mouseDown || !mouseId) return;
-            
-            updateFinger(mouseId, e.clientX, e.clientY);
-            updateTouchState();
-        }
-        
-        function handleMouseUp(e) {
-            if (!mouseDown || !mouseId) return;
-            
-            mouseDown = false;
-            removeFinger(mouseId);
-            mouseId = null;
-            updateTouchState();
-        }
-        
-        function isUIControl(element) {
-            // Check if element is a UI control
-            const uiTags = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
-            const uiClasses = ['mode-btn', 'ranking-style-btn', 'team-slider', 'reset-button'];
-            
-            let current = element;
-            while (current && current !== document.body) {
-                // Check tag
-                if (uiTags.includes(current.tagName)) {
+            fingers = fingers.filter(finger => {
+                if (touchIds.includes(finger.id)) {
                     return true;
+                } else {
+                    finger.element.remove();
+                    return false;
                 }
-                
-                // Check classes
-                for (const className of uiClasses) {
-                    if (current.classList && current.classList.contains(className)) {
-                        return true;
-                    }
-                }
-                
-                current = current.parentElement;
-            }
+            });
             
-            return false;
+            // Update or create fingers
+            touches.forEach(touch => {
+                const existing = fingers.find(f => f.id === touch.identifier);
+                if (existing) {
+                    // Update position
+                    existing.x = touch.clientX;
+                    existing.y = touch.clientY;
+                    existing.element.style.left = touch.clientX + 'px';
+                    existing.element.style.top = touch.clientY + 'px';
+                } else {
+                    // Create new finger
+                    createFinger(touch.identifier, touch.clientX, touch.clientY);
+                }
+            });
+            
+            checkStability();
+            updateStatus();
         }
         
-        function updateTouchState() {
-            const currentTime = Date.now();
-            const currentFingerCount = touches.size;
+        function handleMouse(e, type) {
+            const mouseId = 'mouse';
             
-            if (currentFingerCount >= 2) {
-                if (currentFingerCount !== lastTouchCount) {
-                    // Finger count changed
-                    lastTouchCount = currentFingerCount;
-                    stableStartTime = currentTime;
-                    stopCountdown();
-                } else if (!isCountingDown) {
-                    // Same count for 500ms, start countdown
-                    if (stableStartTime && (currentTime - stableStartTime) >= 500) {
-                        startCountdown();
-                    }
+            if (type === 'start') {
+                createFinger(mouseId, e.clientX, e.clientY);
+                checkStability();
+            } else if (type === 'move') {
+                const finger = fingers.find(f => f.id === mouseId);
+                if (finger) {
+                    finger.x = e.clientX;
+                    finger.y = e.clientY;
+                    finger.element.style.left = e.clientX + 'px';
+                    finger.element.style.top = e.clientY + 'px';
+                    checkStability();
                 }
-            } else {
-                // Not enough fingers
-                lastTouchCount = currentFingerCount;
-                stableStartTime = null;
-                stopCountdown();
+            } else if (type === 'end') {
+                fingers = fingers.filter(f => {
+                    if (f.id === mouseId) {
+                        f.element.remove();
+                        return false;
+                    }
+                    return true;
+                });
+                stopTimer();
+                updateStatus();
             }
-            
-            updateStatusDisplay();
         }
         
         function createFinger(id, x, y) {
-            const finger = document.createElement('div');
-            finger.className = 'finger';
-            finger.id = `finger-${id}`;
-            finger.textContent = (touches.size + 1).toString();
-            finger.style.left = `${x}px`;
-            finger.style.top = `${y}px`;
+            const fingerDiv = document.createElement('div');
+            fingerDiv.className = 'finger';
+            fingerDiv.textContent = (fingers.length + 1).toString();
+            fingerDiv.style.left = x + 'px';
+            fingerDiv.style.top = y + 'px';
             
-            // Assign random color
-            const hue = Math.floor(Math.random() * 360);
-            finger.style.background = `hsl(${hue}, 80%, 65%)`;
+            // Random color for new finger
+            const colors = ['#FF5252', '#448AFF', '#64FFDA', '#FFD740', '#E040FB', '#667eea', '#764ba2'];
+            fingerDiv.style.background = colors[fingers.length % colors.length];
             
-            touches.set(id, {
-                element: finger,
+            document.getElementById('touchArea').appendChild(fingerDiv);
+            
+            fingers.push({
+                id: id,
                 x: x,
                 y: y,
-                number: touches.size + 1
+                element: fingerDiv,
+                number: fingers.length + 1
             });
-            
-            document.body.appendChild(finger);
-            
-            // Animate appearance
-            finger.style.transform = 'translate(-50%, -50%) scale(0)';
-            setTimeout(() => {
-                finger.style.transform = 'translate(-50%, -50%) scale(1)';
-            }, 10);
         }
         
-        function updateFinger(id, x, y) {
-            const fingerData = touches.get(id);
-            if (fingerData) {
-                fingerData.x = x;
-                fingerData.y = y;
-                fingerData.element.style.left = `${x}px`;
-                fingerData.element.style.top = `${y}px`;
-            }
-        }
-        
-        function removeFinger(id) {
-            const fingerData = touches.get(id);
-            if (fingerData) {
-                // Quick fade out
-                fingerData.element.style.opacity = '0';
-                fingerData.element.style.transform = 'translate(-50%, -50%) scale(0)';
-                
-                setTimeout(() => {
-                    if (fingerData.element.parentNode) {
-                        fingerData.element.parentNode.removeChild(fingerData.element);
-                    }
-                }, 300);
-                
-                touches.delete(id);
-            }
-        }
-        
-        function startCountdown() {
-            if (isCountingDown) return;
-            
-            isCountingDown = true;
-            const startTime = Date.now();
-            
-            countdownTimer = setInterval(() => {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / ACTIVATION_TIME, 1);
-                
-                // Update progress bar
-                countdownProgress.style.width = `${progress * 100}%`;
-                
-                // Execute when countdown completes
-                if (elapsed >= ACTIVATION_TIME) {
-                    clearInterval(countdownTimer);
-                    executeMode();
-                    stopCountdown();
+        function checkStability() {
+            if (fingers.length >= 2) {
+                // Start or continue timer
+                if (!timer) {
+                    startTimer();
                 }
-            }, 50);
-        }
-        
-        function stopCountdown() {
-            isCountingDown = false;
-            clearInterval(countdownTimer);
-            countdownProgress.style.width = '0%';
-        }
-        
-        function updateStatusDisplay() {
-            const count = touches.size;
-            let statusText = '';
-            
-            if (count === 0) {
-                statusText = 'Touch anywhere (avoid buttons) and hold still...';
-            } else if (count === 1) {
-                statusText = 'Add more fingers (need at least 2)';
             } else {
-                if (isCountingDown) {
-                    const remaining = Math.ceil((ACTIVATION_TIME - (Date.now() - (Date.now() - ACTIVATION_TIME * (1 - parseFloat(countdownProgress.style.width) / 100))) / 1000);
-                    statusText = `${count} fingers - Activating in ${remaining}s...`;
-                } else {
-                    statusText = `${count} fingers - Hold still for 3 seconds`;
-                }
+                // Not enough fingers
+                stopTimer();
             }
-            
-            statusDisplay.textContent = statusText;
         }
         
-        function executeMode() {
-            if (touches.size === 0) return;
+        function startTimer() {
+            if (timer) return;
             
-            // Lock all fingers in place
-            touches.forEach(fingerData => {
-                fingerData.element.classList.add('fixed');
-            });
+            progress = 0;
+            updateProgress();
+            
+            timer = setInterval(() => {
+                progress += 100/30; // 3 seconds total
+                updateProgress();
+                
+                if (progress >= 100) {
+                    stopTimer();
+                    runMode();
+                }
+            }, 100);
+        }
+        
+        function stopTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            progress = 0;
+            updateProgress();
+        }
+        
+        function updateProgress() {
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        function updateStatus() {
+            const status = document.getElementById('status');
+            
+            if (fingers.length === 0) {
+                status.textContent = 'Touch below with fingers and hold still...';
+            } else if (fingers.length === 1) {
+                status.textContent = 'Add more fingers (need at least 2)';
+            } else if (timer) {
+                const secondsLeft = Math.ceil((100 - progress) / (100/3));
+                status.textContent = `${fingers.length} fingers - ${secondsLeft}s...`;
+            } else {
+                status.textContent = `${fingers.length} fingers - Hold still!`;
+            }
+        }
+        
+        function runMode() {
+            if (fingers.length === 0) return;
             
             switch(currentMode) {
                 case 'winner':
@@ -762,145 +462,104 @@
                     createRanking();
                     break;
             }
-            
-            // Reset stability tracking
-            stableStartTime = null;
-            lastTouchCount = 0;
         }
         
         function selectWinner() {
-            const ids = Array.from(touches.keys());
-            const winnerId = ids[Math.floor(Math.random() * ids.length)];
-            const winnerNumber = touches.get(winnerId)?.number;
+            const winnerIndex = Math.floor(Math.random() * fingers.length);
+            const winner = fingers[winnerIndex];
             
-            // Make winner BIG and others fade
-            touches.forEach((fingerData, id) => {
-                if (id === winnerId) {
-                    fingerData.element.classList.add('winner');
-                    fingerData.element.textContent = '👑';
+            // Make winner BIG and gold
+            fingers.forEach((finger, index) => {
+                if (index === winnerIndex) {
+                    finger.element.classList.add('winner');
+                    finger.element.textContent = '👑';
                 } else {
-                    fingerData.element.style.opacity = '0.2';
-                    fingerData.element.style.transform = 'translate(-50%, -50%) scale(0.7)';
+                    // Fade others
+                    finger.element.style.opacity = '0.3';
                 }
             });
             
-            showFingerInfo(`🎉 Winner: Finger #${winnerNumber}!`);
-            
-            // Auto-reset after 3 seconds
-            setTimeout(resetSelection, 3000);
+            showResult(`Winner: Finger #${winner.number}!`);
+            setTimeout(resetAll, 3000);
         }
         
         function createTeams() {
-            const ids = Array.from(touches.keys());
+            // Shuffle fingers
+            const shuffled = [...fingers].sort(() => Math.random() - 0.5);
             
-            // Calculate team sizes
-            const baseSize = Math.floor(ids.length / teamCount);
-            const remainder = ids.length % teamCount;
-            const teamSizes = Array(teamCount).fill(baseSize);
-            
-            for (let i = 0; i < remainder; i++) {
-                teamSizes[i]++;
+            // Distribute into teams
+            const teams = [];
+            for (let i = 0; i < teamCount; i++) {
+                teams.push([]);
             }
             
-            // Shuffle IDs for random assignment
-            const shuffledIds = [...ids].sort(() => Math.random() - 0.5);
-            
-            // Assign teams
-            let teamIndex = 0;
-            let teamMemberIndex = 0;
-            const teams = Array.from({length: teamCount}, () => []);
-            
-            shuffledIds.forEach(id => {
-                teams[teamIndex].push(id);
-                teamMemberIndex++;
+            shuffled.forEach((finger, index) => {
+                const teamIndex = index % teamCount;
+                teams[teamIndex].push(finger);
                 
-                if (teamMemberIndex >= teamSizes[teamIndex]) {
-                    teamIndex++;
-                    teamMemberIndex = 0;
-                }
+                // Apply team color and number
+                finger.element.classList.add('team-' + (teamIndex + 1));
+                finger.element.textContent = 'T' + (teamIndex + 1);
             });
             
-            // Apply team colors
-            teams.forEach((team, teamIndex) => {
-                team.forEach(id => {
-                    const fingerData = touches.get(id);
-                    if (fingerData) {
-                        // Apply team color
-                        teamColors.forEach(colorClass => {
-                            fingerData.element.classList.remove(colorClass);
-                        });
-                        fingerData.element.classList.add(teamColors[teamIndex % teamColors.length]);
-                        fingerData.element.textContent = `T${teamIndex + 1}`;
-                    }
-                });
-            });
-            
-            // Show team info
-            let infoText = `👥 ${teamCount} Teams\n`;
+            // Show result
+            let resultText = `${teamCount} Teams Created\n`;
             teams.forEach((team, index) => {
-                infoText += `Team ${index + 1}: ${team.length} player${team.length !== 1 ? 's' : ''}\n`;
+                resultText += `Team ${index + 1}: ${team.length} player${team.length !== 1 ? 's' : ''}\n`;
             });
-            showFingerInfo(infoText);
+            showResult(resultText);
             
-            // Auto-reset after 3 seconds
-            setTimeout(resetSelection, 3000);
+            setTimeout(resetAll, 3000);
         }
         
         function createRanking() {
-            const ids = Array.from(touches.keys());
+            // Shuffle for random ranking
+            const shuffled = [...fingers].sort(() => Math.random() - 0.5);
             
-            // Shuffle IDs for random ranking
-            const shuffledIds = [...ids].sort(() => Math.random() - 0.5);
-            
-            // Apply ranking styles
-            shuffledIds.forEach((id, index) => {
-                const fingerData = touches.get(id);
-                if (fingerData) {
-                    // Remove any existing classes
-                    fingerData.element.classList.remove('rank-1', 'rank-2', 'rank-3', 'rank-other');
-                    
-                    // Add rank class
-                    if (index === 0) {
-                        fingerData.element.classList.add('rank-1');
-                        fingerData.element.textContent = rankingStyle === 'medals' ? '🥇' : '1';
-                    } else if (index === 1) {
-                        fingerData.element.classList.add('rank-2');
-                        fingerData.element.textContent = rankingStyle === 'medals' ? '🥈' : '2';
-                    } else if (index === 2) {
-                        fingerData.element.classList.add('rank-3');
-                        fingerData.element.textContent = rankingStyle === 'medals' ? '🥉' : '3';
-                    } else {
-                        fingerData.element.classList.add('rank-other');
-                        fingerData.element.textContent = (index + 1).toString();
-                    }
+            shuffled.forEach((finger, index) => {
+                // Remove any existing classes
+                finger.element.className = 'finger';
+                
+                // Add rank class
+                if (index === 0) {
+                    finger.element.classList.add('rank-1');
+                    finger.element.textContent = rankingStyle === 'medals' ? '🥇' : '1';
+                } else if (index === 1) {
+                    finger.element.classList.add('rank-2');
+                    finger.element.textContent = rankingStyle === 'medals' ? '🥈' : '2';
+                } else if (index === 2) {
+                    finger.element.classList.add('rank-3');
+                    finger.element.textContent = rankingStyle === 'medals' ? '🥉' : '3';
+                } else {
+                    finger.element.classList.add('rank-other');
+                    finger.element.textContent = (index + 1).toString();
                 }
             });
             
-            showFingerInfo('🏆 Ranking Created');
+            showResult('Ranking Created!');
         }
         
-        function showFingerInfo(text) {
-            fingerInfo.textContent = text;
-            fingerInfo.classList.add('active');
+        function showResult(text) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = text;
+            resultDiv.classList.add('show');
             
             setTimeout(() => {
-                fingerInfo.classList.remove('active');
+                resultDiv.classList.remove('show');
             }, 2000);
         }
         
-        function resetSelection() {
-            touches.forEach((fingerData, id) => {
-                if (fingerData.element.parentNode) {
-                    fingerData.element.parentNode.removeChild(fingerData.element);
-                }
+        function resetAll() {
+            // Remove all fingers
+            fingers.forEach(finger => {
+                finger.element.remove();
             });
-            touches.clear();
+            fingers = [];
             
-            fingerInfo.classList.remove('active');
-            stopCountdown();
-            stableStartTime = null;
-            lastTouchCount = 0;
-            updateStatusDisplay();
+            // Reset UI
+            stopTimer();
+            updateStatus();
+            document.getElementById('result').classList.remove('show');
         }
     </script>
 </body>
