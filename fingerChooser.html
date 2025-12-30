@@ -10,7 +10,6 @@
             padding: 0;
             box-sizing: border-box;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -18,20 +17,18 @@
             background: #1a1a2e;
             min-height: 100vh;
             overflow: hidden;
-            position: relative;
         }
         
+        /* Header is always clickable */
         .header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px 20px 0;
-            user-select: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
         }
         
         h1 {
@@ -62,18 +59,12 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 0.85rem;
-            position: relative;
-            overflow: hidden;
         }
         
         .mode-btn.active {
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
             color: #1a1a2e;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .mode-btn:active {
-            transform: scale(0.98);
         }
         
         .settings-panel {
@@ -88,12 +79,6 @@
         
         .settings-panel.active {
             display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
         
         .setting-group {
@@ -166,6 +151,7 @@
             color: #1a1a2e;
         }
         
+        /* Progress bar */
         .countdown-bar {
             position: fixed;
             top: 0;
@@ -180,171 +166,138 @@
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #00b894, #00cec9);
-            border-radius: 0 2px 2px 0;
             transition: width 0.1s linear;
         }
         
-        /* FINGER CIRCLES - BIGGER SIZE */
+        /* Main touch area - BELOW the header */
         .touch-area {
             position: fixed;
-            top: 0;
+            top: 140px; /* Start below header */
             left: 0;
             right: 0;
             bottom: 0;
+            background: transparent;
             z-index: 1;
-            overflow: hidden;
         }
         
+        /* Finger circles - BIG */
         .finger {
             position: absolute;
-            width: 100px;  /* BIGGER */
-            height: 100px; /* BIGGER */
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 2rem; /* BIGGER */
+            font-size: 2.2rem;
             color: white;
             transform: translate(-50%, -50%);
             transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4); /* BIGGER shadow */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
             z-index: 10;
-            text-align: center;
+            border: 5px solid white;
             user-select: none;
-            border: 4px solid white;
         }
         
+        /* Winner - VERY BIG */
         .finger.winner {
-            transform: translate(-50%, -50%) scale(1.8); /* BIGGER winner */
+            transform: translate(-50%, -50%) scale(2);
             z-index: 1000;
-            box-shadow: 0 0 60px rgba(255,215,0,0.9); /* BIGGER glow */
+            box-shadow: 0 0 80px rgba(255,215,0,1);
             border-color: #FFD700;
-            border-width: 6px;
+            border-width: 8px;
         }
         
-        .finger.winner-only {
-            opacity: 0.3; /* Make others semi-transparent instead of invisible */
-            transform: translate(-50%, -50%) scale(0.8);
-        }
-        
-        .finger.winner-only.winner {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1.8);
+        /* Others fade out when winner is selected */
+        .finger:not(.winner) {
+            opacity: 0.2;
+            transform: translate(-50%, -50%) scale(0.7);
         }
         
         .finger.fixed {
-            transition: none;
             animation: fadeOut 2s ease 3s forwards;
         }
         
         @keyframes fadeOut {
-            to {
-                opacity: 0;
-            }
+            to { opacity: 0; }
         }
         
-        /* TEAM COLORS - BIGGER & BOLDER */
-        .team-color-1 { 
-            background: #FF5252 !important; 
-            border-color: #FF5252 !important;
-        }
-        .team-color-2 { 
-            background: #448AFF !important; 
-            border-color: #448AFF !important;
-        }
-        .team-color-3 { 
-            background: #64FFDA !important; 
-            border-color: #64FFDA !important;
-        }
-        .team-color-4 { 
-            background: #FFD740 !important; 
-            border-color: #FFD740 !important;
-        }
-        .team-color-5 { 
-            background: #E040FB !important; 
-            border-color: #E040FB !important;
-        }
+        /* Team colors */
+        .team-color-1 { background: #FF5252 !important; border-color: #FF5252 !important; }
+        .team-color-2 { background: #448AFF !important; border-color: #448AFF !important; }
+        .team-color-3 { background: #64FFDA !important; border-color: #64FFDA !important; }
+        .team-color-4 { background: #FFD740 !important; border-color: #FFD740 !important; }
+        .team-color-5 { background: #E040FB !important; border-color: #E040FB !important; }
         
-        /* RANKING COLORS - BIGGER & BOLDER */
-        .rank-1 { 
-            background: linear-gradient(135deg, #FFD700, #FFA500) !important; 
-            border-color: #FFD700 !important;
-        }
-        .rank-2 { 
-            background: linear-gradient(135deg, #C0C0C0, #909090) !important; 
-            border-color: #C0C0C0 !important;
-        }
-        .rank-3 { 
-            background: linear-gradient(135deg, #CD7F32, #A0522D) !important; 
-            border-color: #CD7F32 !important;
-        }
-        .rank-other { 
-            background: linear-gradient(135deg, #667eea, #764ba2) !important; 
-            border-color: #667eea !important;
-        }
+        /* Ranking colors */
+        .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500) !important; border-color: #FFD700 !important; }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0, #909090) !important; border-color: #C0C0C0 !important; }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32, #A0522D) !important; border-color: #CD7F32 !important; }
+        .rank-other { background: linear-gradient(135deg, #667eea, #764ba2) !important; border-color: #667eea !important; }
         
+        /* Reset button */
         .reset-button {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 14px 28px;
-            font-size: 1rem;
+            padding: 16px 32px;
+            font-size: 1.1rem;
             border: none;
             border-radius: 25px;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             z-index: 100;
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        
-        .reset-button:hover {
-            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         
         .reset-button:active {
             transform: translateX(-50%) scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
         }
         
+        /* Status display */
         .status-display {
             position: fixed;
-            top: 160px;
+            top: 110px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
             font-size: 1rem;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
             border-radius: 20px;
             z-index: 999;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             text-align: center;
             max-width: 80%;
         }
         
+        /* Info display */
         .finger-info {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             text-align: center;
             z-index: 2000;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px 40px;
-            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px 50px;
+            border-radius: 25px;
             display: none;
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(30px);
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
         
         .finger-info.active {
@@ -363,46 +316,33 @@
             }
         }
         
-        .simple-result {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 2.5rem;
-            font-weight: bold;
-            text-align: center;
-            z-index: 2000;
-            display: none;
-        }
-        
-        .simple-result.active {
-            display: block;
-        }
-        
         @media (max-width: 480px) {
             h1 { font-size: 1.5rem; }
-            .mode-btn { padding: 10px 4px; font-size: 0.8rem; }
+            .mode-btn { padding: 10px 3px; font-size: 0.8rem; }
             .finger { 
-                width: 90px; /* Slightly smaller on mobile but still big */
-                height: 90px; 
-                font-size: 1.8rem; 
+                width: 100px;
+                height: 100px;
+                font-size: 2rem;
             }
-            .reset-button { padding: 12px 24px; font-size: 0.9rem; }
-            .finger-info { font-size: 1.8rem; padding: 15px 30px; }
-            .status-display { top: 150px; }
-        }
-        
-        @media (max-height: 700px) {
-            .status-display { top: 145px; }
+            .reset-button { 
+                padding: 14px 28px;
+                font-size: 1rem;
+            }
+            .finger-info { 
+                font-size: 2rem;
+                padding: 20px 30px;
+            }
+            .status-display { top: 105px; }
         }
     </style>
 </head>
 <body>
+    <!-- Progress bar -->
     <div class="countdown-bar">
         <div class="countdown-progress" id="countdownProgress"></div>
     </div>
     
+    <!-- Header - ALWAYS clickable -->
     <div class="header" id="header">
         <h1>👆 Finger Chooser</h1>
         
@@ -433,24 +373,28 @@
         </div>
     </div>
     
+    <!-- Status display -->
     <div class="status-display" id="statusDisplay">
-        Place fingers on screen and hold still...
+        Place fingers below and hold still...
     </div>
     
+    <!-- Touch area - BELOW header -->
     <div class="touch-area" id="touchArea"></div>
     
+    <!-- Info display -->
     <div class="finger-info" id="fingerInfo"></div>
     
+    <!-- Reset button -->
     <button class="reset-button" onclick="resetSelection()">
-        ↻ Reset
+        ↻ Reset Game
     </button>
 
     <script>
+        // Simple and reliable approach
         const touchArea = document.getElementById('touchArea');
         const statusDisplay = document.getElementById('statusDisplay');
         const countdownProgress = document.getElementById('countdownProgress');
         const fingerInfo = document.getElementById('fingerInfo');
-        const header = document.getElementById('header');
         
         let touches = new Map();
         let currentMode = 'winner';
@@ -462,9 +406,7 @@
         let isCountingDown = false;
         let lastTouchCount = 0;
         let stableStartTime = null;
-        const ACTIVATION_TIME = 3000; // 3 seconds
-        const STABILITY_THRESHOLD = 30; // pixels movement allowed
-        const RESULT_DISPLAY_TIME = 2000; // 2 seconds
+        const ACTIVATION_TIME = 3000;
         
         const teamColors = ['team-color-1', 'team-color-2', 'team-color-3', 'team-color-4', 'team-color-5'];
         
@@ -481,38 +423,32 @@
         function setupModeSelector() {
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
                     const mode = this.dataset.mode;
                     
-                    if (mode) {
-                        // Mode selection
-                        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        currentMode = mode;
-                        
-                        // Hide all settings panels
-                        document.querySelectorAll('.settings-panel').forEach(panel => {
-                            panel.classList.remove('active');
-                        });
-                        
-                        // Show relevant settings panel
-                        if (mode === 'teams') {
-                            document.getElementById('teamsSettings').classList.add('active');
-                        } else if (mode === 'ranking') {
-                            document.getElementById('rankingSettings').classList.add('active');
-                        }
-                        
-                        updateStatusDisplay();
+                    // Mode selection
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentMode = mode;
+                    
+                    // Hide all settings panels
+                    document.querySelectorAll('.settings-panel').forEach(panel => {
+                        panel.classList.remove('active');
+                    });
+                    
+                    // Show relevant settings panel
+                    if (mode === 'teams') {
+                        document.getElementById('teamsSettings').classList.add('active');
+                    } else if (mode === 'ranking') {
+                        document.getElementById('rankingSettings').classList.add('active');
                     }
+                    
+                    updateStatusDisplay();
                 });
             });
             
             // Ranking style buttons
             document.querySelectorAll('.ranking-style-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
                     const ranking = this.dataset.ranking;
                     
                     document.querySelectorAll('.ranking-style-btn').forEach(b => b.classList.remove('active'));
@@ -530,86 +466,27 @@
                 teamCount = parseInt(this.value);
                 valueDisplay.textContent = teamCount;
             });
-            
-            // Prevent touch events from bubbling to document
-            slider.addEventListener('touchstart', function(e) {
-                e.stopPropagation();
-                e.preventDefault(); // Prevent scrolling
-            });
-            
-            slider.addEventListener('touchmove', function(e) {
-                e.stopPropagation();
-                e.preventDefault(); // Prevent scrolling
-            });
-            
-            slider.addEventListener('touchend', function(e) {
-                e.stopPropagation();
-                e.preventDefault(); // Prevent scrolling
-            });
         }
         
         function setupTouchEvents() {
-            // Use event delegation for touch events
-            document.addEventListener('touchstart', handleTouchStart, { passive: false });
-            document.addEventListener('touchmove', handleTouchMove, { passive: false });
-            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+            // SIMPLE: Only listen for touches in the touch area
+            touchArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+            touchArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+            touchArea.addEventListener('touchend', handleTouchEnd, { passive: false });
             
             // Mouse support for testing
-            document.addEventListener('mousedown', handleMouseDown);
+            touchArea.addEventListener('mousedown', handleMouseDown);
             
             // Prevent context menu
             document.addEventListener('contextmenu', (e) => e.preventDefault());
-            
-            // Disable pull-to-refresh
-            document.body.addEventListener('touchmove', function(e) {
-                if (e.touches.length > 1) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
         }
         
         function handleTouchStart(e) {
-            // First, check if touch is on a UI control
-            for (let i = 0; i < e.touches.length; i++) {
-                const touch = e.touches[i];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                
-                if (target && isUIControl(target)) {
-                    // Let the UI control handle the touch
-                    return;
-                }
-            }
-            
-            // If no UI controls were touched, check if touches are in header
-            for (let i = 0; i < e.touches.length; i++) {
-                const touch = e.touches[i];
-                const headerRect = header.getBoundingClientRect();
-                
-                if (touch.clientY < headerRect.bottom) {
-                    // Touch in header but not on UI control - ignore it
-                    e.preventDefault();
-                    return;
-                }
-            }
-            
-            // If we get here, touches are below header and not on UI controls
             e.preventDefault();
             handleNewTouches(e.touches);
         }
         
         function handleTouchMove(e) {
-            // Allow move events for UI controls
-            for (let i = 0; i < e.touches.length; i++) {
-                const touch = e.touches[i];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                
-                if (target && isUIControl(target)) {
-                    // Let the UI control handle the move
-                    e.preventDefault();
-                    return;
-                }
-            }
-            
             e.preventDefault();
             handleTouchUpdate(e.touches);
         }
@@ -620,15 +497,6 @@
         }
         
         function handleMouseDown(e) {
-            if (isUIControl(e.target)) {
-                return; // Let the UI control handle the click
-            }
-            
-            const headerRect = header.getBoundingClientRect();
-            if (e.clientY < headerRect.bottom) {
-                return; // Click in header but not on UI control
-            }
-            
             if (e.button !== 0) return;
             
             const mockTouch = {
@@ -639,53 +507,10 @@
             handleNewTouches({ length: 1, 0: mockTouch });
         }
         
-        function isUIControl(element) {
-            // Check if element or its parent is a UI control
-            const uiSelectors = [
-                'button',
-                'input',
-                'select',
-                'textarea',
-                '.mode-btn',
-                '.ranking-style-btn',
-                '.team-slider',
-                '.slider-container',
-                '.mode-selector',
-                '.settings-panel',
-                '.reset-button'
-            ];
-            
-            let currentElement = element;
-            while (currentElement && currentElement !== document.body) {
-                // Check tag name
-                if (['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(currentElement.tagName)) {
-                    return true;
-                }
-                
-                // Check classes and IDs
-                for (const selector of uiSelectors) {
-                    if (currentElement.matches && currentElement.matches(selector)) {
-                        return true;
-                    }
-                }
-                
-                // Check if element is in header
-                if (currentElement.id === 'header' || currentElement.classList.contains('header')) {
-                    return true;
-                }
-                
-                currentElement = currentElement.parentElement;
-            }
-            
-            return false;
-        }
-        
         function handleNewTouches(touchList) {
             for (let i = 0; i < touchList.length; i++) {
                 const touch = touchList[i];
-                // Check if touch is below header
-                const headerRect = header.getBoundingClientRect();
-                if (touch.clientY >= headerRect.bottom && !touches.has(touch.identifier)) {
+                if (!touches.has(touch.identifier)) {
                     createFinger(touch.identifier, touch.clientX, touch.clientY);
                 }
             }
@@ -699,13 +524,10 @@
             // Update existing touches
             for (let i = 0; i < touchList.length; i++) {
                 const touch = touchList[i];
-                const headerRect = header.getBoundingClientRect();
-                if (touch.clientY >= headerRect.bottom) {
-                    currentTouchIds.add(touch.identifier);
-                    
-                    if (touches.has(touch.identifier)) {
-                        updateFinger(touch.identifier, touch.clientX, touch.clientY);
-                    }
+                currentTouchIds.add(touch.identifier);
+                
+                if (touches.has(touch.identifier)) {
+                    updateFinger(touch.identifier, touch.clientX, touch.clientY);
                 }
             }
             
@@ -720,17 +542,14 @@
             const currentFingerCount = touches.size;
             
             if (currentFingerCount >= 2) {
-                const hasChanged = currentFingerCount !== lastTouchCount;
-                const isMoving = checkIfFingersMoving();
-                
-                if (hasChanged || isMoving) {
-                    // Reset stability timer
+                if (currentFingerCount !== lastTouchCount) {
+                    // Finger count changed
                     lastTouchCount = currentFingerCount;
                     stableStartTime = currentTime;
                     stopCountdown();
                 } else if (!isCountingDown) {
-                    // Start countdown if stable for 300ms
-                    if (stableStartTime && (currentTime - stableStartTime) >= 300) {
+                    // Same count for 500ms, start countdown
+                    if (stableStartTime && (currentTime - stableStartTime) >= 500) {
                         startCountdown();
                     }
                 }
@@ -742,20 +561,6 @@
             }
             
             updateStatusDisplay();
-        }
-        
-        function checkIfFingersMoving() {
-            let maxMovement = 0;
-            touches.forEach(fingerData => {
-                if (fingerData.lastX && fingerData.lastY) {
-                    const movement = Math.sqrt(
-                        Math.pow(fingerData.x - fingerData.lastX, 2) + 
-                        Math.pow(fingerData.y - fingerData.lastY, 2)
-                    );
-                    maxMovement = Math.max(maxMovement, movement);
-                }
-            });
-            return maxMovement > STABILITY_THRESHOLD;
         }
         
         function createFinger(id, x, y) {
@@ -774,8 +579,6 @@
                 element: finger,
                 x: x,
                 y: y,
-                lastX: x,
-                lastY: y,
                 number: touches.size + 1
             });
             
@@ -791,8 +594,6 @@
         function updateFinger(id, x, y) {
             const fingerData = touches.get(id);
             if (fingerData) {
-                fingerData.lastX = fingerData.x;
-                fingerData.lastY = fingerData.y;
                 fingerData.x = x;
                 fingerData.y = y;
                 fingerData.element.style.left = `${x}px`;
@@ -803,7 +604,6 @@
         function removeFinger(id) {
             const fingerData = touches.get(id);
             if (fingerData) {
-                // Just remove without animation
                 if (fingerData.element.parentNode) {
                     fingerData.element.parentNode.removeChild(fingerData.element);
                 }
@@ -844,12 +644,12 @@
             let statusText = '';
             
             if (count === 0) {
-                statusText = 'Place fingers on screen and hold still...';
+                statusText = 'Place fingers below and hold still...';
             } else if (count === 1) {
                 statusText = 'Add more fingers (need at least 2)';
             } else {
                 if (isCountingDown) {
-                    const remaining = Math.ceil((ACTIVATION_TIME - (Date.now() - (Date.now() - ACTIVATION_TIME * (1 - parseFloat(countdownProgress.style.width) / 100))) / 1000);
+                    const remaining = Math.ceil((ACTIVATION_TIME - (Date.now() - (Date.now() - ACTIVATION_TIME * (1 - parseFloat(countdownProgress.style.width) / 100)))) / 1000);
                     statusText = `${count} fingers - Activating in ${remaining}s...`;
                 } else {
                     statusText = `${count} fingers - Hold still for 3 seconds`;
@@ -889,18 +689,15 @@
             const winnerId = ids[Math.floor(Math.random() * ids.length)];
             const winnerNumber = touches.get(winnerId)?.number;
             
-            // Make winner LARGER and others semi-transparent
+            // Make winner BIG and others fade
             touches.forEach((fingerData, id) => {
                 if (id === winnerId) {
                     fingerData.element.classList.add('winner');
                     fingerData.element.textContent = '👑';
-                    
-                    // Show winner info briefly
-                    showFingerInfo(`Winner: Finger #${winnerNumber}`);
-                } else {
-                    fingerData.element.classList.add('winner-only');
                 }
             });
+            
+            showFingerInfo(`🎉 Winner: Finger #${winnerNumber}!`);
             
             // Auto-reset after 3 seconds
             setTimeout(resetSelection, 3000);
@@ -921,7 +718,7 @@
             // Shuffle IDs for random assignment
             const shuffledIds = [...ids].sort(() => Math.random() - 0.5);
             
-            // Assign teams and colors
+            // Assign teams
             let teamIndex = 0;
             let teamMemberIndex = 0;
             const teams = Array.from({length: teamCount}, () => []);
@@ -936,26 +733,23 @@
                 }
             });
             
-            // Apply team colors - MAKE SAME COLOR FOR SAME TEAM
+            // Apply team colors
             teams.forEach((team, teamIndex) => {
                 team.forEach(id => {
                     const fingerData = touches.get(id);
                     if (fingerData) {
-                        // Remove any existing team classes
+                        // Apply team color
                         teamColors.forEach(colorClass => {
                             fingerData.element.classList.remove(colorClass);
                         });
-                        // Remove any rank classes
-                        fingerData.element.classList.remove('rank-1', 'rank-2', 'rank-3', 'rank-other');
-                        // Add team color
                         fingerData.element.classList.add(teamColors[teamIndex % teamColors.length]);
                         fingerData.element.textContent = `T${teamIndex + 1}`;
                     }
                 });
             });
             
-            // Show team info briefly
-            let infoText = `${teamCount} Teams Created\n`;
+            // Show team info
+            let infoText = `👥 ${teamCount} Teams\n`;
             teams.forEach((team, index) => {
                 infoText += `Team ${index + 1}: ${team.length} player${team.length !== 1 ? 's' : ''}\n`;
             });
@@ -975,14 +769,10 @@
             shuffledIds.forEach((id, index) => {
                 const fingerData = touches.get(id);
                 if (fingerData) {
-                    // Remove any existing team classes
-                    teamColors.forEach(colorClass => {
-                        fingerData.element.classList.remove(colorClass);
-                    });
-                    // Remove any existing rank classes
+                    // Remove any existing classes
                     fingerData.element.classList.remove('rank-1', 'rank-2', 'rank-3', 'rank-other');
                     
-                    // Add appropriate rank class
+                    // Add rank class
                     if (index === 0) {
                         fingerData.element.classList.add('rank-1');
                         fingerData.element.textContent = rankingStyle === 'medals' ? '🥇' : '1';
@@ -999,11 +789,7 @@
                 }
             });
             
-            // Show ranking info briefly
-            showFingerInfo('Ranking Created');
-            
-            // Keep showing numbers even after fingers removed
-            // The numbers will fade out after 3 seconds due to .fixed class
+            showFingerInfo('🏆 Ranking Created');
         }
         
         function showFingerInfo(text) {
@@ -1012,7 +798,7 @@
             
             setTimeout(() => {
                 fingerInfo.classList.remove('active');
-            }, RESULT_DISPLAY_TIME);
+            }, 2000);
         }
         
         function resetSelection() {
@@ -1023,9 +809,7 @@
             });
             touches.clear();
             
-            // Hide info display
             fingerInfo.classList.remove('active');
-            
             stopCountdown();
             stableStartTime = null;
             lastTouchCount = 0;
