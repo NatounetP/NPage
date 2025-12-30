@@ -24,6 +24,8 @@
             padding: 15px;
             text-align: center;
             border-bottom: 3px solid #e94560;
+            position: relative;
+            z-index: 10;
         }
         
         h1 {
@@ -94,21 +96,24 @@
             text-align: center;
             padding: 10px;
             font-size: 1rem;
+            position: relative;
+            z-index: 5;
         }
         
-        /* Touch area - main screen */
+        /* Touch area - covers entire screen below header */
         .touch-area {
             position: fixed;
-            top: 180px; /* Below header */
+            top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: transparent;
+            z-index: 1;
         }
         
         /* Finger circles - BIG and CLEAR */
         .finger {
-            position: absolute;
+            position: fixed; /* Changed from absolute to fixed */
             width: 100px;
             height: 100px;
             border-radius: 50%;
@@ -121,7 +126,8 @@
             transform: translate(-50%, -50%);
             border: 4px solid white;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            z-index: 10;
+            z-index: 2;
+            pointer-events: none; /* Don't interfere with touches */
         }
         
         /* Winner - VERY BIG */
@@ -278,7 +284,7 @@
     </div>
     
     <div class="status" id="status">
-        Touch below with fingers and hold still...
+        Touch anywhere with fingers and hold still...
     </div>
     
     <div class="touch-area" id="touchArea"></div>
@@ -351,30 +357,30 @@
         function setupTouch() {
             const touchArea = document.getElementById('touchArea');
             
-            // Touch events
-            touchArea.addEventListener('touchstart', handleTouch);
-            touchArea.addEventListener('touchmove', handleTouch);
-            touchArea.addEventListener('touchend', handleTouch);
-            touchArea.addEventListener('touchcancel', handleTouch);
+            // Touch events on entire document
+            document.addEventListener('touchstart', handleTouch, { passive: false });
+            document.addEventListener('touchmove', handleTouch, { passive: false });
+            document.addEventListener('touchend', handleTouch, { passive: false });
+            document.addEventListener('touchcancel', handleTouch, { passive: false });
             
             // Mouse events for desktop
-            touchArea.addEventListener('mousedown', function(e) {
+            document.addEventListener('mousedown', function(e) {
                 if (gameActive) return;
                 handleMouse(e, 'start');
             });
-            touchArea.addEventListener('mousemove', function(e) {
+            document.addEventListener('mousemove', function(e) {
                 if (gameActive) return;
                 if (e.buttons === 1) { // Left button pressed
                     handleMouse(e, 'move');
                 }
             });
-            touchArea.addEventListener('mouseup', function(e) {
+            document.addEventListener('mouseup', function(e) {
                 if (gameActive) return;
                 handleMouse(e, 'end');
             });
             
             // Prevent context menu
-            touchArea.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('contextmenu', e => e.preventDefault());
         }
         
         function handleTouch(e) {
@@ -390,7 +396,9 @@
                 if (touchIds.includes(finger.id)) {
                     return true;
                 } else {
-                    finger.element.remove();
+                    if (finger.element.parentNode) {
+                        finger.element.parentNode.removeChild(finger.element);
+                    }
                     return false;
                 }
             });
@@ -399,13 +407,13 @@
             touches.forEach(touch => {
                 const existing = fingers.find(f => f.id === touch.identifier);
                 if (existing) {
-                    // Update position
+                    // Update position - EXACT finger position
                     existing.x = touch.clientX;
                     existing.y = touch.clientY;
                     existing.element.style.left = touch.clientX + 'px';
                     existing.element.style.top = touch.clientY + 'px';
                 } else {
-                    // Create new finger
+                    // Create new finger at EXACT touch position
                     createFinger(touch.identifier, touch.clientX, touch.clientY);
                 }
             });
@@ -415,7 +423,9 @@
         }
         
         function handleMouse(e, type) {
-            const mouseId = 'mouse';
+            if (isUIControl(e.target)) return; // Don't create fingers when clicking UI controls
+            
+            const mouseId = 'mouse_' + Date.now();
             
             if (type === 'start') {
                 createFinger(mouseId, e.clientX, e.clientY);
@@ -432,7 +442,9 @@
             } else if (type === 'end') {
                 fingers = fingers.filter(f => {
                     if (f.id === mouseId) {
-                        f.element.remove();
+                        if (f.element.parentNode) {
+                            f.element.parentNode.removeChild(f.element);
+                        }
                         return false;
                     }
                     return true;
@@ -442,10 +454,37 @@
             }
         }
         
+        function isUIControl(element) {
+            // Check if element is a UI control
+            const uiTags = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
+            const uiClasses = ['mode-btn', 'ranking-style-btn', 'team-slider', 'reset-btn', 'header'];
+            
+            let current = element;
+            while (current && current !== document.body) {
+                // Check tag
+                if (uiTags.includes(current.tagName)) {
+                    return true;
+                }
+                
+                // Check classes
+                for (const className of uiClasses) {
+                    if (current.classList && current.classList.contains(className)) {
+                        return true;
+                    }
+                }
+                
+                current = current.parentElement;
+            }
+            
+            return false;
+        }
+        
         function createFinger(id, x, y) {
             const fingerDiv = document.createElement('div');
             fingerDiv.className = 'finger';
             fingerDiv.textContent = (fingers.length + 1).toString();
+            
+            // Position at EXACT touch point
             fingerDiv.style.left = x + 'px';
             fingerDiv.style.top = y + 'px';
             
@@ -453,7 +492,7 @@
             const colors = ['#FF5252', '#448AFF', '#64FFDA', '#FFD740', '#E040FB', '#667eea', '#764ba2'];
             fingerDiv.style.background = colors[fingers.length % colors.length];
             
-            document.getElementById('touchArea').appendChild(fingerDiv);
+            document.body.appendChild(fingerDiv);
             
             fingers.push({
                 id: id,
@@ -516,7 +555,7 @@
             if (gameActive) {
                 status.textContent = 'Game in progress - Press Reset to start over';
             } else if (fingers.length === 0) {
-                status.textContent = 'Touch below with fingers and hold still...';
+                status.textContent = 'Touch anywhere with fingers and hold still...';
             } else if (fingers.length === 1) {
                 status.textContent = 'Add more fingers (need at least 2)';
             } else if (timer) {
@@ -650,7 +689,9 @@
         function resetAll() {
             // Remove all fingers
             fingers.forEach(finger => {
-                finger.element.remove();
+                if (finger.element.parentNode) {
+                    finger.element.parentNode.removeChild(finger.element);
+                }
             });
             fingers = [];
             
