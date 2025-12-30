@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -17,18 +17,20 @@
             background: #1a1a2e;
             min-height: 100vh;
             overflow: hidden;
+            touch-action: none; /* Prevent browser touch actions */
         }
         
-        /* Header is always clickable */
+        /* Header - controls area */
         .header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
             padding: 15px 20px 0;
             border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            pointer-events: auto; /* Ensure clicks work */
         }
         
         h1 {
@@ -59,6 +61,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 0.85rem;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .mode-btn.active {
@@ -169,15 +173,15 @@
             transition: width 0.1s linear;
         }
         
-        /* Main touch area - BELOW the header */
+        /* Main touch area - covers entire screen */
         .touch-area {
             position: fixed;
-            top: 140px; /* Start below header */
+            top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: transparent;
             z-index: 1;
+            /* Will handle touches below header differently */
         }
         
         /* Finger circles - BIG */
@@ -198,6 +202,7 @@
             z-index: 10;
             border: 5px solid white;
             user-select: none;
+            pointer-events: none; /* Don't interfere with touches */
         }
         
         /* Winner - VERY BIG */
@@ -255,6 +260,7 @@
             backdrop-filter: blur(20px);
             border: 2px solid rgba(255,255,255,0.3);
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            pointer-events: auto; /* Ensure button is clickable */
         }
         
         .reset-button:active {
@@ -278,6 +284,7 @@
             border: 1px solid rgba(255,255,255,0.2);
             text-align: center;
             max-width: 80%;
+            pointer-events: none;
         }
         
         /* Info display */
@@ -298,6 +305,7 @@
             backdrop-filter: blur(30px);
             border: 3px solid rgba(255,255,255,0.3);
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            pointer-events: none;
         }
         
         .finger-info.active {
@@ -375,11 +383,8 @@
     
     <!-- Status display -->
     <div class="status-display" id="statusDisplay">
-        Place fingers below and hold still...
+        Touch anywhere (avoid buttons) and hold still...
     </div>
-    
-    <!-- Touch area - BELOW header -->
-    <div class="touch-area" id="touchArea"></div>
     
     <!-- Info display -->
     <div class="finger-info" id="fingerInfo"></div>
@@ -390,11 +395,11 @@
     </button>
 
     <script>
-        // Simple and reliable approach
-        const touchArea = document.getElementById('touchArea');
+        const touchArea = document.body; // Use body for touch events
         const statusDisplay = document.getElementById('statusDisplay');
         const countdownProgress = document.getElementById('countdownProgress');
         const fingerInfo = document.getElementById('fingerInfo');
+        const header = document.getElementById('header');
         
         let touches = new Map();
         let currentMode = 'winner';
@@ -469,76 +474,148 @@
         }
         
         function setupTouchEvents() {
-            // SIMPLE: Only listen for touches in the touch area
-            touchArea.addEventListener('touchstart', handleTouchStart, { passive: false });
-            touchArea.addEventListener('touchmove', handleTouchMove, { passive: false });
-            touchArea.addEventListener('touchend', handleTouchEnd, { passive: false });
+            // Listen for touches on the entire document
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+            document.addEventListener('touchcancel', handleTouchCancel, { passive: false });
             
             // Mouse support for testing
-            touchArea.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
             
-            // Prevent context menu
+            // Prevent context menu and zoom
             document.addEventListener('contextmenu', (e) => e.preventDefault());
+            document.addEventListener('gesturestart', (e) => e.preventDefault());
+            document.addEventListener('gesturechange', (e) => e.preventDefault());
+            document.addEventListener('gestureend', (e) => e.preventDefault());
         }
         
         function handleTouchStart(e) {
             e.preventDefault();
-            handleNewTouches(e.touches);
-        }
-        
-        function handleTouchMove(e) {
-            e.preventDefault();
-            handleTouchUpdate(e.touches);
-        }
-        
-        function handleTouchEnd(e) {
-            e.preventDefault();
-            handleTouchUpdate(e.touches);
-        }
-        
-        function handleMouseDown(e) {
-            if (e.button !== 0) return;
             
-            const mockTouch = {
-                identifier: Date.now() + Math.random(),
-                clientX: e.clientX,
-                clientY: e.clientY
-            };
-            handleNewTouches({ length: 1, 0: mockTouch });
-        }
-        
-        function handleNewTouches(touchList) {
-            for (let i = 0; i < touchList.length; i++) {
-                const touch = touchList[i];
+            // Get the header position
+            const headerRect = header.getBoundingClientRect();
+            
+            // Check each touch
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                
+                // Check if touch is on a button or in header area
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (isUIControl(target) || touch.clientY < headerRect.bottom) {
+                    // This touch is on a control, skip it
+                    continue;
+                }
+                
+                // Create finger for this touch
                 if (!touches.has(touch.identifier)) {
                     createFinger(touch.identifier, touch.clientX, touch.clientY);
                 }
             }
-            handleTouchUpdate(touchList);
+            
+            updateTouchState();
         }
         
-        function handleTouchUpdate(touchList) {
-            const currentTouchIds = new Set();
-            const currentTime = Date.now();
+        function handleTouchMove(e) {
+            e.preventDefault();
             
-            // Update existing touches
-            for (let i = 0; i < touchList.length; i++) {
-                const touch = touchList[i];
-                currentTouchIds.add(touch.identifier);
-                
+            // Update finger positions
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
                 if (touches.has(touch.identifier)) {
                     updateFinger(touch.identifier, touch.clientX, touch.clientY);
                 }
             }
             
+            updateTouchState();
+        }
+        
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            
+            // Get current touches
+            const currentTouches = new Set();
+            for (let i = 0; i < e.touches.length; i++) {
+                currentTouches.add(e.touches[i].identifier);
+            }
+            
             // Remove fingers that are no longer touching
-            touches.forEach((finger, id) => {
-                if (!currentTouchIds.has(id)) {
+            touches.forEach((fingerData, id) => {
+                if (!currentTouches.has(id)) {
                     removeFinger(id);
                 }
             });
             
-            // Check for stability
+            updateTouchState();
+        }
+        
+        function handleTouchCancel(e) {
+            e.preventDefault();
+            // Clear all touches
+            touches.forEach((fingerData, id) => {
+                removeFinger(id);
+            });
+            updateTouchState();
+        }
+        
+        // Mouse handlers for desktop testing
+        let mouseDown = false;
+        let mouseId = null;
+        
+        function handleMouseDown(e) {
+            if (e.button !== 0 || isUIControl(e.target)) return;
+            
+            mouseDown = true;
+            mouseId = 'mouse_' + Date.now();
+            createFinger(mouseId, e.clientX, e.clientY);
+            updateTouchState();
+        }
+        
+        function handleMouseMove(e) {
+            if (!mouseDown || !mouseId) return;
+            
+            updateFinger(mouseId, e.clientX, e.clientY);
+            updateTouchState();
+        }
+        
+        function handleMouseUp(e) {
+            if (!mouseDown || !mouseId) return;
+            
+            mouseDown = false;
+            removeFinger(mouseId);
+            mouseId = null;
+            updateTouchState();
+        }
+        
+        function isUIControl(element) {
+            // Check if element is a UI control
+            const uiTags = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
+            const uiClasses = ['mode-btn', 'ranking-style-btn', 'team-slider', 'reset-button'];
+            
+            let current = element;
+            while (current && current !== document.body) {
+                // Check tag
+                if (uiTags.includes(current.tagName)) {
+                    return true;
+                }
+                
+                // Check classes
+                for (const className of uiClasses) {
+                    if (current.classList && current.classList.contains(className)) {
+                        return true;
+                    }
+                }
+                
+                current = current.parentElement;
+            }
+            
+            return false;
+        }
+        
+        function updateTouchState() {
+            const currentTime = Date.now();
             const currentFingerCount = touches.size;
             
             if (currentFingerCount >= 2) {
@@ -582,7 +659,7 @@
                 number: touches.size + 1
             });
             
-            touchArea.appendChild(finger);
+            document.body.appendChild(finger);
             
             // Animate appearance
             finger.style.transform = 'translate(-50%, -50%) scale(0)';
@@ -604,9 +681,16 @@
         function removeFinger(id) {
             const fingerData = touches.get(id);
             if (fingerData) {
-                if (fingerData.element.parentNode) {
-                    fingerData.element.parentNode.removeChild(fingerData.element);
-                }
+                // Quick fade out
+                fingerData.element.style.opacity = '0';
+                fingerData.element.style.transform = 'translate(-50%, -50%) scale(0)';
+                
+                setTimeout(() => {
+                    if (fingerData.element.parentNode) {
+                        fingerData.element.parentNode.removeChild(fingerData.element);
+                    }
+                }, 300);
+                
                 touches.delete(id);
             }
         }
@@ -644,12 +728,12 @@
             let statusText = '';
             
             if (count === 0) {
-                statusText = 'Place fingers below and hold still...';
+                statusText = 'Touch anywhere (avoid buttons) and hold still...';
             } else if (count === 1) {
                 statusText = 'Add more fingers (need at least 2)';
             } else {
                 if (isCountingDown) {
-                    const remaining = Math.ceil((ACTIVATION_TIME - (Date.now() - (Date.now() - ACTIVATION_TIME * (1 - parseFloat(countdownProgress.style.width) / 100)))) / 1000);
+                    const remaining = Math.ceil((ACTIVATION_TIME - (Date.now() - (Date.now() - ACTIVATION_TIME * (1 - parseFloat(countdownProgress.style.width) / 100))) / 1000);
                     statusText = `${count} fingers - Activating in ${remaining}s...`;
                 } else {
                     statusText = `${count} fingers - Hold still for 3 seconds`;
@@ -694,6 +778,9 @@
                 if (id === winnerId) {
                     fingerData.element.classList.add('winner');
                     fingerData.element.textContent = '👑';
+                } else {
+                    fingerData.element.style.opacity = '0.2';
+                    fingerData.element.style.transform = 'translate(-50%, -50%) scale(0.7)';
                 }
             });
             
