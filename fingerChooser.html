@@ -136,25 +136,25 @@
         }
         
         /* Teams - same colors */
-        .team-1 { background: #FF5252; }
-        .team-2 { background: #448AFF; }
-        .team-3 { background: #64FFDA; }
-        .team-4 { background: #FFD740; }
-        .team-5 { background: #E040FB; }
+        .team-1 { background: #FF5252; border-color: #FF5252; }
+        .team-2 { background: #448AFF; border-color: #448AFF; }
+        .team-3 { background: #64FFDA; border-color: #64FFDA; }
+        .team-4 { background: #FFD740; border-color: #FFD740; }
+        .team-5 { background: #E040FB; border-color: #E040FB; }
         
         /* Ranking colors */
-        .rank-1 { background: gold; }
-        .rank-2 { background: silver; }
-        .rank-3 { background: #cd7f32; }
-        .rank-other { background: #667eea; }
+        .rank-1 { background: gold; border-color: gold; }
+        .rank-2 { background: silver; border-color: silver; }
+        .rank-3 { background: #cd7f32; border-color: #cd7f32; }
+        .rank-other { background: #667eea; border-color: #667eea; }
         
-        /* Result message */
+        /* Result message - stays visible */
         .result {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             color: white;
             padding: 20px 30px;
             border-radius: 15px;
@@ -162,7 +162,10 @@
             text-align: center;
             display: none;
             z-index: 1000;
-            border: 2px solid white;
+            border: 3px solid #e94560;
+            max-width: 90%;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            line-height: 1.4;
         }
         
         .result.show {
@@ -183,6 +186,65 @@
             font-size: 1rem;
             cursor: pointer;
             z-index: 100;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .reset-btn:hover {
+            background: #ff6b81;
+        }
+        
+        /* Team result display */
+        .team-result {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .team-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .team-members {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .team-member {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .finger {
+                width: 90px;
+                height: 90px;
+                font-size: 1.8rem;
+            }
+            
+            .finger.winner {
+                width: 130px;
+                height: 130px;
+                font-size: 2.5rem;
+            }
+            
+            .result {
+                font-size: 1.3rem;
+                padding: 15px 20px;
+            }
+            
+            .team-member {
+                font-size: 0.9rem;
+                padding: 4px 8px;
+            }
         }
     </style>
 </head>
@@ -233,6 +295,8 @@
         let rankingStyle = 'medals';
         let timer = null;
         let progress = 0;
+        let lastFingerCount = 0;
+        let gameActive = false;
         
         // Setup
         setupButtons();
@@ -242,6 +306,8 @@
             // Mode buttons
             document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
                 btn.onclick = function() {
+                    if (gameActive) return; // Don't change mode during active game
+                    
                     // Update active button
                     document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
@@ -266,6 +332,8 @@
             // Ranking style buttons
             document.querySelectorAll('.mode-btn[data-style]').forEach(btn => {
                 btn.onclick = function() {
+                    if (gameActive) return;
+                    
                     document.querySelectorAll('.mode-btn[data-style]').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     rankingStyle = this.dataset.style;
@@ -274,6 +342,7 @@
             
             // Team slider
             document.getElementById('teamSlider').oninput = function() {
+                if (gameActive) return;
                 teamCount = this.value;
                 document.getElementById('teamCount').textContent = teamCount;
             };
@@ -290,14 +359,17 @@
             
             // Mouse events for desktop
             touchArea.addEventListener('mousedown', function(e) {
+                if (gameActive) return;
                 handleMouse(e, 'start');
             });
             touchArea.addEventListener('mousemove', function(e) {
+                if (gameActive) return;
                 if (e.buttons === 1) { // Left button pressed
                     handleMouse(e, 'move');
                 }
             });
             touchArea.addEventListener('mouseup', function(e) {
+                if (gameActive) return;
                 handleMouse(e, 'end');
             });
             
@@ -307,6 +379,7 @@
         
         function handleTouch(e) {
             e.preventDefault();
+            if (gameActive) return;
             
             // Get current touches
             const touches = Array.from(e.touches);
@@ -376,7 +449,7 @@
             fingerDiv.style.left = x + 'px';
             fingerDiv.style.top = y + 'px';
             
-            // Random color for new finger
+            // Random color for new finger (will be changed in teams mode)
             const colors = ['#FF5252', '#448AFF', '#64FFDA', '#FFD740', '#E040FB', '#667eea', '#764ba2'];
             fingerDiv.style.background = colors[fingers.length % colors.length];
             
@@ -392,15 +465,18 @@
         }
         
         function checkStability() {
-            if (fingers.length >= 2) {
-                // Start or continue timer
-                if (!timer) {
+            // Reset timer if finger count changes
+            if (fingers.length !== lastFingerCount) {
+                lastFingerCount = fingers.length;
+                stopTimer();
+                
+                // Start new timer if we have enough fingers
+                if (fingers.length >= 2) {
                     startTimer();
                 }
-            } else {
-                // Not enough fingers
-                stopTimer();
             }
+            
+            updateStatus();
         }
         
         function startTimer() {
@@ -415,6 +491,7 @@
                 
                 if (progress >= 100) {
                     stopTimer();
+                    gameActive = true;
                     runMode();
                 }
             }, 100);
@@ -436,7 +513,9 @@
         function updateStatus() {
             const status = document.getElementById('status');
             
-            if (fingers.length === 0) {
+            if (gameActive) {
+                status.textContent = 'Game in progress - Press Reset to start over';
+            } else if (fingers.length === 0) {
                 status.textContent = 'Touch below with fingers and hold still...';
             } else if (fingers.length === 1) {
                 status.textContent = 'Add more fingers (need at least 2)';
@@ -479,8 +558,7 @@
                 }
             });
             
-            showResult(`Winner: Finger #${winner.number}!`);
-            setTimeout(resetAll, 3000);
+            showResult(`🎉 Winner: Finger #${winner.number}! 🎉`);
         }
         
         function createTeams() {
@@ -489,6 +567,8 @@
             
             // Distribute into teams
             const teams = [];
+            const teamColors = ['team-1', 'team-2', 'team-3', 'team-4', 'team-5'];
+            
             for (let i = 0; i < teamCount; i++) {
                 teams.push([]);
             }
@@ -497,19 +577,28 @@
                 const teamIndex = index % teamCount;
                 teams[teamIndex].push(finger);
                 
-                // Apply team color and number
-                finger.element.classList.add('team-' + (teamIndex + 1));
+                // Apply team color and number - SAME COLOR FOR ALL TEAM MEMBERS
+                finger.element.className = 'finger ' + teamColors[teamIndex];
                 finger.element.textContent = 'T' + (teamIndex + 1);
             });
             
             // Show result
-            let resultText = `${teamCount} Teams Created\n`;
+            let resultHTML = `<div style="margin-bottom: 15px; font-size: 2rem;">👥 ${teamCount} Teams Created</div>`;
             teams.forEach((team, index) => {
-                resultText += `Team ${index + 1}: ${team.length} player${team.length !== 1 ? 's' : ''}\n`;
+                const teamColor = ['#FF5252', '#448AFF', '#64FFDA', '#FFD740', '#E040FB'][index];
+                resultHTML += `
+                    <div class="team-result">
+                        <div class="team-name" style="color: ${teamColor}">
+                            Team ${index + 1} (${team.length} player${team.length !== 1 ? 's' : ''})
+                        </div>
+                        <div class="team-members">
+                            ${team.map(finger => `<span class="team-member">Finger #${finger.number}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
             });
-            showResult(resultText);
             
-            setTimeout(resetAll, 3000);
+            showResult(resultHTML);
         }
         
         function createRanking() {
@@ -536,17 +625,26 @@
                 }
             });
             
-            showResult('Ranking Created!');
+            // Show result
+            let resultHTML = `<div style="margin-bottom: 15px; font-size: 2rem;">🏆 Ranking Created</div>`;
+            shuffled.forEach((finger, index) => {
+                const rank = index + 1;
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🎯';
+                resultHTML += `<div style="margin: 8px 0; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    ${medal} <strong>Rank ${rank}</strong>: Finger #${finger.number}
+                </div>`;
+            });
+            
+            showResult(resultHTML);
         }
         
-        function showResult(text) {
+        function showResult(html) {
             const resultDiv = document.getElementById('result');
-            resultDiv.textContent = text;
+            resultDiv.innerHTML = html;
             resultDiv.classList.add('show');
             
-            setTimeout(() => {
-                resultDiv.classList.remove('show');
-            }, 2000);
+            // Make sure it stays visible until reset
+            // (no timeout to hide it)
         }
         
         function resetAll() {
@@ -555,6 +653,10 @@
                 finger.element.remove();
             });
             fingers = [];
+            
+            // Reset game state
+            gameActive = false;
+            lastFingerCount = 0;
             
             // Reset UI
             stopTimer();
