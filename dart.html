@@ -6,6 +6,7 @@
     <title>Dart Score Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Reset and Base */
         * {
             margin: 0;
             padding: 0;
@@ -25,19 +26,43 @@
             margin: 0 auto;
         }
 
+        /* Wake Lock Button */
+        .wake-lock-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #4dabf7;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        .wake-lock-btn.active {
+            background: #20c997;
+        }
+
         /* Configuration Screen */
         .config-screen {
             background: #16213e;
             border-radius: 10px;
-            padding: 20px;
+            padding: 25px;
             max-width: 500px;
-            margin: 20px auto;
+            margin: 30px auto;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .config-title {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
+            font-size: 2rem;
+            margin-bottom: 30px;
             color: #FFD700;
             text-align: center;
         }
@@ -53,7 +78,7 @@
             padding: 20px;
             background: #0f3460;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
             font-size: 1.3rem;
             font-weight: bold;
@@ -62,7 +87,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
         }
 
         .game-btn:hover {
@@ -72,17 +97,24 @@
 
         .game-btn.selected {
             background: #4dabf7;
-            border: 2px solid white;
+            border: 3px solid white;
         }
 
         .player-config {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+        }
+
+        .player-config h3 {
+            color: #4dabf7;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
         }
 
         .player-inputs {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .player-input-row {
@@ -93,55 +125,63 @@
 
         .player-input {
             flex: 1;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #4dabf7;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #4dabf7;
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .remove-player {
             background: #ff6b6b;
             color: white;
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             cursor: pointer;
             font-weight: bold;
+            font-size: 1.3rem;
         }
 
         .add-player {
             background: #20c997;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 15px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            margin-top: 10px;
+            font-size: 1.1rem;
             width: 100%;
+            margin-top: 10px;
         }
 
         .start-btn {
             background: #4dabf7;
             color: white;
             border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1.2rem;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 1.3rem;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
             transition: all 0.2s;
+            margin-top: 10px;
         }
 
         .start-btn:hover {
             background: #339af0;
         }
 
-        /* Game Screen */
+        /* Hide remove buttons initially */
+        .remove-player.hidden {
+            display: none;
+        }
+
+        /* Game Screens */
         .game-screen {
             display: none;
         }
@@ -155,10 +195,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 10px;
+            padding: 20px;
             background: #16213e;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .game-title {
@@ -167,54 +207,59 @@
             color: #FFD700;
         }
 
-        .settings-btn {
+        .game-header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .settings-btn, .wake-lock-btn-game {
             background: #4dabf7;
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
         /* 501 Game Layout */
         .scoreboard-501 {
             background: #0f3460;
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
 
         .legs-set-container {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-around;
+            flex-wrap: wrap;
             gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
             border-bottom: 2px solid #4dabf7;
         }
 
         .player-legs-set {
             text-align: center;
-            min-width: 80px;
+            min-width: 100px;
         }
 
         .player-legs-set-name {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #FFD700;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             font-weight: bold;
         }
 
         .legs-set-display {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .leg-set-item {
@@ -222,13 +267,13 @@
         }
 
         .leg-set-label {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: #aaa;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
 
         .leg-set-value {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: #ffffff;
         }
@@ -236,33 +281,35 @@
         .players-score-501 {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
         }
 
         .player-column-501 {
             flex: 1;
             min-width: 200px;
+            max-width: 300px;
             background: #16213e;
-            border-radius: 8px;
-            padding: 15px;
+            border-radius: 10px;
+            padding: 20px;
             text-align: center;
             position: relative;
         }
 
         .player-column-501.active {
-            border: 2px solid #4dabf7;
+            border: 3px solid #4dabf7;
             background: #1a3a6e;
         }
 
         .player-name-501 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #FFD700;
             cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
+            padding: 10px;
+            border-radius: 5px;
             transition: background 0.2s;
         }
 
@@ -270,26 +317,28 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* UPDATED: Remaining score display */
         .player-remaining-score {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 15px 0;
             color: #ffffff;
             background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 6px;
-            border: 2px solid #4dabf7;
+            padding: 15px;
+            border-radius: 8px;
+            border: 3px solid #4dabf7;
         }
 
         .score-history {
-            margin: 15px 0;
-            min-height: 80px;
+            margin: 20px 0;
+            width: 100%;
+            min-height: 100px;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
         .score-item {
             font-size: 1.3rem;
-            padding: 6px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             color: #ffffff;
         }
@@ -305,41 +354,132 @@
 
         .score-input-section {
             background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
         }
 
         .score-input-label {
             display: block;
             color: #4dabf7;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
             text-align: center;
+        }
+
+        /* NEW: Remaining score display next to player name */
+        .remaining-score-display {
+            
+            color: #FFFFFF;
+			background: #0f3460;
+            padding: 8px 18px;
+			border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin-left: 15px;
+            display: inline-block;
+            min-width: 10px;
+            text-align: center;
+			border: 1px solid white;
+
+        }
+
+        .remaining-score-display.low {
+            background: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+
+        .remaining-score-display.win {
+            background: #20c997;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .quick-score-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-score-btn {
+            padding: 12px;
+            background: #0f3460;
+            border: 2px solid #4dabf7;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-score-btn:hover {
+            background: #1a3a6e;
         }
 
         .score-input {
             width: 100%;
-            padding: 12px;
+            padding: 18px;
             font-size: 1.5rem;
             text-align: center;
-            border-radius: 6px;
-            border: 1px solid #4dabf7;
+            border-radius: 8px;
+            border: 2px solid #4dabf7;
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .add-score-btn {
             background: #20c997;
             color: white;
             border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 1.1rem;
+            padding: 18px;
+            border-radius: 8px;
+            font-size: 1.3rem;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
+        }
+
+        /* Game Controls */
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .undo-btn {
+            background: #ff922b;
+            color: white;
+        }
+
+        .next-player-btn {
+            background: #4dabf7;
+            color: white;
+        }
+
+        .new-game-btn {
+            background: #ff6b6b;
+            color: white;
         }
 
         /* Cricket Game Layout */
@@ -450,42 +590,6 @@
             font-weight: bold;
         }
 
-        /* Controls */
-        .game-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .control-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .undo-btn {
-            background: #ff922b;
-            color: white;
-        }
-
-        .next-player-btn {
-            background: #4dabf7;
-            color: white;
-        }
-
-        .new-game-btn {
-            background: #ff6b6b;
-            color: white;
-        }
-
         /* Settings Modal */
         .settings-modal {
             position: fixed;
@@ -497,7 +601,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 2000;
         }
 
         .settings-modal.active {
@@ -506,18 +610,16 @@
 
         .settings-content {
             background: #16213e;
-            border-radius: 10px;
-            padding: 25px;
+            border-radius: 15px;
+            padding: 30px;
             width: 90%;
             max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
         }
 
         .settings-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #FFD700;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
         }
 
@@ -527,86 +629,177 @@
 
         .settings-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: #4dabf7;
             font-weight: bold;
+            font-size: 1.1rem;
         }
 
         .settings-input {
             width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #4dabf7;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #4dabf7;
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .settings-btn-group {
             display: flex;
-            gap: 10px;
-            margin-top: 25px;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .save-settings, .cancel-settings {
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            flex: 1;
+            font-size: 1.1rem;
         }
 
         .save-settings {
             background: #20c997;
             color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
         }
 
         .cancel-settings {
             background: #6c757d;
             color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
         }
 
-        /* Hidden class */
+        /* Hide elements */
         .hidden {
-            display: none;
+            display: none !important;
         }
 
-        /* Responsive */
-        @media (max-width: 600px) {
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            
+            .config-screen {
+                padding: 20px;
+                margin: 15px auto;
+            }
+            
+            .config-title {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+            }
+            
+            .game-btn {
+                padding: 18px;
+                font-size: 1.2rem;
+            }
+            
+            .player-input {
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
             .players-score-501 {
                 flex-direction: column;
+                align-items: center;
             }
             
             .player-column-501 {
-                min-width: 100%;
+                width: 100%;
+                max-width: none;
             }
             
+            .game-controls {
+                flex-direction: column;
+            }
+            
+            .wake-lock-btn {
+                width: 45px;
+                height: 45px;
+                top: 10px;
+                right: 10px;
+            }
+            
+            /* Remaining score display mobile */
+            .remaining-score-display {
+                font-size: 1.3rem;
+                padding: 6px 15px;
+                margin-left: 10px;
+                min-width: 70px;
+            }
+            
+            /* Cricket mobile adjustments */
+            .scoreboard-cricket {
+                padding: 10px;
+            }
+            
+            .cricket-table {
+                min-width: 400px;
+            }
+            
+            .mark-cell {
+                height: 45px;
+            }
+            
+            .mark {
+                width: 16px;
+                height: 16px;
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
             .config-screen {
                 padding: 15px;
             }
             
-            .game-title {
-                font-size: 1.5rem;
+            .config-title {
+                font-size: 1.6rem;
             }
             
-            .player-name-501 {
+            .game-btn {
+                padding: 15px;
                 font-size: 1.1rem;
             }
             
-            .player-remaining-score {
-                font-size: 1.8rem;
-            }
-            
             .legs-set-container {
-                gap: 10px;
+                flex-direction: column;
+                align-items: center;
             }
             
             .player-legs-set {
-                min-width: 70px;
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .quick-score-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            /* Remaining score display small mobile */
+            .score-input-label {
+                font-size: 1.1rem;
+            }
+            
+            .remaining-score-display {
+                font-size: 1.2rem;
+                padding: 5px 12px;
+                margin-left: 8px;
+                min-width: 60px;
+            }
+            
+            /* Cricket mobile adjustments */
+            .cricket-table th,
+            .cricket-table td {
+                padding: 8px 5px;
+            }
+            
+            .number-cell {
+                width: 50px;
+                font-size: 1rem;
             }
         }
     </style>
@@ -627,7 +820,7 @@
             </div>
             
             <div class="player-config">
-                <h3 style="color: #4dabf7; margin-bottom: 10px;">Players</h3>
+                <h3>Players</h3>
                 <div class="player-inputs" id="player-inputs">
                     <div class="player-input-row">
                         <input type="text" class="player-input" placeholder="Player 1" value="Player1">
@@ -652,9 +845,14 @@
         <div class="game-screen" id="game-screen-501">
             <div class="game-header">
                 <div class="game-title" id="game-title-501">501</div>
-                <button class="settings-btn" id="settings-btn-501">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <div class="game-header-controls">
+                    <button class="wake-lock-btn-game" id="wake-lock-btn-501" title="Prevent screen lock">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="settings-btn" id="settings-btn-501">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="scoreboard-501">
@@ -669,8 +867,10 @@
                 <div class="score-input-section">
                     <div class="score-input-label">
                         Current Player: <span id="current-player-name" style="color: #FFD700; font-weight: bold;">Player1</span>
+                        <span class="remaining-score-display" id="remaining-score-display">501</span>
                     </div>
-                    <input type="number" class="score-input" id="score-input-501" placeholder="Score" value="60" min="0" max="180">
+                                      
+                    <input type="number" class="score-input" id="score-input-501" placeholder="Enter score" value="" min="0" max="180">
                     <button class="add-score-btn" id="add-score-501">
                         <i class="fas fa-plus"></i> Add Score
                     </button>
@@ -694,9 +894,14 @@
         <div class="game-screen" id="game-screen-cricket">
             <div class="game-header">
                 <div class="game-title" id="game-title-cricket">Cricket</div>
-                <button class="settings-btn" id="settings-btn-cricket">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <div class="game-header-controls">
+                    <button class="wake-lock-btn-game" id="wake-lock-btn-cricket" title="Prevent screen lock">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="settings-btn" id="settings-btn-cricket">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="scoreboard-cricket">
@@ -773,15 +978,107 @@
             cricketState: {
                 currentPlayerId: null,
                 numbers: [20, 19, 18, 17, 16, 15, 25],
-                closedNumbers: {} // Tracks which player closed each number
-            }
+                closedNumbers: {}
+            },
+            wakeLock: null,
+            isWakeLockActive: false
         };
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
             setupConfiguration();
             setupEventListeners();
+            setupWakeLock();
         });
+
+        // Setup wake lock
+        function setupWakeLock() {
+            const wakeLockBtn = document.getElementById('wake-lock-btn');
+            const wakeLockBtn501 = document.getElementById('wake-lock-btn-501');
+            const wakeLockBtnCricket = document.getElementById('wake-lock-btn-cricket');
+            
+            wakeLockBtn.addEventListener('click', toggleWakeLock);
+            if (wakeLockBtn501) wakeLockBtn501.addEventListener('click', toggleWakeLock);
+            if (wakeLockBtnCricket) wakeLockBtnCricket.addEventListener('click', toggleWakeLock);
+            
+            // Handle visibility change
+            document.addEventListener('visibilitychange', async () => {
+                if (gameState.isWakeLockActive && document.visibilityState === 'visible') {
+                    await acquireWakeLock();
+                }
+            });
+        }
+
+        // Toggle wake lock
+        async function toggleWakeLock() {
+            if (gameState.isWakeLockActive) {
+                await releaseWakeLock();
+            } else {
+                await acquireWakeLock();
+            }
+            
+            updateWakeLockUI();
+        }
+
+        // Acquire wake lock
+        async function acquireWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    gameState.wakeLock = await navigator.wakeLock.request('screen');
+                    gameState.isWakeLockActive = true;
+                    
+                    gameState.wakeLock.addEventListener('release', () => {
+                        gameState.isWakeLockActive = false;
+                        updateWakeLockUI();
+                    });
+                } else {
+                    gameState.isWakeLockActive = true;
+                }
+            } catch (err) {
+                console.error('Failed to acquire wake lock:', err);
+                gameState.isWakeLockActive = false;
+            }
+        }
+
+        // Release wake lock
+        async function releaseWakeLock() {
+            if (gameState.wakeLock) {
+                await gameState.wakeLock.release();
+                gameState.wakeLock = null;
+            }
+            gameState.isWakeLockActive = false;
+        }
+
+        // Update wake lock UI
+        function updateWakeLockUI() {
+            const wakeLockBtn = document.getElementById('wake-lock-btn');
+            const wakeLockBtn501 = document.getElementById('wake-lock-btn-501');
+            const wakeLockBtnCricket = document.getElementById('wake-lock-btn-cricket');
+            
+            if (gameState.isWakeLockActive) {
+                wakeLockBtn.classList.add('active');
+                wakeLockBtn.innerHTML = '<i class="fas fa-sun"></i>';
+                if (wakeLockBtn501) {
+                    wakeLockBtn501.classList.add('active');
+                    wakeLockBtn501.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+                if (wakeLockBtnCricket) {
+                    wakeLockBtnCricket.classList.add('active');
+                    wakeLockBtnCricket.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+            } else {
+                wakeLockBtn.classList.remove('active');
+                wakeLockBtn.innerHTML = '<i class="fas fa-moon"></i>';
+                if (wakeLockBtn501) {
+                    wakeLockBtn501.classList.remove('active');
+                    wakeLockBtn501.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+                if (wakeLockBtnCricket) {
+                    wakeLockBtnCricket.classList.remove('active');
+                    wakeLockBtnCricket.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            }
+        }
 
         // Setup configuration screen
         function setupConfiguration() {
@@ -796,9 +1093,8 @@
             });
             
             gameCricketBtn.addEventListener('click', function() {
-                gameCricketBtn.classList.remove('selected');
-                game501Btn.classList.remove('selected');
                 gameCricketBtn.classList.add('selected');
+                game501Btn.classList.remove('selected');
                 gameState.gameType = 'cricket';
             });
             
@@ -890,7 +1186,7 @@
             }
         }
 
-        // Setup 501 game - UPDATED TO SHOW REMAINING SCORE
+        // Setup 501 game - UPDATED to include remaining score display
         function setup501Game() {
             const gameTitle = document.getElementById('game-title-501');
             gameTitle.textContent = gameState.settings.startingScore;
@@ -933,7 +1229,7 @@
                 playerName.textContent = player.name;
                 playerName.addEventListener('click', () => selectPlayer501(player.id));
                 
-                // Create remaining score display - UPDATED
+                // Create remaining score display
                 const remainingScore = document.createElement('div');
                 remainingScore.className = 'player-remaining-score';
                 remainingScore.id = `player-score-${player.id}`;
@@ -963,7 +1259,7 @@
                 });
                 
                 playerColumn.appendChild(playerName);
-                playerColumn.appendChild(remainingScore); // Changed from totalScore to remainingScore
+                playerColumn.appendChild(remainingScore);
                 playerColumn.appendChild(historyElement);
                 playersContainer.appendChild(playerColumn);
             });
@@ -972,8 +1268,34 @@
             const currentPlayer = gameState.players[gameState.currentPlayerIndex];
             document.getElementById('current-player-name').textContent = currentPlayer.name;
             
+            // NEW: Update the remaining score display next to player name
+            updateRemainingScoreDisplay();
+            
             // Focus on score input
             document.getElementById('score-input-501').focus();
+        }
+
+        // NEW: Update the remaining score display
+        function updateRemainingScoreDisplay() {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const display = document.getElementById('remaining-score-display');
+            
+            if (currentPlayer && display) {
+                display.textContent = currentPlayer.score;
+                
+                // Add visual effects based on score
+                display.classList.remove('low', 'win');
+                
+                if (currentPlayer.score <= 40) {
+                    // Low score warning (for potential finish)
+                    display.classList.add('low');
+                }
+                
+                if (currentPlayer.score === 0) {
+                    // Win condition
+                    display.classList.add('win');
+                }
+            }
         }
 
         // Select player in 501 game
@@ -985,7 +1307,7 @@
             }
         }
 
-        // Add score in 501 game
+        // Add score in 501 game - UPDATED to update remaining score display
         function addScore501() {
             const scoreInput = document.getElementById('score-input-501');
             const score = parseInt(scoreInput.value) || 0;
@@ -1028,6 +1350,9 @@
             
             // Update display
             setup501Game();
+            
+            // NEW: Update the remaining score display
+            updateRemainingScoreDisplay();
             
             // Reset input
             scoreInput.value = '';
@@ -1088,7 +1413,7 @@
             }
         }
 
-        // Skip turn in 501
+        // Skip turn in 501 - UPDATED to update remaining score display
         function nextPlayer501() {
             const currentPlayer = gameState.players[gameState.currentPlayerIndex];
             
@@ -1103,16 +1428,21 @@
             
             // Update display
             setup501Game();
+            
+            // NEW: Update the remaining score display
+            updateRemainingScoreDisplay();
         }
 
-        // Setup cricket game - WITH UPDATED SCORING LOGIC
+        // Setup cricket game
         function setupCricketGame() {
             const tableBody = document.getElementById('cricket-table-body');
             tableBody.innerHTML = '';
             
             // Create header row
             const headerRow = document.createElement('tr');
-            headerRow.innerHTML = '<th></th>';
+            const emptyHeader = document.createElement('th');
+            emptyHeader.textContent = '';
+            headerRow.appendChild(emptyHeader);
             
             gameState.players.forEach(player => {
                 const th = document.createElement('th');
@@ -1127,9 +1457,14 @@
                 headerRow.appendChild(th);
             });
             
+            tableBody.appendChild(headerRow);
+            
             // Add points row
             const pointsRow = document.createElement('tr');
-            pointsRow.innerHTML = '<td class="number-cell">Pts</td>';
+            const pointsLabel = document.createElement('td');
+            pointsLabel.className = 'number-cell';
+            pointsLabel.textContent = 'Pts';
+            pointsRow.appendChild(pointsLabel);
             
             gameState.players.forEach(player => {
                 const td = document.createElement('td');
@@ -1138,7 +1473,6 @@
                 pointsRow.appendChild(td);
             });
             
-            tableBody.appendChild(headerRow);
             tableBody.appendChild(pointsRow);
             
             // Add number rows (20 to 15, then 25 for bull)
@@ -1207,7 +1541,7 @@
             setupCricketGame();
         }
 
-        // Add mark in cricket game - WITH UPDATED SCORING LOGIC
+        // Add mark in cricket game
         function addCricketMark(playerId, number) {
             const player = gameState.players.find(p => p.id === playerId);
             if (!player) return;
@@ -1278,7 +1612,7 @@
             checkCricketWin();
         }
 
-        // Check cricket win condition - UPDATED LOGIC
+        // Check cricket win condition
         function checkCricketWin() {
             // A player wins if they have closed all numbers AND have equal or LOWER points than all opponents
             gameState.players.forEach(player => {
@@ -1430,7 +1764,7 @@
             }
             
             closeSettings();
-			startGame();
+            startGame();
         }
 
         // Setup event listeners
@@ -1442,6 +1776,16 @@
                     addScore501();
                 }
             });
+            
+            // Quick score buttons
+            document.querySelectorAll('.quick-score-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const score = parseInt(this.dataset.score);
+                    document.getElementById('score-input-501').value = score;
+                    addScore501();
+                });
+            });
+            
             document.getElementById('undo-501').addEventListener('click', undoLast);
             document.getElementById('next-player-501').addEventListener('click', nextPlayer501);
             document.getElementById('new-game-501').addEventListener('click', resetGame);
