@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dart Score Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,6 +19,7 @@
             color: #ffffff;
             min-height: 100vh;
             padding: 10px;
+            transition: background 0.3s ease;
         }
 
         .container {
@@ -26,10 +27,10 @@
             margin: 0 auto;
         }
 
-        /* Wake Lock Button */
-        .wake-lock-btn {
+        /* Wake Lock Button - Updated for app mode */
+        .app-mode-toggle {
             position: fixed;
-            top: 15px;
+            top: 90px;
             right: 15px;
             background: #4dabf7;
             color: white;
@@ -44,10 +45,142 @@
             font-size: 1.3rem;
             z-index: 1000;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
-        .wake-lock-btn.active {
+        .app-mode-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .app-mode-toggle.active {
             background: #20c997;
+        }
+
+        /* Fullscreen mode styles */
+        body.fullscreen-mode {
+            padding: 0 !important;
+            background: #1a1a2e !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            overflow: hidden !important;
+        }
+
+        .fullscreen-mode .container {
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: none !important;
+        }
+
+        .fullscreen-mode .config-screen {
+            height: 100vh !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .fullscreen-mode .game-screen.active {
+            height: 100vh !important;
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        .fullscreen-mode .game-header {
+            border-radius: 0 !important;
+            margin-bottom: 10px !important;
+        }
+
+        .fullscreen-mode .scoreboard-501,
+        .fullscreen-mode .scoreboard-cricket {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px !important;
+        }
+
+        .fullscreen-mode .game-controls {
+            margin-top: 10px !important;
+            padding: 10px !important;
+        }
+
+        /* App mode exit button */
+        .exit-app-mode-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            padding: 8px 16px;
+            font-size: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background-color: rgba(248, 150, 30, 0.9);
+            color: white;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: none;
+            font-weight: 500;
+        }
+
+        .fullscreen-mode .exit-app-mode-btn {
+            display: block;
+        }
+
+        .exit-app-mode-btn:hover {
+            background-color: rgba(248, 150, 30, 1);
+            transform: scale(1.05);
+        }
+
+        .exit-app-mode-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* App mode notification */
+        .app-mode-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            display: none;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+        }
+
+        .app-mode-notification.info {
+            background-color: #4dabf7;
+        }
+
+        .app-mode-notification.error {
+            background-color: #ff6b6b;
+        }
+
+        .app-mode-notification.success {
+            background-color: #20c997;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         /* Configuration Screen */
@@ -58,6 +191,7 @@
             max-width: 500px;
             margin: 30px auto;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
         .config-title {
@@ -212,7 +346,7 @@
             gap: 10px;
         }
 
-        .settings-btn, .wake-lock-btn-game {
+        .settings-btn {
             background: #4dabf7;
             color: white;
             border: none;
@@ -224,6 +358,11 @@
             align-items: center;
             justify-content: center;
             font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.1);
         }
 
         /* 501 Game Layout */
@@ -367,21 +506,19 @@
             text-align: center;
         }
 
-        /* NEW: Remaining score display next to player name */
+        /* Remaining score display next to player name */
         .remaining-score-display {
-            
             color: #FFFFFF;
-			background: #0f3460;
+            background: #0f3460;
             padding: 8px 18px;
-			border-radius: 10px;
+            border-radius: 10px;
             font-weight: bold;
             font-size: 1.4rem;
             margin-left: 15px;
             display: inline-block;
             min-width: 10px;
             text-align: center;
-			border: 1px solid white;
-
+            border: 1px solid white;
         }
 
         .remaining-score-display.low {
@@ -716,11 +853,27 @@
                 flex-direction: column;
             }
             
-            .wake-lock-btn {
+            .app-mode-toggle {
                 width: 45px;
                 height: 45px;
                 top: 10px;
                 right: 10px;
+                font-size: 1.1rem;
+            }
+            
+            .exit-app-mode-btn {
+                top: 10px;
+                left: 10px;
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            
+            .app-mode-notification {
+                top: 10px;
+                right: 10px;
+                max-width: 250px;
+                font-size: 12px;
+                padding: 10px 16px;
             }
             
             /* Remaining score display mobile */
@@ -748,6 +901,16 @@
                 width: 16px;
                 height: 16px;
                 font-size: 0.7rem;
+            }
+            
+            /* Fullscreen mode adjustments for mobile */
+            .fullscreen-mode .scoreboard-501,
+            .fullscreen-mode .scoreboard-cricket {
+                padding: 10px !important;
+            }
+            
+            .fullscreen-mode .player-column-501 {
+                padding: 15px !important;
             }
         }
 
@@ -805,6 +968,16 @@
     </style>
 </head>
 <body>
+    <!-- App Mode Toggle Button (always visible) -->
+    <button class="app-mode-toggle" id="app-mode-toggle" title="Toggle app mode (fullscreen + screen lock)">
+        <i class="fas fa-moon"></i>
+    </button>
+    
+    <!-- Exit App Mode Button (only visible in app mode) -->
+    <button class="exit-app-mode-btn" id="exit-app-mode-btn" title="Exit app mode">
+        <i class="fas fa-times"></i> Exit App Mode
+    </button>
+
     <div class="container">
         <!-- Configuration Screen -->
         <div class="config-screen" id="config-screen">
@@ -846,9 +1019,6 @@
             <div class="game-header">
                 <div class="game-title" id="game-title-501">501</div>
                 <div class="game-header-controls">
-                    <button class="wake-lock-btn-game" id="wake-lock-btn-501" title="Prevent screen lock">
-                        <i class="fas fa-moon"></i>
-                    </button>
                     <button class="settings-btn" id="settings-btn-501">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -895,9 +1065,6 @@
             <div class="game-header">
                 <div class="game-title" id="game-title-cricket">Cricket</div>
                 <div class="game-header-controls">
-                    <button class="wake-lock-btn-game" id="wake-lock-btn-cricket" title="Prevent screen lock">
-                        <i class="fas fa-moon"></i>
-                    </button>
                     <button class="settings-btn" id="settings-btn-cricket">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -979,105 +1146,240 @@
                 currentPlayerId: null,
                 numbers: [20, 19, 18, 17, 16, 15, 25],
                 closedNumbers: {}
-            },
-            wakeLock: null,
-            isWakeLockActive: false
+            }
         };
+
+        // App mode state
+        let isAppModeActive = false;
+        let wakeLock = null;
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
             setupConfiguration();
             setupEventListeners();
-            setupWakeLock();
+            setupAppMode();
+            
+            // Add visual feedback for button presses on mobile
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                button.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            });
+            
+            // Listen for fullscreen changes
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
         });
 
-        // Setup wake lock
-        function setupWakeLock() {
-            const wakeLockBtn = document.getElementById('wake-lock-btn');
-            const wakeLockBtn501 = document.getElementById('wake-lock-btn-501');
-            const wakeLockBtnCricket = document.getElementById('wake-lock-btn-cricket');
+        // Setup app mode functionality
+        function setupAppMode() {
+            const appModeToggle = document.getElementById('app-mode-toggle');
+            const exitAppModeBtn = document.getElementById('exit-app-mode-btn');
             
-            wakeLockBtn.addEventListener('click', toggleWakeLock);
-            if (wakeLockBtn501) wakeLockBtn501.addEventListener('click', toggleWakeLock);
-            if (wakeLockBtnCricket) wakeLockBtnCricket.addEventListener('click', toggleWakeLock);
+            // Initial setup
+            updateAppModeUI();
             
-            // Handle visibility change
+            // Event listeners
+            appModeToggle.addEventListener('click', toggleAppMode);
+            appModeToggle.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                toggleAppMode();
+            });
+            
+            exitAppModeBtn.addEventListener('click', disableAppMode);
+            exitAppModeBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                disableAppMode();
+            });
+            
+            // Handle visibility change - reacquire wake lock if needed
             document.addEventListener('visibilitychange', async () => {
-                if (gameState.isWakeLockActive && document.visibilityState === 'visible') {
-                    await acquireWakeLock();
+                if (isAppModeActive && document.visibilityState === 'visible') {
+                    try {
+                        await acquireWakeLock();
+                    } catch (err) {
+                        console.warn('Failed to reacquire wake lock:', err);
+                    }
                 }
             });
         }
 
-        // Toggle wake lock
-        async function toggleWakeLock() {
-            if (gameState.isWakeLockActive) {
-                await releaseWakeLock();
+        // Toggle app mode
+        async function toggleAppMode() {
+            if (isAppModeActive) {
+                await disableAppMode();
             } else {
-                await acquireWakeLock();
+                await enableAppMode();
             }
+        }
+
+        // Enable app mode (fullscreen + wake lock)
+        async function enableAppMode() {
+            try {
+                // Request fullscreen
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    await document.documentElement.webkitRequestFullscreen();
+                }
+                
+                // Add fullscreen class to body
+                document.body.classList.add('fullscreen-mode');
+                
+                // Request wake lock
+                await acquireWakeLock();
+                
+                // Update state and UI
+                isAppModeActive = true;
+                updateAppModeUI();
+                
+                // Show notification
+                showAppModeNotification('App mode activated - Fullscreen and screen lock prevention enabled', 'success');
+                
+            } catch (error) {
+                console.error('Error enabling app mode:', error);
+                showAppModeNotification('Failed to activate app mode', 'error');
+            }
+        }
+
+        // Disable app mode
+        async function disableAppMode() {
+            try {
+                // Exit fullscreen
+                if (document.fullscreenElement && document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+                    await document.webkitExitFullscreen();
+                }
+                
+                // Remove fullscreen class
+                document.body.classList.remove('fullscreen-mode');
+                
+                // Release wake lock
+                await releaseWakeLock();
+                
+                // Update state and UI
+                isAppModeActive = false;
+                updateAppModeUI();
+                
+                // Show notification
+                showAppModeNotification('App mode disabled', 'info');
+                
+            } catch (error) {
+                console.error('Error disabling app mode:', error);
+            }
+        }
+
+        // Handle fullscreen change events
+        function handleFullscreenChange() {
+            const isCurrentlyFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
             
-            updateWakeLockUI();
+            if (!isCurrentlyFullscreen && isAppModeActive) {
+                // User manually exited fullscreen
+                console.log('Manual exit from fullscreen detected');
+                isAppModeActive = false;
+                document.body.classList.remove('fullscreen-mode');
+                
+                // Also release wake lock
+                if (wakeLock) {
+                    wakeLock.release().then(() => {
+                        wakeLock = null;
+                        console.log('Wake lock released after exiting fullscreen');
+                    });
+                }
+                
+                updateAppModeUI();
+                showAppModeNotification('App mode disabled', 'info');
+            }
         }
 
         // Acquire wake lock
         async function acquireWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
-                    gameState.wakeLock = await navigator.wakeLock.request('screen');
-                    gameState.isWakeLockActive = true;
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake lock acquired');
                     
-                    gameState.wakeLock.addEventListener('release', () => {
-                        gameState.isWakeLockActive = false;
-                        updateWakeLockUI();
+                    // Add event listener for wake lock release
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Wake lock was released');
+                        wakeLock = null;
+                        
+                        // If app mode is still active but wake lock was released, try to reacquire
+                        if (isAppModeActive && document.visibilityState === 'visible') {
+                            setTimeout(() => {
+                                acquireWakeLock().catch(err => {
+                                    console.error('Failed to reacquire wake lock:', err);
+                                });
+                            }, 1000);
+                        }
                     });
                 } else {
-                    gameState.isWakeLockActive = true;
+                    console.warn('Wake Lock API not supported');
                 }
             } catch (err) {
                 console.error('Failed to acquire wake lock:', err);
-                gameState.isWakeLockActive = false;
+                throw err;
             }
         }
 
         // Release wake lock
         async function releaseWakeLock() {
-            if (gameState.wakeLock) {
-                await gameState.wakeLock.release();
-                gameState.wakeLock = null;
+            try {
+                if (wakeLock) {
+                    await wakeLock.release();
+                    wakeLock = null;
+                    console.log('Wake lock released');
+                }
+            } catch (err) {
+                console.error('Failed to release wake lock:', err);
             }
-            gameState.isWakeLockActive = false;
         }
 
-        // Update wake lock UI
-        function updateWakeLockUI() {
-            const wakeLockBtn = document.getElementById('wake-lock-btn');
-            const wakeLockBtn501 = document.getElementById('wake-lock-btn-501');
-            const wakeLockBtnCricket = document.getElementById('wake-lock-btn-cricket');
+        // Update app mode UI
+        function updateAppModeUI() {
+            const appModeToggle = document.getElementById('app-mode-toggle');
             
-            if (gameState.isWakeLockActive) {
-                wakeLockBtn.classList.add('active');
-                wakeLockBtn.innerHTML = '<i class="fas fa-sun"></i>';
-                if (wakeLockBtn501) {
-                    wakeLockBtn501.classList.add('active');
-                    wakeLockBtn501.innerHTML = '<i class="fas fa-sun"></i>';
-                }
-                if (wakeLockBtnCricket) {
-                    wakeLockBtnCricket.classList.add('active');
-                    wakeLockBtnCricket.innerHTML = '<i class="fas fa-sun"></i>';
-                }
+            if (isAppModeActive) {
+                appModeToggle.classList.add('active');
+                appModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                appModeToggle.title = 'App mode active - click to disable';
             } else {
-                wakeLockBtn.classList.remove('active');
-                wakeLockBtn.innerHTML = '<i class="fas fa-moon"></i>';
-                if (wakeLockBtn501) {
-                    wakeLockBtn501.classList.remove('active');
-                    wakeLockBtn501.innerHTML = '<i class="fas fa-moon"></i>';
-                }
-                if (wakeLockBtnCricket) {
-                    wakeLockBtnCricket.classList.remove('active');
-                    wakeLockBtnCricket.innerHTML = '<i class="fas fa-moon"></i>';
-                }
+                appModeToggle.classList.remove('active');
+                appModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                appModeToggle.title = 'App mode disabled - click to enable';
             }
+        }
+
+        // Show app mode notification
+        function showAppModeNotification(message, type = 'info') {
+            // Remove existing notification
+            const existingNotification = document.querySelector('.app-mode-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `app-mode-notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.style.display = 'block';
+            }, 10);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
         }
 
         // Setup configuration screen
@@ -1186,7 +1488,7 @@
             }
         }
 
-        // Setup 501 game - UPDATED to include remaining score display
+        // Setup 501 game
         function setup501Game() {
             const gameTitle = document.getElementById('game-title-501');
             gameTitle.textContent = gameState.settings.startingScore;
@@ -1228,6 +1530,10 @@
                 playerName.className = 'player-name-501';
                 playerName.textContent = player.name;
                 playerName.addEventListener('click', () => selectPlayer501(player.id));
+                playerName.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    selectPlayer501(player.id);
+                });
                 
                 // Create remaining score display
                 const remainingScore = document.createElement('div');
@@ -1268,14 +1574,14 @@
             const currentPlayer = gameState.players[gameState.currentPlayerIndex];
             document.getElementById('current-player-name').textContent = currentPlayer.name;
             
-            // NEW: Update the remaining score display next to player name
+            // Update the remaining score display next to player name
             updateRemainingScoreDisplay();
             
             // Focus on score input
             document.getElementById('score-input-501').focus();
         }
 
-        // NEW: Update the remaining score display
+        // Update the remaining score display
         function updateRemainingScoreDisplay() {
             const currentPlayer = gameState.players[gameState.currentPlayerIndex];
             const display = document.getElementById('remaining-score-display');
@@ -1307,7 +1613,7 @@
             }
         }
 
-        // Add score in 501 game - UPDATED to update remaining score display
+        // Add score in 501 game
         function addScore501() {
             const scoreInput = document.getElementById('score-input-501');
             const score = parseInt(scoreInput.value) || 0;
@@ -1351,7 +1657,7 @@
             // Update display
             setup501Game();
             
-            // NEW: Update the remaining score display
+            // Update the remaining score display
             updateRemainingScoreDisplay();
             
             // Reset input
@@ -1413,7 +1719,7 @@
             }
         }
 
-        // Skip turn in 501 - UPDATED to update remaining score display
+        // Skip turn in 501
         function nextPlayer501() {
             const currentPlayer = gameState.players[gameState.currentPlayerIndex];
             
@@ -1429,7 +1735,7 @@
             // Update display
             setup501Game();
             
-            // NEW: Update the remaining score display
+            // Update the remaining score display
             updateRemainingScoreDisplay();
         }
 
@@ -1451,6 +1757,10 @@
                 th.dataset.playerId = player.id;
                 
                 th.addEventListener('click', function() {
+                    selectCricketPlayer(player.id);
+                });
+                th.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
                     selectCricketPlayer(player.id);
                 });
                 
@@ -1523,6 +1833,12 @@
                     
                     // Add click event
                     td.addEventListener('click', function() {
+                        if (gameState.cricketState.currentPlayerId === player.id) {
+                            addCricketMark(player.id, number);
+                        }
+                    });
+                    td.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
                         if (gameState.cricketState.currentPlayerId === player.id) {
                             addCricketMark(player.id, number);
                         }
