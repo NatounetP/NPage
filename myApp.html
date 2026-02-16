@@ -240,21 +240,7 @@
                 font-size: 2rem;
             }
         }
-        .mode-app-body {
-    overflow: hidden !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background-color: white !important;
-    z-index: 9999 !important;
-  }
-  .mode-app-body .container {
-    height: 100% !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
+       
         /* Animation for app cards */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -285,9 +271,6 @@
             </div>-->
         </div>
 		<div style="text-align: center; margin: 20px 0;">
-  <button id="simpleAppBtn" style="padding: 15px 30px; font-size: 18px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-    🌟 Mode Application
-  </button>
 </div>
     </header>
     
@@ -476,43 +459,6 @@
                 }
             });
         });
-		document.getElementById('simpleAppBtn').addEventListener('click', function() {
-  const btn = this;
-  const body = document.body;
-  
-  if (body.classList.contains('mode-app-body')) {
-    // Désactiver
-    body.classList.remove('mode-app-body');
-    btn.innerHTML = '🌟 Mode Application';
-    btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    
-    // Essayer de libérer l'écran
-    if (window.wakeLockReleased) {
-      window.wakeLockReleased();
-    }
-    
-  } else {
-    // Activer
-    body.classList.add('mode-app-body');
-    btn.innerHTML = '🔴 Quitter';
-    btn.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-    
-    // Essayer d'empêcher la mise en veille (si possible)
-    if ('wakeLock' in navigator) {
-      navigator.wakeLock.request('screen').then(lock => {
-        window.wakeLockReleased = () => {
-          lock.release();
-          window.wakeLockReleased = null;
-        };
-      }).catch(err => {
-        console.log('Wake lock non disponible');
-      });
-    }
-    
-    // Faire défiler vers le haut
-    window.scrollTo(0, 0);
-  }
-});
         
         // Download function (simulated)
         function downloadApp(filename) {
