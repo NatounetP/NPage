@@ -30,7 +30,7 @@
         /* Wake Lock Button */
         .app-mode-toggle {
             position: fixed;
-            top: 90px;
+            top: 30px;
             right: 15px;
             background: #4dabf7;
             color: white;
@@ -870,13 +870,12 @@
                 
                 <!-- Section de saisie des scores - SANS BOUTONS PRÉDÉFINIS -->
                 <div class="score-input-section">
+                    
+                    <input type="number" class="score-input" id="score-input-501" placeholder="Score" value="" min="0" max="180" inputmode="numeric">
                     <div class="current-player-indicator">
                         <span class="current-player-label">Joueur sélectionné :</span>
                         <span class="current-player-value" id="current-player-name">Joueur 1</span>
                     </div>
-                    
-                    <input type="number" class="score-input" id="score-input-501" placeholder="Score" value="" min="0" max="180" inputmode="numeric">
-                    
                     <button class="add-score-btn" id="add-score-501">
                         <i class="fas fa-plus"></i> Ajouter le score
                     </button>
@@ -1314,8 +1313,9 @@
                 `;
                 
                 playerCard.appendChild(playerName);
+				playerCard.appendChild(legsSetMini);
                 playerCard.appendChild(playerScore);
-                playerCard.appendChild(legsSetMini);
+                
                 
                 // Ajouter l'événement de sélection
                 playerCard.addEventListener('click', () => selectPlayer501(player.id));
