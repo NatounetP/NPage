@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dart Score Tracker</title>
+    <title>Dart Score Tracker V3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Reset and Base */
@@ -27,7 +27,7 @@
             margin: 0 auto;
         }
 
-        /* Wake Lock Button - Updated for app mode */
+        /* Wake Lock Button */
         .app-mode-toggle {
             position: fixed;
             top: 90px;
@@ -110,7 +110,7 @@
             padding: 10px !important;
         }
 
-        /* App mode exit button */
+        /* Exit app mode button */
         .exit-app-mode-btn {
             position: fixed;
             top: 15px;
@@ -310,11 +310,6 @@
             background: #339af0;
         }
 
-        /* Hide remove buttons initially */
-        .remove-player.hidden {
-            display: none;
-        }
-
         /* Game Screens */
         .game-screen {
             display: none;
@@ -353,6 +348,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
+			margin-right: 60px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -365,208 +361,144 @@
             transform: scale(1.1);
         }
 
-        /* 501 Game Layout */
+        /* ===== 501 GAME - OPTIMISÉ POUR MOBILE ===== */
         .scoreboard-501 {
             background: #0f3460;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 15px;
             margin-bottom: 20px;
         }
 
-        .legs-set-container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #4dabf7;
-        }
-
-        .player-legs-set {
-            text-align: center;
-            min-width: 100px;
-        }
-
-        .player-legs-set-name {
-            font-size: 1rem;
-            color: #FFD700;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .legs-set-display {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .leg-set-item {
-            text-align: center;
-        }
-
-        .leg-set-label {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-bottom: 5px;
-        }
-
-        .leg-set-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #ffffff;
-        }
-
+        /* Grille des joueurs pour mobile */
         .players-score-501 {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 25px;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .player-column-501 {
-            flex: 1;
-            min-width: 200px;
-            max-width: 300px;
+        .player-card-501 {
             background: #16213e;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 15px 10px;
             text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             position: relative;
+            overflow: hidden;
         }
 
-        .player-column-501.active {
-            border: 3px solid #4dabf7;
+        .player-card-501.selected {
+            border-color: #4dabf7;
             background: #1a3a6e;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(77, 171, 247, 0.5);
+        }
+
+        .player-card-501.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #20c997;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .player-name-501 {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #FFD700;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 5px;
-            transition: background 0.2s;
-        }
-
-        .player-name-501:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .player-remaining-score {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 15px 0;
-            color: #ffffff;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 8px;
-            border: 3px solid #4dabf7;
-        }
-
-        .score-history {
-            margin: 20px 0;
-            width: 100%;
-            min-height: 100px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .score-item {
-            font-size: 1.3rem;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-        }
-
-        .score-item.bust {
-            color: #ff6b6b;
-        }
-
-        .score-item.win {
-            color: #20c997;
-            font-weight: bold;
-        }
-
-        .score-input-section {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 25px;
-        }
-
-        .score-input-label {
-            display: block;
-            color: #4dabf7;
-            margin-bottom: 15px;
             font-size: 1.2rem;
-            text-align: center;
-        }
-
-        /* Remaining score display next to player name */
-        .remaining-score-display {
-            color: #FFFFFF;
-            background: #0f3460;
-            padding: 8px 18px;
-            border-radius: 10px;
             font-weight: bold;
-            font-size: 1.4rem;
-            margin-left: 15px;
-            display: inline-block;
-            min-width: 10px;
-            text-align: center;
-            border: 1px solid white;
+            margin-bottom: 8px;
+            color: #FFD700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 5px;
         }
 
-        .remaining-score-display.low {
+        .player-score-501 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 5px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 2px solid #4dabf7;
+        }
+
+        .player-score-501.low {
             background: #ff6b6b;
             animation: pulse 1s infinite;
         }
 
-        .remaining-score-display.win {
+        .player-score-501.win {
             background: #20c997;
             animation: pulse 0.5s infinite;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .player-legs-set-mini {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 8px;
         }
 
-        .quick-score-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .quick-score-btn {
-            padding: 12px;
-            background: #0f3460;
-            border: 2px solid #4dabf7;
-            border-radius: 8px;
+        .player-legs-set-mini span {
+            font-weight: bold;
             color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s;
+            margin-left: 5px;
         }
 
-        .quick-score-btn:hover {
-            background: #1a3a6e;
+        /* Section d'input des scores - SANS BOUTONS PRÉDÉFINIS */
+        .score-input-section {
+            background: #16213e;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 10px;
+            border: 1px solid rgba(77, 171, 247, 0.3);
+        }
+
+        .current-player-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f3460;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .current-player-label {
+            font-size: 1rem;
+            color: #4dabf7;
+        }
+
+        .current-player-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #FFD700;
         }
 
         .score-input {
             width: 100%;
-            padding: 18px;
-            font-size: 1.5rem;
+            padding: 12px;
+            font-size: 2rem;
             text-align: center;
             border-radius: 8px;
-            border: 2px solid #4dabf7;
-            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #4dabf7;
+            background: rgba(0, 0, 0, 0.3);
             color: white;
             margin-bottom: 15px;
         }
@@ -575,55 +507,37 @@
             background: #20c997;
             color: white;
             border: none;
-            padding: 18px;
-            border-radius: 8px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        /* Game Controls */
-        .game-controls {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .control-btn {
-            flex: 1;
-            padding: 18px;
-            border: none;
+            padding: 12px;
             border-radius: 8px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            width: 49%;
         }
 
-        .undo-btn {
-            background: #ff922b;
-            color: white;
-        }
-
-        .next-player-btn {
+        .skip-turn-btn {
             background: #4dabf7;
             color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 49%;
         }
 
-        .new-game-btn {
-            background: #ff6b6b;
-            color: white;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        /* Cricket Game Layout */
+        /* ===== CRICKET GAME - NOUVEAU SYSTÈME DE MARQUES ===== */
         .scoreboard-cricket {
             background: #0f3460;
             border-radius: 10px;
-            padding: 15px;
+            padding: 10px;
             margin-bottom: 15px;
             overflow-x: auto;
         }
@@ -631,19 +545,25 @@
         .cricket-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 500px;
+            min-width: 400px;
         }
 
         .cricket-table th {
             background: #16213e;
-            padding: 12px 8px;
+            padding: 10px 5px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 0.9rem;
             border-bottom: 2px solid #4dabf7;
+            cursor: pointer;
+        }
+
+        .cricket-table th.active {
+            background: #4dabf7;
+            color: white;
         }
 
         .cricket-table td {
-            padding: 10px 8px;
+            padding: 8px 5px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -651,29 +571,12 @@
         .number-cell {
             background: #16213e;
             font-weight: bold;
-            font-size: 1.1rem;
-            width: 60px;
-        }
-
-        .player-header-cell {
-            background: #16213e;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-            position: relative;
-        }
-
-        .player-header-cell:hover {
-            background: #1a3a6e;
-        }
-
-        .player-header-cell.active {
-            background: #4dabf7;
-            color: white;
+            font-size: 1rem;
+            width: 50px;
         }
 
         .player-score-cell {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             color: #FFD700;
         }
@@ -682,34 +585,36 @@
             height: 50px;
             cursor: pointer;
             transition: background 0.2s;
-            position: relative;
         }
 
         .mark-cell:hover {
             background: rgba(255, 255, 255, 0.1);
         }
 
-        .mark-cell.active {
-            background: rgba(77, 171, 247, 0.3);
-        }
-
         .mark-display {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 5px;
             height: 100%;
         }
 
+        .marks-row {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+        }
+
         .mark {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
 
         .mark.filled {
@@ -722,9 +627,53 @@
             color: white;
         }
 
-        .mark.x {
+        .mark.points {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .points-indicator {
+            font-size: 0.9rem;
+            color: #ff6b6b;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .points-indicator i {
+            font-size: 0.8rem;
+        }
+
+        /* Game Controls */
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .undo-btn {
+            background: #ff922b;
+            color: white;
+        }
+
+        .new-game-btn {
+            background: #ff6b6b;
+            color: white;
         }
 
         /* Settings Modal */
@@ -813,175 +762,63 @@
             display: none !important;
         }
 
-        /* Mobile Responsive */
+        /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 5px;
-            }
-            
-            .config-screen {
-                padding: 20px;
-                margin: 15px auto;
-            }
-            
-            .config-title {
-                font-size: 1.8rem;
-                margin-bottom: 20px;
-            }
-            
-            .game-btn {
-                padding: 18px;
-                font-size: 1.2rem;
-            }
-            
-            .player-input {
-                padding: 12px;
-                font-size: 1rem;
-            }
-            
-            .players-score-501 {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .player-column-501 {
-                width: 100%;
-                max-width: none;
-            }
-            
-            .game-controls {
-                flex-direction: column;
-            }
-            
             .app-mode-toggle {
                 width: 45px;
                 height: 45px;
                 top: 10px;
                 right: 10px;
-                font-size: 1.1rem;
             }
             
-            .exit-app-mode-btn {
-                top: 10px;
-                left: 10px;
-                font-size: 12px;
-                padding: 6px 12px;
+            .players-score-501 {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
             
-            .app-mode-notification {
-                top: 10px;
-                right: 10px;
-                max-width: 250px;
-                font-size: 12px;
-                padding: 10px 16px;
+            .player-name-501 {
+                font-size: 1rem;
             }
             
-            /* Remaining score display mobile */
-            .remaining-score-display {
-                font-size: 1.3rem;
-                padding: 6px 15px;
-                margin-left: 10px;
-                min-width: 70px;
+            .player-score-501 {
+                font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .players-score-501 {
+                grid-template-columns: repeat(2, 1fr);
             }
             
-            /* Cricket mobile adjustments */
-            .scoreboard-cricket {
-                padding: 5px;
+            .player-name-501 {
+                font-size: 0.9rem;
             }
             
-            .cricket-table {
-                min-width: 200px;
-            }
-            
-            .mark-cell {
-                height: 45px;
+            .player-score-501 {
+                font-size: 1.4rem;
             }
             
             .mark {
                 width: 16px;
                 height: 16px;
-                font-size: 0.7rem;
-            }
-            
-            /* Fullscreen mode adjustments for mobile */
-            .fullscreen-mode .scoreboard-501,
-            .fullscreen-mode .scoreboard-cricket {
-                padding: 10px !important;
-            }
-            
-            .fullscreen-mode .player-column-501 {
-                padding: 15px !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .config-screen {
-                padding: 15px;
-            }
-            
-            .config-title {
-                font-size: 1.6rem;
-            }
-            
-            .game-btn {
-                padding: 15px;
-                font-size: 1.1rem;
-            }
-            
-            .legs-set-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .player-legs-set {
-                width: 100%;
-                max-width: 200px;
-            }
-            
-            .quick-score-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            /* Remaining score display small mobile */
-            .score-input-label {
-                font-size: 1.1rem;
-            }
-            
-            .remaining-score-display {
-                font-size: 1.2rem;
-                padding: 5px 12px;
-                margin-left: 8px;
-                min-width: 60px;
-            }
-            
-            /* Cricket mobile adjustments */
-            .cricket-table th,
-            .cricket-table td {
-                padding: 8px 5px;
-            }
-            
-            .number-cell {
-                width: 50px;
-                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- App Mode Toggle Button (always visible) -->
-    <button class="app-mode-toggle" id="app-mode-toggle" title="Toggle app mode (fullscreen + screen lock)">
+    <!-- App Mode Toggle Button -->
+    <button class="app-mode-toggle" id="app-mode-toggle" title="Mode App (plein écran + verrouillage écran)">
         <i class="fas fa-moon"></i>
     </button>
     
-    <!-- Exit App Mode Button (only visible in app mode) -->
-    <button class="exit-app-mode-btn" id="exit-app-mode-btn" title="Exit app mode">
-        <i class="fas fa-times"></i> Exit App Mode
+    <!-- Exit App Mode Button -->
+    <button class="exit-app-mode-btn" id="exit-app-mode-btn" title="Quitter le mode App">
+        <i class="fas fa-times"></i> Quitter
     </button>
 
     <div class="container">
         <!-- Configuration Screen -->
         <div class="config-screen" id="config-screen">
-            <h1 class="config-title">Dart Score Tracker</h1>
+            <h1 class="config-title">Dart Score V3</h1>
             
             <div class="game-selection">
                 <button class="game-btn selected" id="game-501-btn">
@@ -993,28 +830,28 @@
             </div>
             
             <div class="player-config">
-                <h3>Players</h3>
+                <h3>Joueurs</h3>
                 <div class="player-inputs" id="player-inputs">
                     <div class="player-input-row">
-                        <input type="text" class="player-input" placeholder="Player 1" value="Player1">
+                        <input type="text" class="player-input" placeholder="Joueur 1" value="Joueur 1">
                         <button class="remove-player hidden">×</button>
                     </div>
                     <div class="player-input-row">
-                        <input type="text" class="player-input" placeholder="Player 2" value="Player2">
+                        <input type="text" class="player-input" placeholder="Joueur 2" value="Joueur 2">
                         <button class="remove-player hidden">×</button>
                     </div>
                 </div>
                 <button class="add-player" id="add-player">
-                    <i class="fas fa-plus"></i> Add Player
+                    <i class="fas fa-plus"></i> Ajouter un joueur
                 </button>
             </div>
             
             <button class="start-btn" id="start-game">
-                <i class="fas fa-play"></i> Start Game
+                <i class="fas fa-play"></i> Commencer
             </button>
         </div>
 
-        <!-- 501 Game Screen -->
+        <!-- 501 Game Screen - Sans boutons prédéfinis -->
         <div class="game-screen" id="game-screen-501">
             <div class="game-header">
                 <div class="game-title" id="game-title-501">501</div>
@@ -1026,41 +863,41 @@
             </div>
             
             <div class="scoreboard-501">
-                <div class="legs-set-container" id="legs-set-container">
-                    <!-- Player legs/sets will be dynamically added here -->
-                </div>
-                
+                <!-- Grille des joueurs avec scores -->
                 <div class="players-score-501" id="players-score-container">
-                    <!-- Player columns will be dynamically added here -->
+                    <!-- Les cartes joueurs seront ajoutées dynamiquement -->
                 </div>
                 
+                <!-- Section de saisie des scores - SANS BOUTONS PRÉDÉFINIS -->
                 <div class="score-input-section">
-                    <div class="score-input-label">
-                        Current Player: <span id="current-player-name" style="color: #FFD700; font-weight: bold;">Player1</span>
-                        <span class="remaining-score-display" id="remaining-score-display">501</span>
+                    <div class="current-player-indicator">
+                        <span class="current-player-label">Joueur sélectionné :</span>
+                        <span class="current-player-value" id="current-player-name">Joueur 1</span>
                     </div>
-                                      
-                    <input type="number" class="score-input" id="score-input-501" placeholder="Enter score" value="" min="0" max="180">
+                    
+                    <input type="number" class="score-input" id="score-input-501" placeholder="Score" value="" min="0" max="180" inputmode="numeric">
+                    
                     <button class="add-score-btn" id="add-score-501">
-                        <i class="fas fa-plus"></i> Add Score
+                        <i class="fas fa-plus"></i> Ajouter le score
+                    </button>
+                    
+                    <button class="skip-turn-btn" id="next-player-501">
+                        <i class="fas fa-forward"></i> Passer le tour
                     </button>
                 </div>
             </div>
             
             <div class="game-controls">
                 <button class="control-btn undo-btn" id="undo-501">
-                    <i class="fas fa-undo"></i> Undo Last
-                </button>
-                <button class="control-btn next-player-btn" id="next-player-501">
-                    <i class="fas fa-forward"></i> Skip Turn
+                    <i class="fas fa-undo"></i> Annuler
                 </button>
                 <button class="control-btn new-game-btn" id="new-game-501">
-                    <i class="fas fa-redo"></i> New Game
+                    <i class="fas fa-redo"></i> Nouvelle partie
                 </button>
             </div>
         </div>
 
-        <!-- Cricket Game Screen -->
+        <!-- Cricket Game Screen - Nouveau système X pour fermer, I pour points -->
         <div class="game-screen" id="game-screen-cricket">
             <div class="game-header">
                 <div class="game-title" id="game-title-cricket">Cricket</div>
@@ -1074,7 +911,7 @@
             <div class="scoreboard-cricket">
                 <table class="cricket-table">
                     <thead>
-                        <tr>
+                        <tr id="cricket-header-row">
                             <th></th>
                             <!-- Player headers will be added here -->
                         </tr>
@@ -1087,10 +924,10 @@
             
             <div class="game-controls">
                 <button class="control-btn undo-btn" id="undo-cricket">
-                    <i class="fas fa-undo"></i> Undo Last
+                    <i class="fas fa-undo"></i> Annuler
                 </button>
                 <button class="control-btn new-game-btn" id="new-game-cricket">
-                    <i class="fas fa-redo"></i> New Game
+                    <i class="fas fa-redo"></i> Nouvelle partie
                 </button>
             </div>
         </div>
@@ -1099,10 +936,10 @@
     <!-- Settings Modal -->
     <div class="settings-modal" id="settings-modal">
         <div class="settings-content">
-            <h2 class="settings-title">Game Settings</h2>
+            <h2 class="settings-title">Paramètres</h2>
             
             <div class="settings-group">
-                <label class="settings-label" for="starting-score">Starting Score</label>
+                <label class="settings-label" for="starting-score">Score de départ</label>
                 <select class="settings-input" id="starting-score">
                     <option value="501">501</option>
                     <option value="301">301</option>
@@ -1110,21 +947,21 @@
             </div>
             
             <div class="settings-group">
-                <label class="settings-label" for="legs-to-win-set">Legs to Win a Set</label>
+                <label class="settings-label" for="legs-to-win-set">Legs pour gagner un set</label>
                 <input type="number" class="settings-input" id="legs-to-win-set" min="1" max="10" value="1">
             </div>
             
             <div class="settings-group">
-                <label class="settings-label" for="sets-to-win-game">Sets to Win Game</label>
+                <label class="settings-label" for="sets-to-win-game">Sets pour gagner</label>
                 <input type="number" class="settings-input" id="sets-to-win-game" min="1" max="10" value="1">
             </div>
             
             <div class="settings-btn-group">
                 <button class="save-settings" id="save-settings">
-                    <i class="fas fa-check"></i> Save
+                    <i class="fas fa-check"></i> Sauvegarder
                 </button>
                 <button class="cancel-settings" id="cancel-settings">
-                    <i class="fas fa-times"></i> Cancel
+                    <i class="fas fa-times"></i> Annuler
                 </button>
             </div>
         </div>
@@ -1136,6 +973,7 @@
             gameType: '501',
             players: [],
             currentPlayerIndex: 0,
+            selectedPlayerId: null, // Pour le mode 501 avec sélection libre
             settings: {
                 startingScore: 501,
                 legsToWinSet: 1,
@@ -1145,7 +983,8 @@
             cricketState: {
                 currentPlayerId: null,
                 numbers: [20, 19, 18, 17, 16, 15, 25],
-                closedNumbers: {}
+                closedNumbers: {},
+                pointsHistory: [] // Pour suivre qui a donné des points à qui
             }
         };
 
@@ -1159,7 +998,7 @@
             setupEventListeners();
             setupAppMode();
             
-            // Add visual feedback for button presses on mobile
+            // Visual feedback for buttons
             document.querySelectorAll('button').forEach(button => {
                 button.addEventListener('touchstart', function() {
                     this.style.transform = 'scale(0.95)';
@@ -1169,20 +1008,18 @@
                 });
             });
             
-            // Listen for fullscreen changes
+            // Fullscreen change listener
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
         });
 
-        // Setup app mode functionality
+        // ==================== APP MODE FUNCTIONS ====================
         function setupAppMode() {
             const appModeToggle = document.getElementById('app-mode-toggle');
             const exitAppModeBtn = document.getElementById('exit-app-mode-btn');
             
-            // Initial setup
             updateAppModeUI();
             
-            // Event listeners
             appModeToggle.addEventListener('click', toggleAppMode);
             appModeToggle.addEventListener('touchstart', function(e) {
                 e.preventDefault();
@@ -1195,7 +1032,6 @@
                 disableAppMode();
             });
             
-            // Handle visibility change - reacquire wake lock if needed
             document.addEventListener('visibilitychange', async () => {
                 if (isAppModeActive && document.visibilityState === 'visible') {
                     try {
@@ -1207,7 +1043,6 @@
             });
         }
 
-        // Toggle app mode
         async function toggleAppMode() {
             if (isAppModeActive) {
                 await disableAppMode();
@@ -1216,99 +1051,68 @@
             }
         }
 
-        // Enable app mode (fullscreen + wake lock)
         async function enableAppMode() {
             try {
-                // Request fullscreen
                 if (document.documentElement.requestFullscreen) {
                     await document.documentElement.requestFullscreen();
                 } else if (document.documentElement.webkitRequestFullscreen) {
                     await document.documentElement.webkitRequestFullscreen();
                 }
                 
-                // Add fullscreen class to body
                 document.body.classList.add('fullscreen-mode');
-                
-                // Request wake lock
                 await acquireWakeLock();
-                
-                // Update state and UI
                 isAppModeActive = true;
                 updateAppModeUI();
-                
-                // Show notification
-                showAppModeNotification('App mode activated - Fullscreen and screen lock prevention enabled', 'success');
-                
+                showAppModeNotification('Mode App activé', 'success');
             } catch (error) {
                 console.error('Error enabling app mode:', error);
-                showAppModeNotification('Failed to activate app mode', 'error');
+                showAppModeNotification('Échec d\'activation du mode App', 'error');
             }
         }
 
-        // Disable app mode
         async function disableAppMode() {
             try {
-                // Exit fullscreen
                 if (document.fullscreenElement && document.exitFullscreen) {
                     await document.exitFullscreen();
                 } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
                     await document.webkitExitFullscreen();
                 }
                 
-                // Remove fullscreen class
                 document.body.classList.remove('fullscreen-mode');
-                
-                // Release wake lock
                 await releaseWakeLock();
-                
-                // Update state and UI
                 isAppModeActive = false;
                 updateAppModeUI();
-                
-                // Show notification
-                showAppModeNotification('App mode disabled', 'info');
-                
+                showAppModeNotification('Mode App désactivé', 'info');
             } catch (error) {
                 console.error('Error disabling app mode:', error);
             }
         }
 
-        // Handle fullscreen change events
         function handleFullscreenChange() {
             const isCurrentlyFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
             
             if (!isCurrentlyFullscreen && isAppModeActive) {
-                // User manually exited fullscreen
-                console.log('Manual exit from fullscreen detected');
                 isAppModeActive = false;
                 document.body.classList.remove('fullscreen-mode');
                 
-                // Also release wake lock
                 if (wakeLock) {
                     wakeLock.release().then(() => {
                         wakeLock = null;
-                        console.log('Wake lock released after exiting fullscreen');
                     });
                 }
                 
                 updateAppModeUI();
-                showAppModeNotification('App mode disabled', 'info');
+                showAppModeNotification('Mode App désactivé', 'info');
             }
         }
 
-        // Acquire wake lock
         async function acquireWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake lock acquired');
                     
-                    // Add event listener for wake lock release
                     wakeLock.addEventListener('release', () => {
-                        console.log('Wake lock was released');
                         wakeLock = null;
-                        
-                        // If app mode is still active but wake lock was released, try to reacquire
                         if (isAppModeActive && document.visibilityState === 'visible') {
                             setTimeout(() => {
                                 acquireWakeLock().catch(err => {
@@ -1317,8 +1121,6 @@
                             }, 1000);
                         }
                     });
-                } else {
-                    console.warn('Wake Lock API not supported');
                 }
             } catch (err) {
                 console.error('Failed to acquire wake lock:', err);
@@ -1326,37 +1128,32 @@
             }
         }
 
-        // Release wake lock
         async function releaseWakeLock() {
             try {
                 if (wakeLock) {
                     await wakeLock.release();
                     wakeLock = null;
-                    console.log('Wake lock released');
                 }
             } catch (err) {
                 console.error('Failed to release wake lock:', err);
             }
         }
 
-        // Update app mode UI
         function updateAppModeUI() {
             const appModeToggle = document.getElementById('app-mode-toggle');
             
             if (isAppModeActive) {
                 appModeToggle.classList.add('active');
                 appModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-                appModeToggle.title = 'App mode active - click to disable';
+                appModeToggle.title = 'Mode App actif - cliquer pour désactiver';
             } else {
                 appModeToggle.classList.remove('active');
                 appModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-                appModeToggle.title = 'App mode disabled - click to enable';
+                appModeToggle.title = 'Mode App inactif - cliquer pour activer';
             }
         }
 
-        // Show app mode notification
         function showAppModeNotification(message, type = 'info') {
-            // Remove existing notification
             const existingNotification = document.querySelector('.app-mode-notification');
             if (existingNotification) {
                 existingNotification.remove();
@@ -1368,12 +1165,10 @@
             
             document.body.appendChild(notification);
             
-            // Show notification
             setTimeout(() => {
                 notification.style.display = 'block';
             }, 10);
             
-            // Auto-remove after 3 seconds
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.style.animation = 'slideOut 0.3s ease';
@@ -1382,9 +1177,8 @@
             }, 3000);
         }
 
-        // Setup configuration screen
+        // ==================== CONFIGURATION ====================
         function setupConfiguration() {
-            // Game type selection
             const game501Btn = document.getElementById('game-501-btn');
             const gameCricketBtn = document.getElementById('game-cricket-btn');
             
@@ -1400,7 +1194,6 @@
                 gameState.gameType = 'cricket';
             });
             
-            // Add player button
             document.getElementById('add-player').addEventListener('click', function() {
                 const playerInputs = document.getElementById('player-inputs');
                 const playerCount = playerInputs.children.length + 1;
@@ -1408,13 +1201,12 @@
                 const playerRow = document.createElement('div');
                 playerRow.className = 'player-input-row';
                 playerRow.innerHTML = `
-                    <input type="text" class="player-input" placeholder="Player ${playerCount}" value="Player${playerCount}">
+                    <input type="text" class="player-input" placeholder="Joueur ${playerCount}" value="Joueur ${playerCount}">
                     <button class="remove-player">×</button>
                 `;
                 
                 playerInputs.appendChild(playerRow);
                 
-                // Show remove buttons for all rows if more than 2 players
                 if (playerInputs.children.length > 2) {
                     document.querySelectorAll('.remove-player').forEach(btn => {
                         btn.classList.remove('hidden');
@@ -1422,13 +1214,11 @@
                 }
             });
             
-            // Remove player event delegation
             document.getElementById('player-inputs').addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-player')) {
                     const playerRow = e.target.parentElement;
                     playerRow.remove();
                     
-                    // Hide remove buttons if only 2 players left
                     if (document.querySelectorAll('.player-input-row').length <= 2) {
                         document.querySelectorAll('.remove-player').forEach(btn => {
                             btn.classList.add('hidden');
@@ -1437,18 +1227,16 @@
                 }
             });
             
-            // Start game button
             document.getElementById('start-game').addEventListener('click', startGame);
         }
 
-        // Start the game
+        // ==================== GAME START ====================
         function startGame() {
-            // Get player names
             const playerInputs = document.querySelectorAll('.player-input');
             gameState.players = [];
             
             playerInputs.forEach((input, index) => {
-                const playerName = input.value || `Player${index + 1}`;
+                const playerName = input.value || `Joueur ${index + 1}`;
                 const startingScore = gameState.gameType === 'cricket' ? 0 : gameState.settings.startingScore;
                 
                 gameState.players.push({
@@ -1459,7 +1247,13 @@
                     legs: 0,
                     sets: 0,
                     cricketMarks: {
-                        20: 0, 19: 0, 18: 0, 17: 0, 16: 0, 15: 0, 25: 0
+                        20: { marks: 0, points: [] },
+                        19: { marks: 0, points: [] },
+                        18: { marks: 0, points: [] },
+                        17: { marks: 0, points: [] },
+                        16: { marks: 0, points: [] },
+                        15: { marks: 0, points: [] },
+                        25: { marks: 0, points: [] }
                     },
                     cricketPoints: 0,
                     currentRoundScore: 0,
@@ -1467,16 +1261,15 @@
                 });
             });
             
-            // Reset game state
             gameState.currentPlayerIndex = 0;
+            gameState.selectedPlayerId = gameState.players[0]?.id || null;
             gameState.history = [];
             gameState.cricketState.currentPlayerId = gameState.players[0]?.id || null;
             gameState.cricketState.closedNumbers = {};
+            gameState.cricketState.pointsHistory = [];
             
-            // Hide config screen
             document.getElementById('config-screen').classList.add('hidden');
             
-            // Show appropriate game screen
             if (gameState.gameType === 'cricket') {
                 document.getElementById('game-screen-501').classList.remove('active');
                 document.getElementById('game-screen-cricket').classList.add('active');
@@ -1488,267 +1281,178 @@
             }
         }
 
-        // Setup 501 game
+        // ==================== 501 GAME - SANS BOUTONS PRÉDÉFINIS ====================
         function setup501Game() {
             const gameTitle = document.getElementById('game-title-501');
             gameTitle.textContent = gameState.settings.startingScore;
             
-            // Update legs/sets display
-            const legsSetContainer = document.getElementById('legs-set-container');
-            legsSetContainer.innerHTML = '';
-            
-            gameState.players.forEach(player => {
-                const playerLegSet = document.createElement('div');
-                playerLegSet.className = 'player-legs-set';
-                playerLegSet.innerHTML = `
-                    <div class="player-legs-set-name">${player.name}</div>
-                    <div class="legs-set-display">
-                        <div class="leg-set-item">
-                            <div class="leg-set-label">Leg:</div>
-                            <div class="leg-set-value">${player.legs}</div>
-                        </div>
-                        <div class="leg-set-item">
-                            <div class="leg-set-label">Set:</div>
-                            <div class="leg-set-value">${player.sets}</div>
-                        </div>
-                    </div>
-                `;
-                legsSetContainer.appendChild(playerLegSet);
-            });
-            
-            // Update player columns
+            // Mise à jour de la grille des joueurs
             const playersContainer = document.getElementById('players-score-container');
             playersContainer.innerHTML = '';
             
-            gameState.players.forEach((player, index) => {
-                const playerColumn = document.createElement('div');
-                playerColumn.className = `player-column-501 ${index === gameState.currentPlayerIndex ? 'active' : ''}`;
-                playerColumn.id = `player-column-${player.id}`;
+            gameState.players.forEach((player) => {
+                const playerCard = document.createElement('div');
+                playerCard.className = `player-card-501 ${player.id === gameState.selectedPlayerId ? 'selected' : ''}`;
+                playerCard.id = `player-card-${player.id}`;
+                playerCard.dataset.playerId = player.id;
                 
-                // Create player name (clickable to select)
+                // Créer la carte joueur
                 const playerName = document.createElement('div');
                 playerName.className = 'player-name-501';
                 playerName.textContent = player.name;
-                playerName.addEventListener('click', () => selectPlayer501(player.id));
-                playerName.addEventListener('touchstart', (e) => {
+                
+                const playerScore = document.createElement('div');
+                playerScore.className = `player-score-501 ${player.score <= 40 ? 'low' : ''} ${player.score === 0 ? 'win' : ''}`;
+                playerScore.id = `player-score-display-${player.id}`;
+                playerScore.textContent = player.score;
+                
+                const legsSetMini = document.createElement('div');
+                legsSetMini.className = 'player-legs-set-mini';
+                legsSetMini.innerHTML = `
+                    <span>Legs: <span id="player-legs-${player.id}">${player.legs}</span></span>
+                    <span>Sets: <span id="player-sets-${player.id}">${player.sets}</span></span>
+                `;
+                
+                playerCard.appendChild(playerName);
+                playerCard.appendChild(playerScore);
+                playerCard.appendChild(legsSetMini);
+                
+                // Ajouter l'événement de sélection
+                playerCard.addEventListener('click', () => selectPlayer501(player.id));
+                playerCard.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     selectPlayer501(player.id);
                 });
                 
-                // Create remaining score display
-                const remainingScore = document.createElement('div');
-                remainingScore.className = 'player-remaining-score';
-                remainingScore.id = `player-score-${player.id}`;
-                remainingScore.textContent = player.score;
-                
-                // Create history display
-                const historyElement = document.createElement('div');
-                historyElement.className = 'score-history';
-                historyElement.id = `player-history-${player.id}`;
-                
-                // Add previous scores (last 5)
-                player.history.slice(-5).forEach(score => {
-                    const scoreItem = document.createElement('div');
-                    scoreItem.className = 'score-item';
-                    
-                    if (typeof score === 'string' && score.includes('BUST')) {
-                        scoreItem.textContent = score;
-                        scoreItem.classList.add('bust');
-                    } else if (typeof score === 'string' && score.includes('WIN')) {
-                        scoreItem.textContent = score;
-                        scoreItem.classList.add('win');
-                    } else {
-                        scoreItem.textContent = score;
-                    }
-                    
-                    historyElement.appendChild(scoreItem);
-                });
-                
-                playerColumn.appendChild(playerName);
-                playerColumn.appendChild(remainingScore);
-                playerColumn.appendChild(historyElement);
-                playersContainer.appendChild(playerColumn);
+                playersContainer.appendChild(playerCard);
             });
             
-            // Update current player display
-            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            document.getElementById('current-player-name').textContent = currentPlayer.name;
+            // Mettre à jour l'affichage du joueur sélectionné
+            const selectedPlayer = gameState.players.find(p => p.id === gameState.selectedPlayerId) || gameState.players[0];
+            if (selectedPlayer) {
+                document.getElementById('current-player-name').textContent = selectedPlayer.name;
+            }
             
-            // Update the remaining score display next to player name
-            updateRemainingScoreDisplay();
-            
-            // Focus on score input
+            // Focus sur l'input
             document.getElementById('score-input-501').focus();
         }
 
-        // Update the remaining score display
-        function updateRemainingScoreDisplay() {
-            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            const display = document.getElementById('remaining-score-display');
-            
-            if (currentPlayer && display) {
-                display.textContent = currentPlayer.score;
-                
-                // Add visual effects based on score
-                display.classList.remove('low', 'win');
-                
-                if (currentPlayer.score <= 40) {
-                    // Low score warning (for potential finish)
-                    display.classList.add('low');
-                }
-                
-                if (currentPlayer.score === 0) {
-                    // Win condition
-                    display.classList.add('win');
-                }
-            }
-        }
-
-        // Select player in 501 game
         function selectPlayer501(playerId) {
-            const playerIndex = gameState.players.findIndex(p => p.id === playerId);
-            if (playerIndex !== -1) {
-                gameState.currentPlayerIndex = playerIndex;
-                setup501Game();
+            gameState.selectedPlayerId = playerId;
+            
+            // Mettre à jour l'affichage des cartes
+            document.querySelectorAll('.player-card-501').forEach(card => {
+                const cardPlayerId = parseInt(card.dataset.playerId);
+                if (cardPlayerId === playerId) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+            
+            // Mettre à jour le nom du joueur sélectionné
+            const player = gameState.players.find(p => p.id === playerId);
+            if (player) {
+                document.getElementById('current-player-name').textContent = player.name;
             }
         }
 
-        // Add score in 501 game
         function addScore501() {
             const scoreInput = document.getElementById('score-input-501');
             const score = parseInt(scoreInput.value) || 0;
             
             if (score < 0 || score > 180) {
-                alert('Please enter a score between 0 and 180');
+                alert('Veuillez entrer un score entre 0 et 180');
                 return;
             }
             
-            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            const newScore = currentPlayer.score - score;
+            // Utiliser le joueur sélectionné (pas forcément le joueur courant)
+            const selectedPlayer = gameState.players.find(p => p.id === gameState.selectedPlayerId);
+            if (!selectedPlayer) return;
             
-            // Track this dart
-            currentPlayer.dartsThisRound++;
-            currentPlayer.currentRoundScore += score;
+            const newScore = selectedPlayer.score - score;
             
-            // Turn after each score input
-            if (currentPlayer.dartsThisRound >= 1) {
-                // End of turn - process the score
-                processTurnEnd501(currentPlayer, newScore);
-                currentPlayer.dartsThisRound = 0;
-                currentPlayer.currentRoundScore = 0;
-                
-                // Move to next player
-                gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
-            } else {
-                // Still within turn, just update display
-                currentPlayer.history.push(score);
-            }
-            
-            // Add to history
+            // Enregistrer dans l'historique
             gameState.history.push({
-                playerId: currentPlayer.id,
+                playerId: selectedPlayer.id,
                 action: 'score',
                 value: score,
-                roundScore: currentPlayer.currentRoundScore,
-                darts: currentPlayer.dartsThisRound,
+                previousScore: selectedPlayer.score,
+                newScore: newScore,
                 timestamp: new Date().getTime()
             });
             
-            // Update display
-            setup501Game();
-            
-            // Update the remaining score display
-            updateRemainingScoreDisplay();
-            
-            // Reset input
-            scoreInput.value = '';
-            scoreInput.focus();
-        }
-
-        // Process end of turn in 501
-        function processTurnEnd501(player, newScore) {
-            const turnScore = player.currentRoundScore;
-            
-            // Check if game is finished
+            // Vérifier les règles de bust et de fin
             if (newScore === 0) {
-                // Check if last dart was a double or bullseye
-                const lastDartWasDouble = confirm(`${player.name} finished with ${turnScore} points. Was the last dart a double or bullseye? (OK for Yes, Cancel for No)`);
-                
-                if (lastDartWasDouble) {
-                    // Player wins the leg
-                    player.legs++;
-                    player.history.push(`WIN! (${turnScore})`);
+                // Vérifier si c'est une fin valide (double ou bull)
+                if (confirm(`${selectedPlayer.name} a terminé avec ${score} points. Le dernier tir était-il un double ou un bull? (OK pour Oui, Annuler pour Non)`)) {
+                    // Victoire valide
+                    selectedPlayer.score = 0;
+                    selectedPlayer.history.push(`WIN (${score})`);
                     
-                    // Check if player wins the set
-                    if (player.legs >= gameState.settings.legsToWinSet) {
-                        player.sets++;
-                        player.legs = 0;
+                    // Gagner la leg
+                    selectedPlayer.legs++;
+                    
+                    // Vérifier la victoire du set
+                    if (selectedPlayer.legs >= gameState.settings.legsToWinSet) {
+                        selectedPlayer.sets++;
+                        selectedPlayer.legs = 0;
                         
-                        // Check if player wins the game
-                        if (player.sets >= gameState.settings.setsToWinGame) {
-                            alert(`${player.name} wins the game!`);
+                        if (selectedPlayer.sets >= gameState.settings.setsToWinGame) {
+                            alert(`${selectedPlayer.name} remporte la partie !`);
                             resetGame();
                             return;
                         } else {
-                            alert(`${player.name} wins the set! Starting new set.`);
-                            // Reset scores for new set
+                            alert(`${selectedPlayer.name} remporte le set ! Nouveau set.`);
+                            // Réinitialiser les scores pour le nouveau set
                             gameState.players.forEach(p => {
                                 p.score = gameState.settings.startingScore;
                                 p.history = [];
                             });
                         }
                     } else {
-                        alert(`${player.name} wins the leg!`);
-                        // Reset scores for new leg
+                        alert(`${selectedPlayer.name} remporte la leg !`);
+                        // Réinitialiser les scores pour la nouvelle leg
                         gameState.players.forEach(p => {
                             p.score = gameState.settings.startingScore;
                             p.history = [];
                         });
                     }
                 } else {
-                    // Bust - score stays the same
-                    player.history.push(`BUST (${turnScore})`);
+                    // Bust - le score reste inchangé
+                    selectedPlayer.history.push(`BUST (${score})`);
                 }
             } else if (newScore < 0 || newScore === 1) {
-                // Bust - score stays the same
-                player.history.push(`BUST (${turnScore})`);
+                // Bust
+                selectedPlayer.history.push(`BUST (${score})`);
             } else {
-                // Valid score
-                player.score = newScore;
-                player.history.push(turnScore);
-            }
-        }
-
-        // Skip turn in 501
-        function nextPlayer501() {
-            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            
-            // Reset current round if there were partial darts
-            if (currentPlayer.dartsThisRound > 0) {
-                currentPlayer.dartsThisRound = 0;
-                currentPlayer.currentRoundScore = 0;
+                // Score valide
+                selectedPlayer.score = newScore;
+                selectedPlayer.history.push(score);
             }
             
-            // Move to next player
-            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
-            
-            // Update display
+            // Mettre à jour l'affichage
             setup501Game();
-            
-            // Update the remaining score display
-            updateRemainingScoreDisplay();
+            nextPlayer501();
+            // Réinitialiser l'input
+            scoreInput.value = '';
+            scoreInput.focus();
         }
 
-        // Setup cricket game
+        function nextPlayer501() {
+            // Passer au joueur suivant dans l'ordre
+            if (gameState.players.length > 0) {
+                const currentIndex = gameState.players.findIndex(p => p.id === gameState.selectedPlayerId);
+                const nextIndex = (currentIndex + 1) % gameState.players.length;
+                gameState.selectedPlayerId = gameState.players[nextIndex].id;
+                setup501Game();
+            }
+        }
+
+        // ==================== CRICKET GAME - X POUR FERMER, I POUR POINTS ====================
         function setupCricketGame() {
-            const tableBody = document.getElementById('cricket-table-body');
-            tableBody.innerHTML = '';
-            
-            // Create header row
-            const headerRow = document.createElement('tr');
-            const emptyHeader = document.createElement('th');
-            emptyHeader.textContent = '';
-            headerRow.appendChild(emptyHeader);
+            const headerRow = document.getElementById('cricket-header-row');
+            headerRow.innerHTML = '<th></th>';
             
             gameState.players.forEach(player => {
                 const th = document.createElement('th');
@@ -1756,10 +1460,8 @@
                 th.textContent = player.name;
                 th.dataset.playerId = player.id;
                 
-                th.addEventListener('click', function() {
-                    selectCricketPlayer(player.id);
-                });
-                th.addEventListener('touchstart', function(e) {
+                th.addEventListener('click', () => selectCricketPlayer(player.id));
+                th.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     selectCricketPlayer(player.id);
                 });
@@ -1767,9 +1469,10 @@
                 headerRow.appendChild(th);
             });
             
-            tableBody.appendChild(headerRow);
+            const tableBody = document.getElementById('cricket-table-body');
+            tableBody.innerHTML = '';
             
-            // Add points row
+            // Points row (total des points)
             const pointsRow = document.createElement('tr');
             const pointsLabel = document.createElement('td');
             pointsLabel.className = 'number-cell';
@@ -1785,53 +1488,63 @@
             
             tableBody.appendChild(pointsRow);
             
-            // Add number rows (20 to 15, then 25 for bull)
+            // Number rows
             gameState.cricketState.numbers.forEach(number => {
                 const row = document.createElement('tr');
                 
-                // Number cell
                 const numberCell = document.createElement('td');
                 numberCell.className = 'number-cell';
                 numberCell.textContent = number === 25 ? 'Bull' : number;
                 row.appendChild(numberCell);
                 
-                // Player cells
                 gameState.players.forEach(player => {
                     const td = document.createElement('td');
                     td.className = 'mark-cell';
                     td.dataset.playerId = player.id;
                     td.dataset.number = number;
                     
-                    const marks = player.cricketMarks[number] || 0;
+                    const markData = player.cricketMarks[number] || { marks: 0, points: [] };
                     
                     const markDisplay = document.createElement('div');
                     markDisplay.className = 'mark-display';
                     
-                    // Show marks
-                    if (marks >= 3) {
-                        // Closed - show XXX
-                        for (let i = 0; i < 3; i++) {
-                            const mark = document.createElement('div');
-                            mark.className = 'mark filled closed x';
+                    // Première ligne : les X pour fermer le numéro (max 3)
+                    const marksRow = document.createElement('div');
+                    marksRow.className = 'marks-row';
+                    
+                    for (let i = 0; i < 3; i++) {
+                        const mark = document.createElement('div');
+                        mark.className = 'mark';
+                        if (i < markData.marks) {
+                            mark.classList.add('filled');
                             mark.textContent = 'X';
-                            markDisplay.appendChild(mark);
                         }
-                    } else {
-                        // Not closed - show individual marks
-                        for (let i = 0; i < 3; i++) {
-                            const mark = document.createElement('div');
-                            mark.className = 'mark';
-                            if (i < marks) {
-                                mark.classList.add('filled');
-                                mark.textContent = 'X';
-                            }
-                            markDisplay.appendChild(mark);
+                        marksRow.appendChild(mark);
+                    }
+                    
+                    markDisplay.appendChild(marksRow);
+                    
+                    // Deuxième ligne : les I pour les points marqués (uniquement si le numéro est fermé par ce joueur)
+                    if (markData.marks >= 0 && markData.points && markData.points.length > 0) {
+                        const pointsRow = document.createElement('div');
+                        pointsRow.className = 'points-indicator';
+                        
+                        // Afficher le nombre de points avec des I
+                        const pointsCount = markData.points.length;
+                        for (let i = 0; i < pointsCount; i++) {
+                            const pointMark = document.createElement('span');
+                            pointMark.innerHTML = 'I';
+                            pointMark.style.color = '#ff6b6b';
+                            pointMark.style.fontWeight = 'bold';
+                            pointMark.style.marginRight = '2px';
+                            pointsRow.appendChild(pointMark);
                         }
+                        
+                        markDisplay.appendChild(pointsRow);
                     }
                     
                     td.appendChild(markDisplay);
                     
-                    // Add click event
                     td.addEventListener('click', function() {
                         if (gameState.cricketState.currentPlayerId === player.id) {
                             addCricketMark(player.id, number);
@@ -1851,42 +1564,56 @@
             });
         }
 
-        // Select cricket player
         function selectCricketPlayer(playerId) {
             gameState.cricketState.currentPlayerId = playerId;
             setupCricketGame();
         }
 
-        // Add mark in cricket game
         function addCricketMark(playerId, number) {
             const player = gameState.players.find(p => p.id === playerId);
             if (!player) return;
             
-            // Check if player has already closed this number (3 marks)
-            const hasClosedNumber = player.cricketMarks[number] >= 3;
+            const markData = player.cricketMarks[number];
+            const hasClosedNumber = markData.marks >= 3;
             
             if (hasClosedNumber) {
-                // Player has already closed this number
-                // Give points to all players who haven't closed this number
+                // Le numéro est déjà fermé par ce joueur
+                // Il donne des points à tous ceux qui n'ont pas fermé ce numéro
                 gameState.players.forEach(otherPlayer => {
-                    if (otherPlayer.id !== playerId && otherPlayer.cricketMarks[number] < 3) {
-                        // Other player hasn't closed this number - they get points
-                        const pointsToAdd = (number === 25 ? 25 : number);
-                        otherPlayer.cricketPoints += pointsToAdd;
+                    if (otherPlayer.id !== playerId) {
+                        const otherMarkData = otherPlayer.cricketMarks[number];
                         
-                        // Add to history
-                        gameState.history.push({
-                            playerId: otherPlayer.id,
-                            action: 'cricket-points-received',
-                            fromPlayer: playerId,
-                            number: number,
-                            points: pointsToAdd,
-                            timestamp: new Date().getTime()
-                        });
+                        if (otherMarkData.marks < 3) {
+                            // Ce joueur n'a pas fermé le numéro - il reçoit des points
+                            const pointsToAdd = (number === 25 ? 25 : number);
+                            
+                            // Ajouter des points au total du joueur
+                            otherPlayer.cricketPoints += pointsToAdd;
+                            
+                            // Enregistrer que ce joueur a reçu des points sur ce numéro
+                            if (!otherMarkData.points) {
+                                otherMarkData.points = [];
+                            }
+                            
+                            // Ajouter une entrée pour ce point reçu
+                            otherMarkData.points.push({
+                                from: playerId,
+                                value: pointsToAdd,
+                                timestamp: new Date().getTime()
+                            });
+                            
+                            gameState.history.push({
+                                playerId: otherPlayer.id,
+                                action: 'cricket-points-received',
+                                fromPlayer: playerId,
+                                number: number,
+                                points: pointsToAdd,
+                                timestamp: new Date().getTime()
+                            });
+                        }
                     }
                 });
                 
-                // Add to history
                 gameState.history.push({
                     playerId: playerId,
                     action: 'cricket-hit-closed',
@@ -1894,54 +1621,43 @@
                     timestamp: new Date().getTime()
                 });
             } else {
-                // Player hasn't closed this number yet - add a mark
-                player.cricketMarks[number]++;
+                // Le joueur n'a pas encore fermé ce numéro - ajouter un X
+                markData.marks++;
                 
-                // Check if this mark closes the number (reaches 3 marks)
-                if (player.cricketMarks[number] === 3) {
-                    // Player just closed this number
+                if (markData.marks === 3) {
                     gameState.cricketState.closedNumbers[number] = playerId;
                     
-                    // Add to history
                     gameState.history.push({
                         playerId: playerId,
                         action: 'cricket-close',
                         number: number,
                         timestamp: new Date().getTime()
                     });
-                };
+                }
                 
-                // Add to history
                 gameState.history.push({
                     playerId: playerId,
                     action: 'cricket-mark',
                     number: number,
-                    marks: player.cricketMarks[number],
+                    marks: markData.marks,
                     timestamp: new Date().getTime()
                 });
             }
             
-            // Update display
             setupCricketGame();
-            
-            // Check for win condition
             checkCricketWin();
         }
 
-        // Check cricket win condition
         function checkCricketWin() {
-            // A player wins if they have closed all numbers AND have equal or LOWER points than all opponents
             gameState.players.forEach(player => {
                 let allClosed = true;
                 gameState.cricketState.numbers.forEach(number => {
-                    if (player.cricketMarks[number] < 3) {
+                    if (player.cricketMarks[number].marks < 3) {
                         allClosed = false;
                     }
                 });
                 
                 if (allClosed) {
-                    // Player has closed all numbers
-                    // Check if they have equal or LOWER points than all opponents
                     let hasLowestScore = true;
                     gameState.players.forEach(otherPlayer => {
                         if (otherPlayer.id !== player.id && player.cricketPoints > otherPlayer.cricketPoints) {
@@ -1951,7 +1667,7 @@
                     
                     if (hasLowestScore) {
                         setTimeout(() => {
-                            alert(`${player.name} wins the cricket game!`);
+                            alert(`${player.name} remporte la partie de cricket !`);
                             resetGame();
                         }, 500);
                     }
@@ -1959,96 +1675,72 @@
             });
         }
 
-        // Undo last action
+        // ==================== UNDO FUNCTION ====================
         function undoLast() {
             if (gameState.history.length === 0) return;
             
             const lastAction = gameState.history.pop();
             
             if (gameState.gameType === '501') {
-                // Undo 501 score
                 const player = gameState.players.find(p => p.id === lastAction.playerId);
                 if (player && lastAction.action === 'score') {
-                    // Remove from history
+                    player.score = lastAction.previousScore;
                     if (player.history.length > 0) {
                         player.history.pop();
                     }
-                    
-                    // Adjust darts count and current round score
-                    if (player.dartsThisRound > 0) {
-                        player.dartsThisRound--;
-                        player.currentRoundScore -= lastAction.value;
-                    }
-                    
-                    // Go back to previous player if this was the start of a new turn
-                    if (lastAction.darts === 1) {
-                        gameState.currentPlayerIndex = (gameState.currentPlayerIndex - 1 + gameState.players.length) % gameState.players.length;
-                    }
-                    
                     setup501Game();
                 }
             } else if (gameState.gameType === 'cricket') {
-                // For cricket, we need to revert based on the action type
                 const player = gameState.players.find(p => p.id === lastAction.playerId);
                 if (player) {
                     switch (lastAction.action) {
                         case 'cricket-mark':
-                            // Remove the mark
-                            if (player.cricketMarks[lastAction.number] > 0) {
-                                player.cricketMarks[lastAction.number]--;
-                                
-                                // If this was the 3rd mark, remove from closed numbers
-                                if (player.cricketMarks[lastAction.number] === 2) {
+                            if (player.cricketMarks[lastAction.number].marks > 0) {
+                                player.cricketMarks[lastAction.number].marks--;
+                                if (player.cricketMarks[lastAction.number].marks === 2) {
                                     delete gameState.cricketState.closedNumbers[lastAction.number];
                                 }
                             }
                             break;
-                            
                         case 'cricket-close':
-                            // Revert closing
-                            player.cricketMarks[lastAction.number] = 2;
+                            player.cricketMarks[lastAction.number].marks = 2;
                             delete gameState.cricketState.closedNumbers[lastAction.number];
                             break;
-                            
                         case 'cricket-points-received':
-                            // Remove points from the player who received them
                             const receiver = gameState.players.find(p => p.id === lastAction.playerId);
                             if (receiver) {
                                 receiver.cricketPoints -= lastAction.points;
-                            }
-                            break;
-                            
-                        case 'cricket-points-from-hit':
-                            // Remove points from the player who earned them
-                            const earner = gameState.players.find(p => p.id === lastAction.playerId);
-                            if (earner) {
-                                earner.cricketPoints -= lastAction.points;
+                                // Retirer le dernier point reçu de l'historique des points
+                                const pointsArray = receiver.cricketMarks[lastAction.number].points;
+                                if (pointsArray && pointsArray.length > 0) {
+                                    pointsArray.pop();
+                                }
                             }
                             break;
                     }
-                    
                     setupCricketGame();
                 }
             }
         }
 
-        // Reset game
+        // ==================== RESET GAME ====================
         function resetGame() {
             gameState.players = [];
             gameState.history = [];
             gameState.currentPlayerIndex = 0;
+            gameState.selectedPlayerId = null;
             gameState.cricketState.closedNumbers = {};
+            gameState.cricketState.pointsHistory = [];
             
             document.getElementById('game-screen-501').classList.remove('active');
             document.getElementById('game-screen-cricket').classList.remove('active');
             document.getElementById('config-screen').classList.remove('hidden');
         }
 
-        // Settings modal
+        // ==================== SETTINGS ====================
         function openSettings() {
             document.getElementById('settings-modal').classList.add('active');
             
-            // Load current settings
             document.getElementById('starting-score').value = gameState.settings.startingScore;
             document.getElementById('legs-to-win-set').value = gameState.settings.legsToWinSet;
             document.getElementById('sets-to-win-game').value = gameState.settings.setsToWinGame;
@@ -2063,13 +1755,11 @@
             gameState.settings.legsToWinSet = parseInt(document.getElementById('legs-to-win-set').value);
             gameState.settings.setsToWinGame = parseInt(document.getElementById('sets-to-win-game').value);
             
-            // Update game title if 501 game is active
             if (gameState.gameType === '501') {
                 document.getElementById('game-title-501').textContent = gameState.settings.startingScore;
                 
-                // Also update player scores if game is in progress
                 if (gameState.players.length > 0) {
-                    const isNewSet = confirm("Changing settings will reset the current game. Continue?");
+                    const isNewSet = confirm("Changer les paramètres va réinitialiser la partie. Continuer?");
                     if (isNewSet) {
                         resetGame();
                     } else {
@@ -2083,7 +1773,7 @@
             startGame();
         }
 
-        // Setup event listeners
+        // ==================== EVENT LISTENERS ====================
         function setupEventListeners() {
             // 501 game events
             document.getElementById('add-score-501').addEventListener('click', addScore501);
@@ -2091,15 +1781,6 @@
                 if (e.key === 'Enter') {
                     addScore501();
                 }
-            });
-            
-            // Quick score buttons
-            document.querySelectorAll('.quick-score-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const score = parseInt(this.dataset.score);
-                    document.getElementById('score-input-501').value = score;
-                    addScore501();
-                });
             });
             
             document.getElementById('undo-501').addEventListener('click', undoLast);
@@ -2116,7 +1797,6 @@
             document.getElementById('save-settings').addEventListener('click', saveSettings);
             document.getElementById('cancel-settings').addEventListener('click', closeSettings);
             
-            // Close modal when clicking outside
             document.getElementById('settings-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeSettings();
