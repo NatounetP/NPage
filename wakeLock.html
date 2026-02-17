@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+    .wake-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      font-family: Arial, sans-serif;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 2px solid #4285f4;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .wake-control:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(66,133,244,0.3);
+    }
+    .wake-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #34A853;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    .wake-text {
+      color: #202124;
+      font-weight: 500;
+    }
+    .wake-icon {
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="wakeLockControl" class="wake-control" onclick="toggleWakeLock()">
+    <span class="wake-icon">🔆</span>
+    <span id="wakeText" class="wake-text">Écran toujours allumé</span>
+    <span id="wakeIndicator" class="wake-indicator"></span>
+  </div>
+
+  <script>
+    let wakeLock = null;
+    let isActive = true;
+
+    async function toggleWakeLock() {
+      if (isActive) {
+        await releaseWakeLock();
+      } else {
+        await requestWakeLock();
+      }
+    }
+
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          isActive = true;
+          updateUI();
+          
+          wakeLock.addEventListener('release', () => {
+            isActive = false;
+            updateUI();
+          });
+        } else {
+          alert('Désolé, votre navigateur ne supporte pas cette fonctionnalité');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Impossible d\'activer le maintien de l\'écran');
+      }
+    }
+
+    async function releaseWakeLock() {
+      if (wakeLock) {
+        await wakeLock.release();
+        wakeLock = null;
+        isActive = false;
+        updateUI();
+      }
+    }
+
+    function updateUI() {
+      const text = document.getElementById('wakeText');
+      const indicator = document.getElementById('wakeIndicator');
+      const control = document.getElementById('wakeLockControl');
+      
+      if (isActive) {
+        text.textContent = 'Écran toujours allumé ✓';
+        indicator.style.background = '#34A853';
+        control.style.borderColor = '#34A853';
+      } else {
+        text.textContent = 'Activer le maintien écran';
+        indicator.style.background = '#EA4335';
+        control.style.borderColor = '#EA4335';
+      }
+    }
+
+    requestWakeLock();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && !isActive) {
+        requestWakeLock();
+      }
+    });
+  </script>
+</body>
+</html>
