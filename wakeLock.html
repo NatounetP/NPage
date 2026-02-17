@@ -1,124 +1,117 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <base target="_blank">
-  <style>
-    .wake-button {
-      background: #4285f4;
-      border: none;
-      color: white;
-      padding: 15px 32px;
-      text-align: center;
-      font-size: 18px;
-      font-family: Arial, sans-serif;
-      border-radius: 50px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(66,133,244,0.3);
-      transition: all 0.3s;
-      width: 250px;
-      margin: 10px;
-      border: 2px solid transparent;
-    }
-    .wake-button:hover {
-      transform: scale(1.05);
-      background: #5a95f5;
-    }
-    .wake-button.active {
-      background: #34A853;
-      border-color: #0f9d58;
-    }
-    .status {
-      font-family: Arial, sans-serif;
-      margin-top: 15px;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      display: inline-block;
-    }
-  </style>
-</head>
-<body>
-  <div style="text-align: center; padding: 20px;">
-    <button id="wakeBtn" class="wake-button" onclick="handleWakeLock()">
-      🔆 ACTIVER MAINTIEN ÉCRAN
-    </button>
-    <div id="statusMessage" class="status">
-      ⏻ Prêt - Cliquez sur le bouton
-    </div>
-  </div>
+<style>
+  .wake-control {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    font-family: Arial, sans-serif;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid #4285f4;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .wake-control:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(66,133,244,0.3);
+  }
+  .wake-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #34A853;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+  .wake-text {
+    color: #202124;
+    font-weight: 500;
+  }
+  .wake-icon {
+    font-size: 20px;
+  }
+</style>
 
-  <script>
-    // Variable pour suivre l'état
-    let wakeLockActive = false;
-    let wakeLock = null;
+<div id="wakeLockControl" class="wake-control" onclick="toggleWakeLock()">
+  <span class="wake-icon">🔆</span>
+  <span id="wakeText" class="wake-text">Écran toujours allumé</span>
+  <span id="wakeIndicator" class="wake-indicator"></span>
+</div>
 
-    // Fonction principale appelée par le bouton
-    window.handleWakeLock = function() {
-      if (wakeLockActive) {
-        releaseWakeLock();
-      } else {
-        requestWakeLock();
-      }
-    };
+<script>
+let wakeLock = null;
+let isActive = true;
 
-    async function requestWakeLock() {
-      try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await navigator.wakeLock.request('screen');
-          wakeLockActive = true;
-          updateUI();
-          
-          wakeLock.addEventListener('release', () => {
-            wakeLockActive = false;
-            updateUI();
-          });
-          
-          console.log('Wake Lock activé');
-        } else {
-          document.getElementById('statusMessage').innerHTML = 
-            '❌ Navigateur non compatible';
-        }
-      } catch (err) {
-        console.error(err);
-        document.getElementById('statusMessage').innerHTML = 
-          '❌ Erreur: ' + err.message;
-      }
-    }
+async function toggleWakeLock() {
+  if (isActive) {
+    await releaseWakeLock();
+  } else {
+    await requestWakeLock();
+  }
+}
 
-    async function releaseWakeLock() {
-      if (wakeLock) {
-        await wakeLock.release();
-        wakeLock = null;
-        wakeLockActive = false;
-        updateUI();
-        console.log('Wake Lock désactivé');
-      }
-    }
-
-    function updateUI() {
-      const btn = document.getElementById('wakeBtn');
-      const status = document.getElementById('statusMessage');
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      isActive = true;
+      updateUI();
       
-      if (wakeLockActive) {
-        btn.textContent = '🔆 DÉSACTIVER MAINTIEN ÉCRAN';
-        btn.classList.add('active');
-        status.innerHTML = '✅ Écran maintenu allumé';
-        status.style.background = '#e6f4e6';
-      } else {
-        btn.textContent = '🔆 ACTIVER MAINTIEN ÉCRAN';
-        btn.classList.remove('active');
-        status.innerHTML = '⏻ Maintien désactivé';
-        status.style.background = '#f8f9fa';
-      }
+      wakeLock.addEventListener('release', () => {
+        isActive = false;
+        updateUI();
+      });
+      
+    } else {
+      alert('Désolé, votre navigateur ne supporte pas cette fonctionnalité');
     }
+  } catch (err) {
+    console.error(err);
+    alert('Impossible d\'activer le maintien de l\'écran');
+  }
+}
 
-    // Gestion du retour sur l'onglet
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && wakeLockActive) {
-        // Réactiver si c'était actif avant
-        requestWakeLock();
-      }
-    });
-  </script>
-</body>
-</html>
+async function releaseWakeLock() {
+  if (wakeLock) {
+    await wakeLock.release();
+    wakeLock = null;
+    isActive = false;
+    updateUI();
+  }
+}
+
+function updateUI() {
+  const text = document.getElementById('wakeText');
+  const indicator = document.getElementById('wakeIndicator');
+  const control = document.getElementById('wakeLockControl');
+  
+  if (isActive) {
+    text.textContent = 'Écran toujours allumé ✓';
+    indicator.style.background = '#34A853';
+    control.style.borderColor = '#34A853';
+  } else {
+    text.textContent = 'Activer le maintien écran';
+    indicator.style.background = '#EA4335';
+    control.style.borderColor = '#EA4335';
+  }
+}
+
+// Activation automatique au chargement de la page
+requestWakeLock();
+
+// Réactivation quand l'utilisateur revient sur la page
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && !isActive) {
+    requestWakeLock();
+  }
+});
+</script>
