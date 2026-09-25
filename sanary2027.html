@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vacances 2027</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EDE7D6;
+    --bg-panel: #F7F3E7;
+    --ink: #24331F;
+    --ink-soft: #55604C;
+    --gold: #A97A22;
+    --gold-deep: #8A5F13;
+    --line: rgba(36,51,31,0.18);
+    --danger: #9A4B32;
+    --ok: #5B7A52;
+    --shadow: 0 1px 2px rgba(36,51,31,0.08);
+    --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    --font-body: 'Work Sans', 'Segoe UI', -apple-system, sans-serif;
+    --bar-text: #2A2013;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #1B2419;
+      --bg-panel: #222D1F;
+      --ink: #F1ECDC;
+      --ink-soft: #ACB6A2;
+      --gold: #D6A64B;
+      --gold-deep: #E9BE6E;
+      --line: rgba(241,236,220,0.16);
+      --danger: #D98467;
+      --ok: #8FB585;
+      --shadow: 0 1px 2px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #1B2419;
+    --bg-panel: #222D1F;
+    --ink: #F1ECDC;
+    --ink-soft: #ACB6A2;
+    --gold: #D6A64B;
+    --gold-deep: #E9BE6E;
+    --line: rgba(241,236,220,0.16);
+    --danger: #D98467;
+    --ok: #8FB585;
+    --shadow: 0 1px 2px rgba(0,0,0,0.35);
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{ max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  #setup-banner{
+    display:none;
+    background: var(--danger);
+    color: #FBF3EC;
+    font-size: 14px;
+    padding: 12px 24px;
+    text-align: center;
+  }
+  #setup-banner code{ background: rgba(0,0,0,0.18); padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+
+  header{ padding: 28px 0 0; }
+  .brand{
+    display:flex; align-items:baseline; justify-content: space-between; gap: 12px;
+    padding-bottom: 18px; border-bottom: 1px solid var(--line);
+  }
+  .brand-mark{ font-family: var(--font-display); font-size: 19px; }
+  .brand-dates{ font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  .hero{ padding: 60px 0 36px; position: relative; }
+  .hero-deco{ position: absolute; top: 8px; right: -10px; width: 180px; height: auto; opacity: 0.9; pointer-events: none; }
+  h1{
+    font-family: var(--font-display); font-weight: 500;
+    font-size: clamp(38px, 6vw, 64px); line-height: 1.05; letter-spacing: -0.01em;
+    margin: 0 0 20px; max-width: 12ch;
+  }
+  .hero-sub{ max-width: 48ch; font-size: 18px; color: var(--ink-soft); margin: 0 0 28px; }
+  .hero-stats{ display:flex; flex-wrap: wrap; gap: 28px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .stat .num{ font-family: var(--font-display); font-size: 24px; color: var(--gold-deep); }
+  .stat .label{ font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+
+  .description-slot{
+    margin: 8px 0 56px; padding: 22px 24px; border: 1.5px dashed var(--line);
+    border-radius: 3px; background: var(--bg-panel);
+  }
+  .description-slot p{ margin: 0; font-style: italic; color: var(--ink-soft); font-size: 15px; }
+  .description-slot .tag{ display:inline-block; font-size: 11px; color: var(--gold); margin-bottom: 8px; }
+
+  section{ padding: 8px 0 56px; }
+  h2{ font-family: var(--font-display); font-weight: 500; font-size: 27px; margin: 0 0 6px; }
+  .section-intro{ color: var(--ink-soft); font-size: 15px; margin: 0 0 24px; max-width: 54ch; }
+
+  /* ---------- calendar grid ---------- */
+  .cal-scroll{ overflow-x: auto; border-radius: 4px; border: 1px solid var(--line); }
+  .cal-grid{
+    display: grid;
+    grid-auto-rows: 56px;
+    min-width: 820px;
+    font-size: 12.5px;
+    background: var(--bg-panel);
+    padding: 0 14px;
+  }
+  /* full-width rule closing the header row — keeps every room row bordered top & bottom */
+  .cal-grid::before{
+    content: '';
+    grid-column: 2 / -1;
+    grid-row: 1;
+    border-bottom: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .cal-corner{ border-bottom: 1px solid var(--line); }
+  .cal-tick{
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .cal-tick::after{
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 1px;
+    background: var(--line);
+  }
+  .tick-label{
+    position: absolute;
+    top: 4px; left: 0;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    white-space: nowrap;
+    z-index: 1;
+    background: var(--bg-panel);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+  .cal-tick .dow{ font-size: 10px; color: var(--ink-soft); }
+  .cal-tick .dnum{ font-family: var(--font-display); font-size: 14px; }
+  .cal-room-label{
+    display:flex; align-items:center; padding: 0 14px; font-size: 13px;
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .cal-daycell{
+    border-bottom: 1px solid var(--line);
+    display:flex; flex-direction:column;
+  }
+  .cal-half{
+    flex: 1; display:flex; align-items:center; justify-content:center; text-align:center;
+    padding: 1px 4px; font-size: 10.5px; overflow: hidden;
+    white-space: nowrap; text-overflow: ellipsis;
+  }
+  .cal-half.filled{ font-weight: 600; color: var(--bar-text); }
+  .cal-half.free{ color: var(--ink-soft); font-style: italic; font-size: 10px; }
+  .cal-half:first-child{ border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  .cal-legend-note{ margin-top: 14px; font-size: 13px; color: var(--ink-soft); }
+
+  .booked-list{ margin-top: 22px; display:flex; flex-direction:column; gap: 8px; }
+  .booked-row{ display:flex; align-items:center; gap: 10px; font-size: 14px; }
+  .booked-swatch{ width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .booked-dates{ color: var(--ink-soft); font-size: 13px; }
+  .empty-note{ color: var(--ink-soft); font-size: 14.5px; font-style: italic; }
+
+  /* ---------- form ---------- */
+  form{ background: var(--bg-panel); border: 1px solid var(--line); border-radius: 4px; padding: 32px; }
+  .field{ margin-bottom: 20px; }
+  .field label{ display:block; font-size: 13.5px; color: var(--ink-soft); margin-bottom: 6px; }
+  .field input[type="text"], .field select, .field textarea{
+    width: 100%; font-family: var(--font-body); font-size: 15px; color: var(--ink);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 10px 12px;
+  }
+  .field textarea{ min-height: 78px; resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus, .party-option:focus-within{
+    outline: 2px solid var(--gold); outline-offset: 1px;
+  }
+
+  .two-col{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 520px){ .two-col{ grid-template-columns: 1fr; } }
+
+  .party-toggle{ display:flex; gap: 10px; }
+  .party-option{ flex:1; position:relative; border: 1px solid var(--line); border-radius: 3px; padding: 14px; cursor: pointer; background: var(--bg); }
+  .party-option input{ position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .party-option .t{ font-size: 15px; margin-bottom: 2px; }
+  .party-option .d{ font-size: 12.5px; color: var(--ink-soft); }
+  .party-option.checked{ border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--bg)); }
+
+  #second-guest{ display:none; }
+  #second-guest.show{ display:block; }
+
+  .suggestion-list{ display:flex; flex-direction:column; gap: 8px; max-height: 280px; overflow-y: auto; }
+  .suggestion-item{
+    position:relative; display:flex; align-items:center; justify-content:space-between; gap: 12px;
+    border: 1px solid var(--line); border-radius: 3px; padding: 10px 14px; cursor: pointer;
+    background: var(--bg); font-size: 13.5px;
+  }
+  .suggestion-item input{ position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .suggestion-item.checked{ border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--bg)); }
+  .suggestion-item .s-room{ font-weight: 600; }
+  .suggestion-item .s-dates{ color: var(--ink-soft); font-size: 12.5px; }
+  .suggestion-item .s-tag{ font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; flex: none; }
+  .suggestion-empty{ font-size: 13.5px; color: var(--ink-soft); font-style: italic; }
+
+  .cal-half.free{ cursor: pointer; }
+  .cal-half.free:hover{ background: color-mix(in srgb, var(--gold) 16%, var(--bg-panel)); }
+  .cal-daycell.pending{ outline: 2px solid var(--gold); outline-offset: -2px; }
+
+  .submit-row{ display:flex; align-items:center; gap: 16px; margin-top: 26px; flex-wrap: wrap; }
+  button[type="submit"]{
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--bg);
+    background: var(--gold); border: none; border-radius: 3px; padding: 12px 24px; cursor: pointer;
+  }
+  button[type="submit"]:hover{ background: var(--gold-deep); }
+  button[type="submit"]:disabled{ background: var(--ink-soft); cursor: not-allowed; }
+  .form-msg{ font-size: 13.5px; }
+  .form-msg.error{ color: var(--danger); }
+  .form-msg.ok{ color: var(--ok); }
+
+  footer{ border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--ink-soft); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div id="setup-banner">
+  Firebase isn't connected yet — registrations won't be saved. Add your project config where marked <code>INCL_FIREBASE</code> in the script.
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">Vacances 2027</div>
+      <div class="brand-dates">19 – 29 Septembre</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <svg class="hero-deco" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="150" cy="34" r="20" fill="none" stroke="var(--gold)" stroke-width="1.4" opacity="0.55"/>
+      <path d="M0 110 Q 50 80 100 105 T 200 100" fill="none" stroke="var(--gold)" stroke-width="1.4" opacity="0.5"/>
+      <path d="M0 128 Q 60 100 120 122 T 200 120" fill="none" stroke="var(--ink-soft)" stroke-width="1.2" opacity="0.35"/>
+    </svg>
+
+    <h1>Sanary 2027</h1>
+    <p class="hero-sub">Des petites vacances à Sanary dans le mood qu'on aime tant</p>
+  </section>
+
+  <div class="description-slot">
+    <span class="tag">Le plan:</span>
+    <p id="trip-description">Une grosse villa, une belle équipe, un spot plutôt sympa et chill quoi! Dans la même vibe que les vacances qu'on avait fait à St Paul 3 Château, la maison est commune mais à part ça, pas d'obligation. Chacun est libre de faire des activités avec d'autres ou pas, de proposer des idées d'activités aux autres ou pas. 
+On s'organise avec un "package" nuit + déj mais à côté de ça rien ne vous oblige même à manger avec l'équipe. Tout un cadre respectueux, simple, humain pour que chacun puisse trouver son bonheur!
+Si vous avez des questions n'hésitez pas! Julie et moi sommes là pour lever toutes vos incertitudes!
+</p>
+<p id="maison"><a href="https://fr.airbnb.ch/rooms/896734089523429563?search_mode=regular_search&adults=1&check_in=2026-10-02&check_out=2026-10-09&children=0&infants=0&pets=0&source_impression_id=p3_a01291f4-2acc-4cb7-8f37-b448beb9a854_cf3b5991-9971-49b7-a9d3-ab5d0f96d2db_0_896734089523429563_0&previous_page_section_name=1000&federated_search_id=a01291f4-2acc-4cb7-8f37-b448beb9a854">Voir la maison! </a></p>
+  </div>
+
+  <section id="calendar-section">
+    <h2>The calendar</h2>
+    <div class="cal-scroll">
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="booked-list" id="booked-list">
+      <span class="empty-note">No one registered yet — be the first.</span>
+    </div>
+  </section>
+
+  <section id="register">
+    <h2>Register</h2>
+
+    <form id="reg-form">
+      <div class="field">
+        <label for="name1">Your name</label>
+        <input type="text" id="name1" name="name1" required autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label>Registering for</label>
+        <div class="party-toggle">
+          <label class="party-option checked" id="opt-one">
+            <input type="radio" name="party" value="1" checked>
+            <div class="t">Just me</div><div class="d">1 person</div>
+          </label>
+          <label class="party-option" id="opt-two">
+            <input type="radio" name="party" value="2">
+            <div class="t">Me and someone</div><div class="d">2 people, one room</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="field" id="second-guest">
+        <label for="name2">Their name</label>
+        <input type="text" id="name2" name="name2" autocomplete="name">
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label for="checkin">Arriving</label>
+          <select id="checkin" required></select>
+        </div>
+        <div class="field">
+          <label for="checkout">Leaving</label>
+          <select id="checkout" required></select>
+        </div>
+      </div>
+
+      <div class="field" id="room-field">
+        <label>Available options for your dates</label>
+        <div class="suggestion-list" id="suggestion-list"></div>
+        <div class="form-msg" id="room-msg"></div>
+      </div>
+
+      <div class="field">
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" name="notes"></textarea>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" id="submit-btn">Reserve your spot</button>
+        <span class="form-msg" id="form-msg"></span>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    NPage - Vacances 2027
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.5/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.5/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+
+  // ------------------------------------------------------------------
+  // INCL_FIREBASE — paste your Firebase project config below.
+  // Firebase console → Project settings → General → Your apps → SDK setup and config
+  // Every value marked INCL_FIREBASE needs to be replaced.
+  // ------------------------------------------------------------------
+  const firebaseConfig = {
+  apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
+  authDomain: "paris-entre-amis-598e9.firebaseapp.com",
+  projectId: "paris-entre-amis-598e9",
+  storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
+  messagingSenderId: "638642602040",
+  appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
+  };
+
+  // Matches your Firestore structure: collection "holidays" -> document "Sanary2027"
+  // with fields Room1..Room8, each holding a JSON string of that room's bookings.
+  // Rename these if your collection/document names differ.
+  const COLLECTION_NAME = "holidays";
+  const DOC_ID = "Sanary2027";
+  const ROOM_COUNT = 8;
+
+  const TRIP_START = Date.UTC(2027, 8, 19); // months are 0-indexed: 8 = September
+  const TRIP_END   = Date.UTC(2027, 8, 29);
+  const DAY_MS = 86400000;
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const PALETTE = ["#E7B8C2","#C3B4E0","#F0CE7D","#F2BFA0","#9DBBE0","#A9CBA0","#E3A6C7","#D9C48A"];
+
+  const isConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== 1;
+
+  // ---- build day list ----
+  const days = [];
+  for (let t = TRIP_START; t <= TRIP_END; t += DAY_MS) {
+    const d = new Date(t);
+    days.push({ iso: isoDate(d), dow: DOW[d.getUTCDay()], dnum: d.getUTCDate() });
+  }
+  function isoDate(d){ return d.toISOString().slice(0,10); }
+  function dayIndex(iso){ return days.findIndex(d => d.iso === iso); }
+
+  // ---- calendar grid: dates are boundary lines, columns between them are nights ----
+  const NIGHT_COUNT = days.length - 1; // e.g. 19th..29th = 10 nights
+  const calGrid = document.getElementById('cal-grid');
+
+  // Column layout: label | tick0 night0 tick1 night1 ... night9 tick10
+  // Tick tracks are 0-width — the date number is absolutely centered on
+  // that exact line, so it visually sits on the boundary, not inside a cell.
+  let colTemplate = '130px';
+  for (let k = 0; k < NIGHT_COUNT; k++) colTemplate += ' 0px minmax(46px,1fr)';
+  colTemplate += ' 0px';
+  calGrid.style.gridTemplateColumns = colTemplate;
+
+  function tickCol(t){ return 2 + 2 * t; }   // t = 0..NIGHT_COUNT (boundary index)
+  function nightCol(k){ return 3 + 2 * k; }  // k = 0..NIGHT_COUNT-1 (night index)
+
+  const corner = document.createElement('div');
+  corner.className = 'cal-corner';
+  corner.style.gridColumn = '1';
+  corner.style.gridRow = '1';
+  calGrid.appendChild(corner);
+
+  days.forEach((day, t) => {
+    const tick = document.createElement('div');
+    tick.className = 'cal-tick';
+    tick.style.gridColumn = String(tickCol(t));
+    tick.style.gridRow = '1';
+    tick.innerHTML = `<span class="tick-label"><span class="dow">${day.dow}</span><span class="dnum">${day.dnum}</span></span>`;
+    calGrid.appendChild(tick);
+  });
+
+  for (let r = 1; r <= ROOM_COUNT; r++) {
+    const label = document.createElement('div');
+    label.className = 'cal-room-label';
+    label.style.gridColumn = '1';
+    label.style.gridRow = String(r + 1);
+    label.textContent = 'Room ' + r;
+    calGrid.appendChild(label);
+  }
+
+  // Every room/night cell is split into two halves — one per bed. A booked
+  // half shows that person's name on the booking's color; an unclaimed half
+  // (whole room free, or the empty second bed next to a solo booking) shows
+  // "FREE" and can be clicked on its own to book just that bed.
+  function renderCalendarCells(regs){
+    calGrid.querySelectorAll('.cal-daycell').forEach(el => el.remove());
+    for (let room = 1; room <= ROOM_COUNT; room++) {
+      for (let k = 0; k < NIGHT_COUNT; k++) {
+        const nightDate = days[k].iso;
+        const cell = document.createElement('div');
+        cell.className = 'cal-daycell';
+        cell.style.gridColumn = String(nightCol(k));
+        cell.style.gridRow = String(room + 1);
+        cell.dataset.room = String(room);
+        cell.dataset.k = String(k);
+
+        const matches = regs.filter(r => r.room === room && nightDate >= r.checkIn && nightDate < r.checkOut);
+        const m1 = matches[0], m2 = matches[1];
+
+        const top = document.createElement('div');
+        const bottom = document.createElement('div');
+
+        if (m1) {
+          top.className = 'cal-half filled';
+          top.style.background = m1.color;
+          top.textContent = m1.name1;
+          top.title = m1.name1 + ' — Room ' + room;
+        } else {
+          top.className = 'cal-half free';
+          top.textContent = 'FREE';
+          top.title = 'Click to pick this room & night';
+          top.addEventListener('click', function(){ handleCellClick(room, k); });
+        }
+
+        if (m1 && m1.party === 2 && m1.name2) {
+          bottom.className = 'cal-half filled';
+          bottom.style.background = m1.color;
+          bottom.textContent = m1.name2;
+          bottom.title = m1.name2 + ' — Room ' + room;
+        } else if (m2) {
+          bottom.className = 'cal-half filled';
+          bottom.style.background = m2.color;
+          bottom.textContent = m2.name1;
+          bottom.title = m2.name1 + ' — Room ' + room;
+        } else {
+          bottom.className = 'cal-half free';
+          bottom.textContent = 'FREE';
+          bottom.title = 'Click to pick this room & night';
+          bottom.addEventListener('click', function(){ handleCellClick(room, k); });
+        }
+
+        cell.appendChild(top);
+        cell.appendChild(bottom);
+        calGrid.appendChild(cell);
+      }
+    }
+    applyPendingHighlight();
+  }
+
+  // ---- click-to-select on the calendar: pick a room by clicking its free
+  // beds directly (one click per free half, on either the top or bottom row) ----
+  let pendingSelection = null; // { room, k }
+
+  function nightOccupancy(room, k){
+    const nightDate = days[k].iso;
+    return currentRegs.reduce((sum, r) => {
+      if (r.room === room && nightDate >= r.checkIn && nightDate < r.checkOut) return sum + (r.party || 1);
+      return sum;
+    }, 0);
+  }
+
+  // party defaults to 1 bed, since that's the minimum needed for any booking
+  function cellIsBooked(room, k, party){
+    return nightOccupancy(room, k) + (party || 1) > 2;
+  }
+
+  function applyPendingHighlight(){
+    calGrid.querySelectorAll('.cal-daycell.pending').forEach(el => el.classList.remove('pending'));
+    if (!pendingSelection) return;
+    const el = calGrid.querySelector(`.cal-daycell[data-room="${pendingSelection.room}"][data-k="${pendingSelection.k}"]`);
+    if (el) el.classList.add('pending');
+  }
+
+  function handleCellClick(room, k){
+    if (cellIsBooked(room, k, 1)) return;
+
+    if (!pendingSelection || pendingSelection.room !== room) {
+      pendingSelection = { room: room, k: k };
+      applyPendingHighlight();
+      return;
+    }
+
+    const k1 = Math.min(pendingSelection.k, k);
+    const k2 = Math.max(pendingSelection.k, k);
+    for (let i = k1; i <= k2; i++) {
+      if (cellIsBooked(room, i, 1)) {
+        // the range crosses a fully-booked night — restart the selection here
+        pendingSelection = { room: room, k: k };
+        applyPendingHighlight();
+        return;
+      }
+    }
+
+    const checkInIso = days[k1].iso;
+    const checkOutIso = days[k2 + 1].iso;
+    pendingSelection = null;
+
+    checkinSel.value = checkInIso;
+    refreshCheckoutOptions();
+    checkoutSel.value = checkOutIso;
+    selectedRoom = room;
+    refreshRoomOptions();
+    applyPendingHighlight();
+    document.getElementById('register').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const bookedList = document.getElementById('booked-list');
+  function renderBookedList(regs){
+    if (!regs.length) {
+      bookedList.innerHTML = '<span class="empty-note">No one registered yet — be the first.</span>';
+      return;
+    }
+    bookedList.innerHTML = regs.map((reg, idx) => {
+      const label = reg.name2 ? (reg.name1 + ' & ' + reg.name2) : reg.name1;
+      const swatch = reg.color || PALETTE[idx % PALETTE.length];
+      return `<div class="booked-row">
+        <span class="booked-swatch" style="background:${swatch}"></span>
+        <span>${escapeHtml(label)} — Room ${reg.room}</span>
+        <span class="booked-dates">${formatRange(reg.checkIn, reg.checkOut)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function formatRange(inIso, outIso){
+    const i = days[dayIndex(inIso)], o = days[dayIndex(outIso)];
+    if (!i || !o) return '';
+    return `${i.dow} ${i.dnum} – ${o.dow} ${o.dnum} Sept`;
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ---- form: date selects ----
+  const checkinSel = document.getElementById('checkin');
+  const checkoutSel = document.getElementById('checkout');
+
+  days.forEach((day, i) => {
+    if (i < days.length - 1) {
+      const opt = document.createElement('option');
+      opt.value = day.iso;
+      opt.textContent = `${day.dow} ${day.dnum} Sept`;
+      checkinSel.appendChild(opt);
+    }
+  });
+
+  function refreshCheckoutOptions(){
+    const fromIndex = dayIndex(checkinSel.value) + 1;
+    const prevValue = checkoutSel.value;
+    checkoutSel.innerHTML = '';
+    days.forEach((day, i) => {
+      if (i >= fromIndex) {
+        const opt = document.createElement('option');
+        opt.value = day.iso;
+        opt.textContent = `${day.dow} ${day.dnum} Sept`;
+        checkoutSel.appendChild(opt);
+      }
+    });
+    if ([...checkoutSel.options].some(o => o.value === prevValue)) {
+      checkoutSel.value = prevValue;
+    }
+  }
+  checkinSel.addEventListener('change', function(){ refreshCheckoutOptions(); refreshRoomOptions(); });
+  checkoutSel.addEventListener('change', refreshRoomOptions);
+  refreshCheckoutOptions();
+
+  // ---- room/date suggestions: instead of a flat yes/no per room, work out
+  // every free stretch of nights in every room and offer them as options.
+  // A stretch that fully covers the guest's chosen dates is an exact match;
+  // anything else is offered as the closest real alternative in that room. ----
+  let selectedRoom = null;
+  const suggestionList = document.getElementById('suggestion-list');
+  const roomMsg = document.getElementById('room-msg');
+
+  function overlapNights(a1, a2, b1, b2){
+    return Math.max(0, Math.min(a2, b2) - Math.max(a1, b1) + 1);
+  }
+
+  function computeRoomFreeIntervals(room, party){
+    const intervals = [];
+    let runStart = null;
+    for (let k = 0; k < NIGHT_COUNT; k++){
+      if (!cellIsBooked(room, k, party)){
+        if (runStart === null) runStart = k;
+      } else if (runStart !== null){
+        intervals.push({ k1: runStart, k2: k - 1 });
+        runStart = null;
+      }
+    }
+    if (runStart !== null) intervals.push({ k1: runStart, k2: NIGHT_COUNT - 1 });
+    return intervals;
+  }
+
+  function refreshRoomOptions(){
+    const checkIn = checkinSel.value;
+    const checkOut = checkoutSel.value;
+    const party = optTwo.classList.contains('checked') ? 2 : 1;
+    suggestionList.innerHTML = '';
+
+    if (!checkIn || !checkOut || checkOut <= checkIn) {
+      roomMsg.textContent = 'Pick your dates first.';
+      roomMsg.className = 'form-msg';
+      selectedRoom = null;
+      submitBtn.disabled = true;
+      return;
+    }
+
+    const wantK1 = dayIndex(checkIn);
+    const wantK2 = dayIndex(checkOut) - 1;
+    const wantNights = wantK2 - wantK1 + 1;
+
+    const suggestions = [];
+    for (let room = 1; room <= ROOM_COUNT; room++) {
+      computeRoomFreeIntervals(room, party).forEach(iv => {
+        const overlap = overlapNights(wantK1, wantK2, iv.k1, iv.k2);
+        const exact = iv.k1 <= wantK1 && iv.k2 >= wantK2;
+        let maxOcc = 0;
+        for (let kk = iv.k1; kk <= iv.k2; kk++) maxOcc = Math.max(maxOcc, nightOccupancy(room, kk));
+        suggestions.push({
+          room: room, k1: iv.k1, k2: iv.k2, overlap: overlap, exact: exact,
+          nights: iv.k2 - iv.k1 + 1, shared: maxOcc > 0
+        });
+      });
+    }
+
+    suggestions.sort((a, b) => {
+      if (a.exact !== b.exact) return a.exact ? -1 : 1;
+      if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+      if (b.nights !== a.nights) return b.nights - a.nights;
+      return a.room - b.room;
+    });
+
+    const exactRooms = suggestions.filter(s => s.exact).map(s => s.room);
+    if (!(selectedRoom && exactRooms.includes(selectedRoom))) {
+      selectedRoom = exactRooms.length ? exactRooms[0] : null;
+    }
+
+    if (!suggestions.length) {
+      suggestionList.innerHTML = '<span class="suggestion-empty">Every room is fully booked across the whole trip.</span>';
+    } else {
+      suggestions.forEach(s => {
+        const inIso = days[s.k1].iso;
+        const outIso = days[s.k2 + 1].iso;
+        const isChecked = s.room === selectedRoom && s.exact;
+        const tag = s.exact
+          ? 'Matches your dates'
+          : (s.overlap > 0 ? `${s.overlap} of ${wantNights} nights overlap` : 'Different dates');
+
+        const item = document.createElement('label');
+        item.className = 'suggestion-item' + (isChecked ? ' checked' : '');
+        const bedNote = s.shared ? ' · shares room, 1 bed left' : ' · whole room free';
+        item.innerHTML = `<input type="radio" name="room-suggestion" ${isChecked ? 'checked' : ''}>
+          <span><span class="s-room">Room ${s.room}</span> — <span class="s-dates">${formatRange(inIso, outIso)}${bedNote}</span></span>
+          <span class="s-tag">${tag}</span>`;
+        item.addEventListener('click', function(e){
+          e.preventDefault();
+          if (!s.exact) {
+            checkinSel.value = inIso;
+            refreshCheckoutOptions();
+            checkoutSel.value = outIso;
+          }
+          selectedRoom = s.room;
+          refreshRoomOptions();
+        });
+        suggestionList.appendChild(item);
+      });
+    }
+
+    if (!exactRooms.length) {
+      roomMsg.textContent = 'No room is fully free for those exact dates — pick one of the alternatives below.';
+      roomMsg.className = 'form-msg error';
+      submitBtn.disabled = true;
+    } else {
+      roomMsg.textContent = '';
+      roomMsg.className = 'form-msg';
+      submitBtn.disabled = false;
+    }
+  }
+
+  // ---- party toggle ----
+  const optOne = document.getElementById('opt-one');
+  const optTwo = document.getElementById('opt-two');
+  const secondGuest = document.getElementById('second-guest');
+  const name2Input = document.getElementById('name2');
+  function setPartyState(isTwo){
+    optOne.classList.toggle('checked', !isTwo);
+    optTwo.classList.toggle('checked', isTwo);
+    secondGuest.classList.toggle('show', isTwo);
+    name2Input.required = isTwo;
+    if (typeof refreshRoomOptions === 'function') refreshRoomOptions();
+  }
+  optOne.addEventListener('click', () => setPartyState(false));
+  optTwo.addEventListener('click', () => setPartyState(true));
+
+  function parseRoomField(str){
+    if (!str) return [];
+    try {
+      const parsed = JSON.parse(str);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function flattenDoc(data){
+    const regs = [];
+    for (let room = 1; room <= ROOM_COUNT; room++) {
+      const bookings = parseRoomField(data && data['Room' + room]);
+      bookings.forEach(b => regs.push(Object.assign({}, b, { room: room })));
+    }
+    return regs;
+  }
+
+  const form = document.getElementById('reg-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const formMsg = document.getElementById('form-msg');
+  let currentDocData = {};
+  let currentRegs = [];
+
+  if (!isConfigured) {
+    document.getElementById('setup-banner').style.display = 'block';
+    submitBtn.disabled = false;
+    formMsg.textContent = 'Registration is not connected to storage yet.';
+    formMsg.className = 'form-msg error';
+    renderCalendarCells([]);
+    renderBookedList([]);
+    refreshRoomOptions();
+  } else {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const docRef = db.collection(COLLECTION_NAME).doc(DOC_ID);
+
+    docRef.onSnapshot(function(snap){
+      currentDocData = snap.data() || {};
+      currentRegs = flattenDoc(currentDocData);
+      renderCalendarCells(currentRegs);
+      renderBookedList(currentRegs);
+      refreshRoomOptions();
+    }, function(err){
+      formMsg.textContent = 'Could not load registrations: ' + err.message;
+      formMsg.className = 'form-msg error';
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      formMsg.textContent = '';
+      formMsg.className = 'form-msg';
+
+      const checkIn = checkinSel.value;
+      const checkOut = checkoutSel.value;
+      if (!checkIn || !checkOut || checkOut <= checkIn) {
+        formMsg.textContent = 'Pick a leaving day after your arrival day.';
+        formMsg.className = 'form-msg error';
+        return;
+      }
+
+      const room = selectedRoom;
+      const isTwo = optTwo.classList.contains('checked');
+      const party = isTwo ? 2 : 1;
+      const k1 = dayIndex(checkIn);
+      const k2 = dayIndex(checkOut) - 1;
+      let stillFree = !!room;
+      for (let k = k1; stillFree && k <= k2; k++) {
+        if (cellIsBooked(room, k, party)) stillFree = false;
+      }
+      if (!stillFree) {
+        formMsg.textContent = 'That spot just got taken for those dates — pick another.';
+        formMsg.className = 'form-msg error';
+        refreshRoomOptions();
+        return;
+      }
+
+      const booking = {
+        name1: document.getElementById('name1').value.trim(),
+        name2: isTwo ? document.getElementById('name2').value.trim() : '',
+        party: party,
+        notes: document.getElementById('notes').value.trim(),
+        checkIn: checkIn,
+        checkOut: checkOut,
+        color: PALETTE[currentRegs.length % PALETTE.length],
+        createdAt: new Date().toISOString()
+      };
+
+      const fieldName = 'Room' + room;
+      const existing = parseRoomField(currentDocData[fieldName]);
+      existing.push(booking);
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Reserving…';
+
+      docRef.set({ [fieldName]: JSON.stringify(existing) }, { merge: true })
+        .then(function(){
+          form.reset();
+          setPartyState(false);
+          refreshCheckoutOptions();
+          selectedRoom = null;
+          formMsg.textContent = `You're on the list — Room ${room}.`;
+          formMsg.className = 'form-msg ok';
+        })
+        .catch(function(err){
+          formMsg.textContent = 'Something went wrong: ' + err.message;
+          formMsg.className = 'form-msg error';
+        })
+        .finally(function(){
+          submitBtn.textContent = 'Reserve your spot';
+          refreshRoomOptions();
+        });
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
